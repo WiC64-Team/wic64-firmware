@@ -24,7 +24,7 @@ void handleUpdate() {
    detachInterrupt(digitalPinToInterrupt(PA2));       // Interrupts killen - sonst crashed httpupdate
    detachInterrupt(digitalPinToInterrupt(PC2));
 
-   
+
 
   String HTML =   "<html><head><title>WiC64 - by KiWi</title><meta http-equiv=\"refresh\" content=\"30;url=/\" /></head><body>"
                   "<center><h1><strong>WiC64</strong></h1></center>\n"
@@ -40,7 +40,7 @@ void handleUpdate() {
    log_i("--> Standard firmware is updating now !");
    WiFiClient client;
 
-   
+
    t_httpUpdate_return ret = httpUpdate.update(client, "http://sk.sx-64.de:80/wic64/wic64.bin");
 
         switch(ret) {
@@ -67,7 +67,7 @@ void handleDeveloper() {
    detachInterrupt(digitalPinToInterrupt(PA2));       // Interrupts killen - sonst crashed httpupdate
    detachInterrupt(digitalPinToInterrupt(PC2));
 
-   
+
 
   String HTML =   "<html><head><title>WiC64 - by KiWi</title><meta http-equiv=\"refresh\" content=\"30;url=/\" /></head><body>"
                   "<center><h1><strong>WiC64</strong></h1></center>\n"
@@ -83,7 +83,7 @@ void handleDeveloper() {
    log_i("--> Developer firmware is updating now !");
    WiFiClient client;
 
-   
+
    t_httpUpdate_return ret = httpUpdate.update(client, "http://sk.sx-64.de:80/wic64-d1/wic64.bin");
 
         switch(ret) {
@@ -110,7 +110,7 @@ void handleDeveloper2() {
    detachInterrupt(digitalPinToInterrupt(PA2));       // Interrupts killen - sonst crashed httpupdate
    detachInterrupt(digitalPinToInterrupt(PC2));
 
-   
+
 
   String HTML =   "<html><head><title>WiC64 - by KiWi</title><meta http-equiv=\"refresh\" content=\"30;url=/\" /></head><body>"
                   "<center><h1><strong>WiC64</strong></h1></center>\n"
@@ -153,7 +153,7 @@ void handleDowngrade() {
    detachInterrupt(digitalPinToInterrupt(PA2));       // Interrupts killen - sonst crashed httpupdate
    detachInterrupt(digitalPinToInterrupt(PC2));
 
-   
+
 
   String HTML =   "<html><head><title>WiC64 - by KiWi</title><meta http-equiv=\"refresh\" content=\"30;url=/\" /></head><body>"
                   "<center><h1><strong>WiC64</strong></h1></center>\n"
@@ -169,7 +169,7 @@ void handleDowngrade() {
    log_i("--> Firmware downgrade is updating now !");
    WiFiClient client;
 
-   
+
    t_httpUpdate_return ret = httpUpdate.update(client, "http://sk.sx-64.de:80/wic64/wic64-old.bin");
 
         switch(ret) {

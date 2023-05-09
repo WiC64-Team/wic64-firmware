@@ -1,8 +1,8 @@
-// 
+//
 // WiC64 - C64 connected to ESP32
-// 
-// written by KiWI 2020-2022 
-// 
+//
+// written by KiWI 2020-2022
+//
 // Using ESP32 Arduino Release 2.0.2 based on ESP-IDE v4.4
 //          WiC64 Hardware & Software - Copyright (c) 2021
 //
@@ -11,7 +11,7 @@
 //          Hardy "Lazy Jones" Ullendahl <lazyjones@wic64.de>
 //             Henning "Yps" Harperath <yps@wic64.de>
 //
-//     
+//
 //          All rights reserved.
 //
 //Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,8 @@
 //OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //
-// C64 Pinout -> ESP Wroom >>30<< Pin Version 
-// 
+// C64 Pinout -> ESP Wroom >>30<< Pin Version
+//
 // https://www.c64-wiki.de/wiki/Userport
 //
 // https://randomnerdtutorials.com/getting-started-with-esp32/      30 Pin Version !!! Nicht die 36er !!!
@@ -85,11 +85,11 @@
 #include "wic64.h"
 #include "wic64webserver.h"
 #include "wic64display.h"
-              
 
-void setup() {     
+
+void setup() {
       firmwareversion = "0032";
-      
+
       pinMode(PB0, INPUT);                  // Beim Kaltstart erst alle Pins auf Input setzten bis C64 die Kontrolle übernimmt
       pinMode(PB1, INPUT);
       pinMode(PB2, INPUT);
@@ -100,42 +100,42 @@ void setup() {
       pinMode(PB7, INPUT);
       pinMode(LED_BUILTIN,OUTPUT);          // LED kann geschrieben werden
       digitalWrite(LED_BUILTIN, HIGH);      // Eingebaute LED auf dem Developer Board einschalten
-      inputmode=true; payload=""; payloadsize=0; 
+      inputmode=true; payload=""; payloadsize=0;
       count=0; transferdata = false;        // Beim Kaltstart alles auf INPUT schalten - nicht das beide Senden !
-      
-      pinMode(espbootbutton, INPUT);        // Taste Boot0 auf dem ESP32 Board auf Eingabe 
-      pinMode(specialbutton, INPUT_PULLDOWN);        // Taste Boot0 auf dem ESP32 Board auf Eingabe 
+
+      pinMode(espbootbutton, INPUT);        // Taste Boot0 auf dem ESP32 Board auf Eingabe
+      pinMode(specialbutton, INPUT_PULLDOWN);        // Taste Boot0 auf dem ESP32 Board auf Eingabe
 
       pinMode(PA2, INPUT);                  // PC2 Signal sagt dem ESP32 ob er vom C64 lesen soll oder an den C64 senden darf - Signal bei Kaltstart HIGH = ESP soll LESEN
       pinMode(PC2, INPUT);                  // PA2 Signal vom C64 an den ESP - LOW = Daten können abgeholt werden
- 
+
 
       pinMode(FLAG2, OUTPUT);
       digitalWrite(FLAG2, HIGH);            // FLAG2 Signal vom ESP an den C64 - Löst beim C64 NMI aus = Handshake
-    
 
-      Serial.begin(115200);                              // 115.200 Baud für Debugging output 
-      
+
+      Serial.begin(115200);                              // 115.200 Baud für Debugging output
+
       log_i("Version: " __DATE__ " " __TIME__ "\n");   // Compiler Variablen einsetzen - Damit die Build-Version einwandfrei identifiziert werden kann.
       Wire.begin(I2C_SDA, I2C_SCL);                             // Display Pins festlegen und I2C Bus initialisieren
       if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { log_i("SSD1306 allocation failed"); } else { display.clearDisplay();  display.drawBitmap(0, 0,  bitmap_wic64_2, 128, 64, WHITE); display.display(); displayattached=true;} // Hostnamen beim Booten auf Display ausgeben} // Prüfen ob Display angeschlossen wurde
 
       preferences.begin("credentials", false);
-      displayrotate = preferences.getBool("displayrotate", false);            // Rotate Displa 180 degrees for U2 users 
+      displayrotate = preferences.getBool("displayrotate", false);            // Rotate Displa 180 degrees for U2 users
       killswitch = preferences.getBool("killswitch", false);
       if (killswitch == true ) { log_i("kill true"); } else { log_i("kill false"); }
       killled = preferences.getBool("killled", false);
-      if (killled == true ) { log_i("LED DISABLED !"); digitalWrite(LED_BUILTIN, LOW); } else { log_i("LED ENABLED !"); }     
+      if (killled == true ) { log_i("LED DISABLED !"); digitalWrite(LED_BUILTIN, LOW); } else { log_i("LED ENABLED !"); }
       gmtOffset_sec = preferences.getLong("gmtoffset", false);
       log_i("boot time zone %i", gmtOffset_sec);
 
-      
-      
+
+
 
       WiFi.onEvent(WiC64connected, ARDUINO_EVENT_WIFI_STA_CONNECTED);         // Displaystuff aufrufen beim reconnect zum WLAN
       WiFi.onEvent(WiC64disconnected, ARDUINO_EVENT_WIFI_STA_DISCONNECTED );  // Displaystuff aufrufen sollte das WLAN mal disconnecten (Router reboot/powerdown etc)
       WiFi.onEvent(WiC64ipconfig, ARDUINO_EVENT_WIFI_STA_GOT_IP );            // Displaystuff IP vom AP zugewiesen
-     
+
       if (killswitch == false) {
       wic64hostname = "WiC64-" + WiFi.macAddress();     // ESP32 Hostnamen erstellen aus WiC64-MA:CA:DR:ES:SE
       WiFi.mode(WIFI_STA);                              // STA Mode - An Accesspoint anmelden
@@ -144,35 +144,35 @@ void setup() {
       server.on("/", handleRoot);                       // Code anspringen der bei / root Aufruf des Webservers ausgeführt wird
       server.on("/update", handleUpdate);               // ESP Autoupdate starten
       server.on("/developer", handleDeveloper);         // ESP Autoupdate developer channel
-      server.on("/developer2", handleDeveloper2);       // ESP SECRET ! Autoupdate developer channel 
-      server.on("/downgrade", handleDowngrade  );       // ESP SECRET ! Autoupdate developer channel 
+      server.on("/developer2", handleDeveloper2);       // ESP SECRET ! Autoupdate developer channel
+      server.on("/downgrade", handleDowngrade  );       // ESP SECRET ! Autoupdate developer channel
       server.begin();                                   // Webserver starten
 
       log_i( "Waiting for WiFi" );
       for (int i = 0; i <50; i++) { if (WiFi.status() != WL_CONNECTED) { delay(50); } else { i=50; } }
 
       if (WiFi.status() == WL_CONNECTED) {
-      
+
       log_i( "Connected to: SSID: %s IP: %s RSSI: %d", WiFi.SSID(), WiFi.localIP().toString().c_str(), WiFi.RSSI()  );                         // Print SSID + IP + RSSI level
 
 
-     } else 
+     } else
            { log_i("Not connected.");     }                     // WLan connect fehlgeschlagen
       } else {
-        log_i("Killswitch set - Boot without wlan"); 
+        log_i("Killswitch set - Boot without wlan");
         disablewic();
       }
-  
+
       attachInterrupt(digitalPinToInterrupt(PA2), PA2irq, CHANGE);      // ESP-IRQ Pins festlegen PA2 C64
       attachInterrupt(digitalPinToInterrupt(PC2), PC2irq, HIGH);        // ESP-IRQ Pins festlegen PC2 C64
 
-      
-       
+
+
       setserver = preferences.getString("server", "");                  // default server name aus dem flash laden
       if (setserver == "" ) { preferences.putString("server", defaultserver); setserver = defaultserver; log_i("Setserver saved: %s", setserver.c_str()); }
       setsaveserver = preferences.getString("saveserver", "");                  // default server name aus dem flash laden
       if (setsaveserver == "" ) { preferences.putString("saveserver", defaultsaveserver); setserver = defaultserver; log_i("Setserver saved: %s", setserver.c_str()); }
-      
+
 //      payload.reserve(65535);
 //      payloadB.reserve(65535);
 //      input.reserve(1024);
@@ -185,44 +185,44 @@ void setup() {
        HTTPClient http;
        WiFiClient client;
        sectokenname=""; // No default security token name
-       
+
       display.clearDisplay();
       displaystuff(wic64hostname);
-       
+
        }
-       
+
 void loop(){
-      
+
       if (digitalRead(espbootbutton) == LOW) { buttontimeA++; } else { buttontimeA=0;} //Boot0 deaktivert das WiC64 am Userport - Z.B. wg SpeedDos / ProfDos Kollisionen
       if (digitalRead(specialbutton) == HIGH){ buttontimeB++; } else { buttontimeBcount=buttontimeB; buttontimeB=0;}
-      if (buttontimeA >= 20) { 
+      if (buttontimeA >= 20) {
         buttontimeA=0; log_i("Boot0 pressed.");
         if (killswitch == true){ killswitch = false; preferences.putBool("killswitch", killswitch); log_i("WiC64 ENABLED !");  ESP.restart(); } else { disablewic(); ESP.restart(); }
       }
-      if (buttontimeBcount > 5 && buttontimeBcount < 20 ) { buttontimeBcount=0; log_i("SpecialButton 2 seconds pressed."); 
+      if (buttontimeBcount > 5 && buttontimeBcount < 20 ) { buttontimeBcount=0; log_i("SpecialButton 2 seconds pressed.");
         if (killled == true){ killled = false; preferences.putBool("killled", killled); log_i("LED ENABLED !");  } else { killled = true; preferences.putBool("killled", killled);  digitalWrite(LED_BUILTIN, LOW); log_i("LED DISABLED !"); }
       }
-      if (buttontimeBcount > 30  ) { buttontimeBcount=0; log_i("SpecialButton 5 seconds pressed."); 
+      if (buttontimeBcount > 30  ) { buttontimeBcount=0; log_i("SpecialButton 5 seconds pressed.");
         if (displayrotate == true){ displayrotate = false; preferences.putBool("displayrotate", displayrotate); log_i("Rotate display disabled !"); displaystuff("rotate off");  } else { displayrotate = true; preferences.putBool("displayrotate", displayrotate);   log_i("Rotate display enabled !"); displaystuff("rotate off"); }
       }
       buttontimeBcount=0;
 
       if (killswitch == false) {
 
-      server.handleClient();                    // HTTP requests vom Webserver checken & ggf. beantworten  
-      if (millis() > timeout && transferdata == true)  { Serial.println(count);Serial.println(millis() - timeout); Serial.println(millis()); Serial.println(timeout); log_i("Transfer ESP -> C64 TIMEOUT %i",count ); transferdata = false; payloadsize=0; count=0;  }  // Timeout erreicht -  C64 holt die Daten nicht ab 
-      if (millis() > timeout && pending == false && input.length() > 0) {    log_i("\nTransfer C64 -> ESP TIMEOUT: %i", transsize); stringtohexdump(input); input=""; transsize=0; }  // Timeout erreicht -  Dateneingabe vom C64 nicht komplett Empfangen - daher Eingabepuffer von Schrott befreien 
+      server.handleClient();                    // HTTP requests vom Webserver checken & ggf. beantworten
+      if (millis() > timeout && transferdata == true)  { Serial.println(count);Serial.println(millis() - timeout); Serial.println(millis()); Serial.println(timeout); log_i("Transfer ESP -> C64 TIMEOUT %i",count ); transferdata = false; payloadsize=0; count=0;  }  // Timeout erreicht -  C64 holt die Daten nicht ab
+      if (millis() > timeout && pending == false && input.length() > 0) {    log_i("\nTransfer C64 -> ESP TIMEOUT: %i", transsize); stringtohexdump(input); input=""; transsize=0; }  // Timeout erreicht -  Dateneingabe vom C64 nicht komplett Empfangen - daher Eingabepuffer von Schrott befreien
       if (lastinput.length() > 2 ) {      // Kommando muss mindestens 4 Byte haben - sonst Schrott empfangen
         ex=false;
-      
+
       if (lastinput.startsWith ("W"))  {            // Commando startet mit W = Richtig
 
 
-#ifdef DEBUG    
+#ifdef DEBUG
       Serial.print("Message from C64: "); stringtohexdump(lastinput); Serial.print("Message size: "); Serial.println(lastinput.length());
-      
+
 #endif
-      if (lastinput.charAt(3) ==  0 )   { ex=true; displaystuff("get FW version"); sendmessage("WIC64FWV:" + firmwareversion ); }       
+      if (lastinput.charAt(3) ==  0 )   { ex=true; displaystuff("get FW version"); sendmessage("WIC64FWV:" + firmwareversion ); }
       if (lastinput.charAt(3) ==  1 )   { ex=true; displaystuff("loading http"); loader(lastinput); if (messagetoc64 !="") { sendmessage(messagetoc64); } }
       if (lastinput.charAt(3) ==  2 )   { ex=true; displaystuff("config wifi"); httpstring=lastinput;  sendmessage(setwlan()); delay(3000); displaystuff("config changed"); }
       if (lastinput.charAt(3) ==  3 )   { ex=true; displaystuff("FW update 1"); handleUpdate(); }    // Normal SW update - no debug messages on serial
@@ -237,7 +237,7 @@ void loop(){
       if (lastinput.charAt(3) == 12 )   { ex=true; displaystuff("scanning wlan"); sendmessage(getWLAN()); } // wlan scanner
       if (lastinput.charAt(3) == 13 )   { ex=true; displaystuff("config wifi id"); httpstring=lastinput; sendmessage(setWLAN_list()); displaystuff("config wifi set");} // wlan setup via scanlist
       if (lastinput.charAt(3) == 14 )   { ex=true; displaystuff("change udp port"); httpstring=lastinput; startudpport(); }
-      if (lastinput.charAt(3) == 15 )   { ex=true; displaystuff("loading httpchat"); loader(lastinput); if (messagetoc64 !="") { sendmessage(messagetoc64); } } // Chatserver string decoding 
+      if (lastinput.charAt(3) == 15 )   { ex=true; displaystuff("loading httpchat"); loader(lastinput); if (messagetoc64 !="") { sendmessage(messagetoc64); } } // Chatserver string decoding
       if (lastinput.charAt(3) == 16 )   { ex=true; displaystuff("get ssid"); sendmessage(WiFi.SSID()); }
       if (lastinput.charAt(3) == 17 )   { ex=true; displaystuff("get rssi"); sendmessage(String( WiFi.RSSI() )); }
       if (lastinput.charAt(3) == 18 )   { ex=true; displaystuff("get server"); if (setserver !="") {sendmessage(setserver);} else { sendmessage("no server set"); } }
@@ -246,7 +246,7 @@ void loop(){
       if (lastinput.charAt(3) == 21 )   { ex=true; displaystuff("get time and date"); getLocalTime(); sendmessage(acttime); }
       if (lastinput.charAt(3) == 22 )   { ex=true; displaystuff("set timezone"); httpstring=lastinput; settimezone(); }
       if (lastinput.charAt(3) == 23 )   { ex=true; displaystuff("get timezone"); sendmessage( String (gmtOffset_sec, DEC)); }
-#ifdef DEBUG    
+#ifdef DEBUG
       if (lastinput.charAt(3) == 24 )   { ex=true; displaystuff("check update"); loader("XXXXhttp://sk.sx-64.de/wic64-d2/version.txt"); messagetoc64=payload; messagetoc64.remove(0,2); int v1=messagetoc64.toInt(); int v2 =firmwareversion.toInt(); if (v1 > v2) { sendmessage("2"); } else sendmessage("0"); }
 #else
       if (lastinput.charAt(3) == 24 )   { ex=true; displaystuff("check update"); loader("XXXXhttp://sk.sx-64.de/wic64/version.txt"); messagetoc64=payload; messagetoc64.remove(0,2); int v1=messagetoc64.toInt(); int v2 =firmwareversion.toInt(); if (v1 > v2) { sendmessage("1"); } else sendmessage("0"); }
@@ -254,11 +254,11 @@ void loop(){
 
       if (lastinput.charAt(3) == 25 )   { ex=true; displaystuff("read prefs"); httpstring=lastinput;  sendmessage(getprefs()); }
       if (lastinput.charAt(3) == 26 )   { ex=true; displaystuff("save prefs"); httpstring=lastinput;  sendmessage(setprefs()); }
-            
+
       if (lastinput.charAt(3) == 30 )   { ex=true; displaystuff("get tcp"); getudpmsg(); if (messagetoc64 !="") { sendmessage(messagetoc64); }  } // Get TCP data and return them to c64 INCOMPLETE
       if (lastinput.charAt(3) == 31 )   { ex=true; displaystuff("send tcp"); sendudpmsg(lastinput); sendmessage("");  log_i("tcp send %s", lastinput); } // Get TCP data and return them to c64 INCOMPLETE
       if (lastinput.charAt(3) == 32 )   { ex=true; displaystuff("set tcp port"); httpstring=lastinput; settcpport();  }
-      
+
       if (lastinput.charAt(3) == 33 )   { ex=true; displaystuff("connect tcp1"); sendmessage(connecttcp1());  }
       if (lastinput.charAt(3) == 34 )   { ex=true; displaystuff("get tcp1"); sendmessage(gettcp1());  }
       if (lastinput.charAt(3) == 35 )   { ex=true; displaystuff("send tcp1");  sendmessage(sendtcp1()); }
@@ -271,21 +271,21 @@ void loop(){
         if (ex == false) { log_i("Command error.");  sendmessage("command error.");  } // Commando wurde nicht erkannt - String defekt ?
         if (ex == true) { input=""; lastinput =""; transsize=0; crashcounter++; }
         if (pending == true) { pending = false; handshake_flag2(); delay(200); timeout=millis()+2000; }
-        
-        if (payloadsize > 0 && pending == false) handshake_flag2(); // Transfer anschieben 
-        } 
-        
-        
+
+        if (payloadsize > 0 && pending == false) handshake_flag2(); // Transfer anschieben
+        }
+
+
       } // Ende von Killswitch
       delay (100);
-      
+
 } // Ende von LOOP
-     
+
 /////// Subs IRQ
 
 void IRAM_ATTR PA2irq() {                                              // PA2 vom C64 schaltet den ESP auf Input oder Output Modus
 
-  if (digitalRead(PA2)==LOW) {       
+  if (digitalRead(PA2)==LOW) {
       pinMode(PB0, OUTPUT);
       pinMode(PB1, OUTPUT);
       pinMode(PB2, OUTPUT);
@@ -296,9 +296,9 @@ void IRAM_ATTR PA2irq() {                                              // PA2 vo
       pinMode(PB7, OUTPUT);
       digitalWrite(LED_BUILTIN, LOW);      // Eingebaute LED auf dem Developer Board ausschalten
       count=0; inputmode=false;
-     
+
       } else  {
-  
+
       pinMode(PB0, INPUT);
       pinMode(PB1, INPUT);
       pinMode(PB2, INPUT);
@@ -310,7 +310,7 @@ void IRAM_ATTR PA2irq() {                                              // PA2 vo
       if (killled == false) { digitalWrite(LED_BUILTIN, HIGH); }     // Eingebaute LED auf dem Developer Board einschalten
       count=0; inputmode=true; transsize=0;
       payload=""; payloadsize=0; transferdata= false;
-      
+
       }
 }
 void IRAM_ATTR PC2irq() {                     // PC2 IRQ wurde ausgelöst weil C64 vom Userpot gelesen hat oder Daten geschrieben hat
@@ -324,21 +324,21 @@ void IRAM_ATTR PC2irq() {                     // PC2 IRQ wurde ausgelöst weil C
             if ((GPIO.in >> PB5) & 1) databyte |= 1UL << 5;
             if ((GPIO.in >> PB6) & 1) databyte |= 1UL << 6;
             if ((GPIO.in >> PB7) & 1) databyte |= 1UL << 7;
-            timeout=millis()+2000;                                // Timeout 2 Sekunden - Wenn Timeout erreicht wurde und die Daten vom C64 nicht komplett Empfangen wurden ist dieser ggf. Abgestürtz - daher Eingabepuffer von Schrott befreien 
-            
+            timeout=millis()+2000;                                // Timeout 2 Sekunden - Wenn Timeout erreicht wurde und die Daten vom C64 nicht komplett Empfangen wurden ist dieser ggf. Abgestürtz - daher Eingabepuffer von Schrott befreien
+
             input += char(databyte);                              // Byte empfangen und zu input hinzufügen
             if ((input.length() == 3)  && (input.startsWith ("W"))) { unsigned int sizeh = input.charAt(2); unsigned int sizel = input.charAt(1); transsize = sizeh*256+ sizel; }      // Transfergröße der Daten vom C64 ermitteln
             if ((input.length() > 1) && (input.length() == transsize)) { lastinput=input; input=""; pending = true; }     // Anzahl der zu erwartendne Bytes Empfangen -  Kommando in den Ausführungspuffer kopieren und Eingabepuffer löschen
             if (transsize > 1 && (input.length() > transsize)) { Serial.println("send data overflow !"); Serial.println(transsize); Serial.println(input.length());}
             if (pending == false) { handshake_flag2(); }                                  // Handshake an C64 das Byte vom Userport gelesen wurde - es sei denn es ist das letzte - dann pending = C64 warten lassen !
            }   // Inputmode 1 = Send data from C64 to ESP
-            
-            
+
+
       if (inputmode == false){      // C64 empfängt vom ESP32 {
-        if (transferdata == true) { // Nur wenn Daten zum Transfer vorhanden sind 
-         
+        if (transferdata == true) { // Nur wenn Daten zum Transfer vorhanden sind
+
         timeout=millis()+2000;
-        if (count <= payloadsize) {      
+        if (count <= payloadsize) {
         databyte = payload[count];
         if (databyte & (1 << 0)) GPIO.out_w1ts = (1 << PB0); else GPIO.out_w1tc = (1 << PB0);
         if (databyte & (1 << 1)) GPIO.out_w1ts = (1 << PB1); else GPIO.out_w1tc = (1 << PB1);
@@ -351,8 +351,8 @@ void IRAM_ATTR PC2irq() {                     // PC2 IRQ wurde ausgelöst weil C
         count++;  total++;
         }  else {log_i("Request Overflow ! Buffer end: %d of %d - S: %d PL2: %d PL1: %d",count,total,swap,pay2size,payloadsize); }     // C64 requested mehr Bytes als im Puffer sind - daher am Ende des Puffers bleiben !
 
-        if (count == payloadsize ) { log_i("Buffer end: %d of %d - S: %d PL2: %d",count,total,swap,pay2size);    // Puffer wurde komplett übertragen 
-        if (pay2size >0) { payload=payloadB; payloadsize=pay2size; pay2size=0; payloadB=""; count=0; if (swap==2) {swap=1; log_i("swapped"); }  if (swap==3) {swap=3; log_i("End of file"); } } // 
+        if (count == payloadsize ) { log_i("Buffer end: %d of %d - S: %d PL2: %d",count,total,swap,pay2size);    // Puffer wurde komplett übertragen
+        if (pay2size >0) { payload=payloadB; payloadsize=pay2size; pay2size=0; payloadB=""; count=0; if (swap==2) {swap=1; log_i("swapped"); }  if (swap==3) {swap=3; log_i("End of file"); } } //
         }
 
         if (count == payloadsize && swap == 3 && pay2size == 0) { payloadsize=0; count=0; transferdata = false; log_i("Bytes sent: %i",total); }
@@ -367,23 +367,23 @@ void handshake_flag2()
     GPIO.out_w1ts = (1 << FLAG2);         // Flag2 flippen um am C64 FLAG IRQ auszulösen - Der holt dann Daten ab oder darf neue Daten an den Bus anlegen
     delayMicroseconds(5);
     GPIO.out_w1tc = (1 << FLAG2);
-}   
+}
 
 
-/////// Subs Kommandos HTTP & Error codes 
+/////// Subs Kommandos HTTP & Error codes
 
 void sendmessage(String messagetoc64 ){    // Aus messagetoc64 einen String machen der dann als Antwort auf das gesendete Kommando an den C64 gesendet wird (Load error etc.)
 
     int dsize = messagetoc64.length();
     log_i("Datasize %i", dsize);
-    
+
     String datasize;
     char c = ((dsize) / 256); datasize += c;
     c = ((dsize) % 256); datasize += c;
-    payload = datasize + messagetoc64; count=0; payloadsize = payload.length(); 
-    if (pending == true) { pending = false; handshake_flag2(); delay(200); timeout=millis()+2000; } 
-    transferdata = true; 
-#ifdef DEBUG    
+    payload = datasize + messagetoc64; count=0; payloadsize = payload.length();
+    if (pending == true) { pending = false; handshake_flag2(); delay(200); timeout=millis()+2000; }
+    transferdata = true;
+#ifdef DEBUG
       Serial.print("Message to C64: "); stringtohexdump(payload);
 #endif
     messagetoc64 ="";
@@ -397,16 +397,16 @@ void disablewic(){
      WiFi.mode(WIFI_OFF);
 
      killswitch=true;
-     log_i("WiC64 DISABLED !");  
-     
+     log_i("WiC64 DISABLED !");
+
 }
 
 String setwlan(){                         // Seperator $01 - !! ACHTUNG !! SENSIBLE DATEN WIE PASSWÖRTER AUF SERIELLER SCHNITTSTELLE
-       
+
         lastinput.remove(0,4);
         ssiddata = getValue(lastinput, sep, 0);
         passworddata = getValue(lastinput, sep, 1); passworddata = convertspecial(passworddata);
-        log_i("WLAN Config updated: %s - %s ", ssiddata, passworddata); 
+        log_i("WLAN Config updated: %s - %s ", ssiddata, passworddata);
         ssiddata.toCharArray(ssid, ssiddata.length()+1 );
         passworddata.toCharArray(password, passworddata.length()+1 );
         if (ssiddata != "") { WiFi.begin(ssid, password); log_i("ssid: %s password: %s",ssid , password); delay(3000); return "Wlan config changed";} else { WiFi.begin(); delay (3000); return "Wlan config not changed";}
@@ -420,7 +420,7 @@ void loader(String httpstring) {         // Daten via HTTP laden
         byte command = httpstring[3];
         httpstring.remove(0,4);
         swap=3; total=0;
-                
+
         prefstring1 = getValue(lastinput, 36, 1);  // 36 = $VARIABLE$ - Upper case = C64 !
         prefstring2 = getValue(lastinput, 36, 3);  // 36 = $
         prefstring3 = getValue(lastinput, 36, 5);  // 36 = $
@@ -430,17 +430,17 @@ void loader(String httpstring) {         // Daten via HTTP laden
         if (prefstring1.length() > 0 && prefstring1data.length() >0 ) { httpstring.replace("$"+prefstring1+"$", prefstring1data ); }
         if (prefstring2.length() > 0 && prefstring1data.length() >0 ) { httpstring.replace("$"+prefstring2+"$", prefstring2data ); }
         if (prefstring3.length() > 0 && prefstring1data.length() >0 ) { httpstring.replace("$"+prefstring3+"$", prefstring3data ); }
-        
+
         if (command == 15) { httpstring = en_code(httpstring); }     //Strings für Chatserver umkodieren - Hardy
-        
+
         httpstring.replace("%ser", setserver);  // Im Kommando ein %ser durch Serveradresse ersetzen die vorher mit "sets" Kommando gesetzt wurde (C64 Strings abkürzen -> LazyJones Wunsch
         if (httpstring.startsWith ("!"))  {httpstring.replace("!", setserver); }  // Wenn ein http request mit ! beginnt wird das ! durch den default server ersetzt -> load "!xxx.prg" = "http://www.wic64.de/prg/xxx.prg"
-        
+
         if(httpstring.indexOf("%mac") > 0) {
         sectoken = preferences.getString(sectokenname.c_str());
         String tempmac = WiFi.macAddress(); tempmac.replace(":",""); httpstring.replace("%mac", tempmac + sectoken); // Im Kommando ein %mac durch die MAC Adresse des ESP ersetzen XX:XX.XX.XX.XX.XX
         }
-        
+
         log_i("[HTTP] begin. Counter %i ", crashcounter);
         if (httpstring.startsWith ("https")) {
         clientsec.setInsecure();
@@ -450,7 +450,7 @@ void loader(String httpstring) {         // Daten via HTTP laden
         }
 
         if (httpInitResult == true) {
-        http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);    
+        http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
         log_i("HTTP Request: %s", httpstring.c_str());
 
@@ -458,10 +458,10 @@ void loader(String httpstring) {         // Daten via HTTP laden
         log_i("[HTTP] Returncode %d", httpCode);
         if(httpCode == 201) { log_i("201 detected !"); checkprefs=true; httpCode = 200; }                    // Server sendet Code 201 = Preferences Anweisung !
         if(httpCode == 200) {
-                String databuffer = http.getString(); 
+                String databuffer = http.getString();
 
-                if (checkprefs == true) { checkprefs=false; databuffer = setprefsphp(databuffer); } 
-                
+                if (checkprefs == true) { checkprefs=false; databuffer = setprefsphp(databuffer); }
+
                 int dsize = databuffer.length();
                     if (httpstring.endsWith (".prg")) {   dsize--; dsize--;  log_i("--> PRG load detected "); }  //  Ladeadresse am Anfang soll der C64 nicht mitzählen beim Laden 2 Byte x y Schleife
                 String datasize;
@@ -470,16 +470,16 @@ void loader(String httpstring) {         // Daten via HTTP laden
                 payload = datasize;
                 payload += databuffer;
                 count=0; payloadsize = payload.length();
-                if (pending == true) { pending = false; handshake_flag2(); delay(200); timeout=millis()+2000;}  transferdata = true; 
-                if (command == 24) { transferdata = false; } // http nicht via irq übertragen - Sonderfunktion für Firmware-Check 
+                if (pending == true) { pending = false; handshake_flag2(); delay(200); timeout=millis()+2000;}  transferdata = true;
+                if (command == 24) { transferdata = false; } // http nicht via irq übertragen - Sonderfunktion für Firmware-Check
                 log_i("Dataload: %d - Payload: %d ",dsize,payloadsize);
-                
-#ifdef DEBUG    
+
+#ifdef DEBUG
                 Serial.print("Payload message to C64: "); stringtohexdump(payload);
 #endif
-                
-                
-                          } else { messagetoc64 = "!0"; } 
+
+
+                          } else { messagetoc64 = "!0"; }
 
         clientsec.stop(); http.end();
                 } else { messagetoc64 = "!0"; }
@@ -512,10 +512,10 @@ String getudpmsg(){
      for (int i = 0; i < UdppacketSize; i++) { payload += char(buffer[i]); }
 
      payloadsize = payload.length();
-     if (pending == true) { pending = false; handshake_flag2(); delay(200);  timeout=millis()+2000; }  transferdata = true; 
+     if (pending == true) { pending = false; handshake_flag2(); delay(200);  timeout=millis()+2000; }  transferdata = true;
      return payload;
-     
-     } else { 
+
+     } else {
       payload = ""; //String("") +char(0)+char(0);
         return payload;
      }
@@ -536,7 +536,7 @@ void settcpport(){
 }
 
 String getValue(String data, char separator, int index) {         // String auseinanderschneiden nach Seperatorzeichen und Nummer
-    
+
     int found = 0; int strIndex[] = { 0, -1 }; int maxIndex = data.length() - 1;
     for (int i = 0; i <= maxIndex && found <= index; i++) {
         if (data.charAt(i) == separator || i == maxIndex) {
@@ -557,11 +557,11 @@ void stringtohexdump(String data){
     for (int i = 0; i < data.length(); i++) { if (i > 79) {break;} if(data[i] <= 30) {Serial.print("$$ "); } else { Serial.print(" "); Serial.print(data[i]); Serial.print(" "); } }
     Serial.println("");
     Serial.println("---");
-#ifdef DEBUG    
+#ifdef DEBUG
       log_i("Free ESP memory: %i",ESP.getFreeHeap() );
       log_i("---");
 #endif
-    
+
 
 }
 
@@ -578,7 +578,7 @@ if (n>15){n=15;} // Max. Anzahl Wlans in Liste
 if (n == 0) {return "no networks found";}
 else        {for (int i = 0; i < n; ++i) {wlan += i; wlan += sep; wlan += WiFi.SSID(i); wlan += sep; wlan += WiFi.RSSI(i); wlan += sep;}
              return wlan;}
-  
+
 }
 
 String setWLAN_list(){                             // !! ACHTUNG !! SENSIBLE DATEN WIE PASSWÖRTER AUF SERIELLER SCHNITTSTELLE
@@ -588,10 +588,10 @@ String setWLAN_list(){                             // !! ACHTUNG !! SENSIBLE DAT
    lastinput.remove(0,1); // Wegschneiden Netzwerknummer - jetzt bleibt nur noch das Kennwort über.
    passworddata = getValue(lastinput, sep, 1); passworddata = convertspecial(passworddata);
    ssiddata = WiFi.SSID(nr); Serial.println(ssiddata);
-   log_i("WLAN Config updated. SSID: %s Password: %s", ssiddata, passworddata); 
+   log_i("WLAN Config updated. SSID: %s Password: %s", ssiddata, passworddata);
    ssiddata.toCharArray(ssid, ssiddata.length()+1 );
    passworddata.toCharArray(password, passworddata.length()+1 );
-   if (ssiddata != "")  {WiFi.begin(ssid, password); log_i("WLAN Config updated. SSID: %s Password: %s", ssid, password);  delay(3000); return "Wlan config changed"; } else { WiFi.begin(); delay (3000); return "Wlan config not changed";} 
+   if (ssiddata != "")  {WiFi.begin(ssid, password); log_i("WLAN Config updated. SSID: %s Password: %s", ssid, password);  delay(3000); return "Wlan config changed"; } else { WiFi.begin(); delay (3000); return "Wlan config not changed";}
 }
 
 
@@ -605,8 +605,8 @@ String en_code(String httpstring) // Hardy begin
         String hexcode;
 
         // loop über jedes Zeichen von httpstring und Codierung fals erforderlich
-        for (int i = 0; i < httpstring.length(); i++) 
-        { 
+        for (int i = 0; i < httpstring.length(); i++)
+        {
           //Wenn die Escapesequenz <$ gefunden wird
           if(httpstring[i] == 60 and httpstring[i+1] == 36) // Codieren einschalten
           {
@@ -615,11 +615,11 @@ String en_code(String httpstring) // Hardy begin
             laenge = httpstring[i+2];
             laenge = laenge + (256*httpstring[i+3]);
 
-            // Schleife über die zu codierenden Zeichen  
-            for (int x = 0; x < laenge; x++) 
+            // Schleife über die zu codierenden Zeichen
+            for (int x = 0; x < laenge; x++)
             {
                 hexcode = String(httpstring[i+x+4], HEX);
-                
+
                 if (httpstring[i+x+4] <= 15)
                   {
                     httpstring_code += char(48);
@@ -645,7 +645,7 @@ String en_code(String httpstring) // Hardy begin
 
         // Wenn die Codierung abeschlossen ist, das Codierte im HTTP String ersetzten:
         if (codiert == true)
-        {   
+        {
            httpstring=httpstring_code;
         }
 
@@ -694,11 +694,11 @@ void getLocalTime()
 }
 
 void settimezone(){
-     unsigned int timezonel = lastinput.charAt(4); unsigned int timezoneh = lastinput.charAt(5); 
+     unsigned int timezonel = lastinput.charAt(4); unsigned int timezoneh = lastinput.charAt(5);
      unsigned int timezone = timezoneh*10 + timezonel;
      int long timezones[] = {0,0,3600,7200,7200,10800,12600,14400,18000,19800,21600,25200,28800,32400,34200,36000,39600,43200,
-                             -39600,-36000,-32400,-28800,-25200,-25200,-21600,-18000,-18000,-14400,-12600,-10800,-10800,-3600}; 
-     
+                             -39600,-36000,-32400,-28800,-25200,-25200,-21600,-18000,-18000,-14400,-12600,-10800,-10800,-3600};
+
      gmtOffset_sec = timezones[timezone];
      preferences.putLong("gmtoffset", gmtOffset_sec);
      getLocalTime();
@@ -707,30 +707,30 @@ void settimezone(){
 
 
 String getprefs(){                         // Seperator $01
-       
+
         lastinput.remove(0,4);
         prefname = getValue(lastinput, sep, 0);
         prefdata = preferences.getString(prefname.c_str());
-        log_i("Reading prefs name: %s value %s:", prefname, prefdata.c_str() ); 
+        log_i("Reading prefs name: %s value %s:", prefname, prefdata.c_str() );
         return (prefdata);
 }
 
 String setprefs(){                         // Seperator $01
-        
-        lastinput.remove(0,4); 
+
+        lastinput.remove(0,4);
         prefname = getValue(lastinput, sep, 0);
-        prefdata = getValue(lastinput, sep, 1); 
-        preferences.putString(prefname.c_str(), prefdata); 
-        log_i("Saving prefs name: %s value %s:", prefname, prefdata.c_str() ); 
+        prefdata = getValue(lastinput, sep, 1);
+        preferences.putString(prefname.c_str(), prefdata);
+        log_i("Saving prefs name: %s value %s:", prefname, prefdata.c_str() );
         return ("");
 }
 String setprefsphp(String lastinput){                         // Seperator $01
         prefname   = getValue(lastinput, sep, 1);
         prefdata   = getValue(lastinput, sep, 2);
-        prefanswer = getValue(lastinput, sep, 3);  
+        prefanswer = getValue(lastinput, sep, 3);
         preferences.putString(prefname.c_str(), prefdata);
         if (prefname == "sectokenname")  { sectokenname = prefdata; }
-        log_i("Saving PHP prefs name: %s value %s:", prefname, prefdata.c_str() ); 
+        log_i("Saving PHP prefs name: %s value %s:", prefname, prefdata.c_str() );
         return (prefanswer);
 }
 
@@ -741,7 +741,7 @@ String connecttcp1() {
         Serial.print("Server: ");Serial.println(server1);
         Serial.print("Port: ");Serial.println(port1);
         if (client.connect(server1.c_str() , port1, 3000)) { return "0"; } else { return "!E"; }
-  
+
 }
 
 String gettcp1() {
@@ -752,10 +752,10 @@ String gettcp1() {
           if (client.available()) {
             char c = client.read();
             databuffer += c;
-            
+
           }
         }
-        
+
         return databuffer;
 }
 
@@ -774,9 +774,9 @@ String httppost() {
    server1      = getValue(lastinput, 58, 0);  // 58 = :
    port1        = getValue(lastinput, 58, 1).toInt();
    serverpath1  = getValue(lastinput, 58, 2);  // 58 = :
-   filename     = getValue(lastinput, 58, 3);  // 58 = : 
+   filename     = getValue(lastinput, 58, 3);  // 58 = :
    int datacut = lastinput.indexOf(char(1));
-   lastinput.remove(0,datacut+1);  
+   lastinput.remove(0,datacut+1);
    String httpboundary="WiC64"+String (millis(),HEX) + "WiC64";
 
   if (client.connect(server1.c_str(), port1)) {
@@ -786,7 +786,7 @@ String httppost() {
     client.println("Content-Length: "+String(lastinput.length()+head.length()+tail.length() ));
     client.println("Content-Type: multipart/form-data; boundary="+httpboundary+"\r\n");
     client.print(head);
-    client.print (lastinput); 
+    client.print (lastinput);
     client.print(tail);
 
     while (client.connected()) {
@@ -796,23 +796,23 @@ String httppost() {
      while (client.available()) {
       messagetoc64 += char(client.read());
      }
-      
+
     client.stop();
     lastinput="";
     return messagetoc64;
-    
+
   } else { return "!E"; }
-} 
+}
 
 void bigloader(String httpstring) {         // Daten via HTTP laden
 
         WiFiClientSecure clientsec;
         HTTPClient http;
-        WiFiClient client;  
+        WiFiClient client;
         messagetoc64 = "";
         byte command = httpstring[3];
         httpstring.remove(0,4);
-               
+
         prefstring1 = getValue(lastinput, 36, 1);  // 36 = $VARIABLE$ - Upper case = C64 !
         prefstring2 = getValue(lastinput, 36, 3);  // 36 = $
         prefstring3 = getValue(lastinput, 36, 5);  // 36 = $
@@ -822,15 +822,15 @@ void bigloader(String httpstring) {         // Daten via HTTP laden
         if (prefstring1.length() > 0 && prefstring1data.length() >0 ) { httpstring.replace("$"+prefstring1+"$", prefstring1data ); }
         if (prefstring2.length() > 0 && prefstring1data.length() >0 ) { httpstring.replace("$"+prefstring2+"$", prefstring2data ); }
         if (prefstring3.length() > 0 && prefstring1data.length() >0 ) { httpstring.replace("$"+prefstring3+"$", prefstring3data ); }
-       
+
         httpstring.replace("%ser", setserver);  // Im Kommando ein %ser durch Serveradresse ersetzen die vorher mit "sets" Kommando gesetzt wurde (C64 Strings abkürzen -> LazyJones Wunsch
         if (httpstring.startsWith ("!"))  {httpstring.replace("!", setserver); }  // Wenn ein http request mit ! beginnt wird das ! durch den default server ersetzt -> load "!xxx.prg" = "http://www.wic64.de/prg/xxx.prg"
-        
+
         if(httpstring.indexOf("%mac") > 0) {
         sectoken = preferences.getString(sectokenname.c_str());
         String tempmac = WiFi.macAddress(); tempmac.replace(":",""); httpstring.replace("%mac", tempmac + sectoken); // Im Kommando ein %mac durch die MAC Adresse des ESP ersetzen XX:XX.XX.XX.XX.XX
         }
-        
+
         log_i("[Large HTTP] begin. Counter %i ", crashcounter);
         if (httpstring.startsWith ("https")) {
         clientsec.setInsecure();
@@ -840,28 +840,28 @@ void bigloader(String httpstring) {         // Daten via HTTP laden
         }
 
         if (httpInitResult == true) {
-        http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);  
+        http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
         log_i("HTTP Request: %s", httpstring.c_str());
 
         int httpCode = http.GET();          // start connection and send HTTP header
         log_i("[HTTP] Returncode %d", httpCode);
         if(httpCode == 200) {
-                
 
-                                
+
+
                 swap=0; total=0;
                 int len = http.getSize();
                 buff[65535] = { 0 };   // create buffer for read
                 String datasize;
                 char c = ((len) / 16777216); datasize += c;
                      c = ((len) / 65536); datasize += c;
-                     c = ((len) / 256); datasize += c; 
+                     c = ((len) / 256); datasize += c;
                      c = ((len) % 256); datasize += c;
 
                 buff[65535] = { 0 };   // create buffer for read
                       int fr=0;
-                
+
                 WiFiClient * stream = http.getStreamPtr(); // get tcp stream
                 while(http.connected() && (len > 0 || len == -1)) {    // read all data from server
 
@@ -874,9 +874,9 @@ void bigloader(String httpstring) {         // Daten via HTTP laden
                         while (pay2size != 0 ) { delay(10); } // Warten bis der 2. Buffer leer ist
                         if (swap==1 ||swap==3) { payloadB = ""; for (int i = 0; i < c; i++) { payloadB+=char(buff[i]); } pay2size = c; swap=2; log_i("PayB filled");} // pay2size = payloadB.length();
                         }
-                        if (fr==1) { fr=2;  swap=1; } 
+                        if (fr==1) { fr=2;  swap=1; }
                         if(len > 0) { len -= c; }
-                        if(len < 1) { swap=3; log_i("All data received"); } 
+                        if(len < 1) { swap=3; log_i("All data received"); }
                         if (len > 65535 && fr ==2) { fr=3; log_i("both buffers filled");
                         if (pending == true) { pending = false; handshake_flag2(); delay(200); timeout=millis()+2000; }  // C64 ggf. aus Senderoutine rausholen
                         }
@@ -884,16 +884,15 @@ void bigloader(String httpstring) {         // Daten via HTTP laden
                         log_i("loop");
                         }
                     delay(1);
-                    
-                    } 
-                    swap=3;  
-                    log_i("Big dataload ended: %d - Payload: %d ",len,payloadsize);                
-                   
-                
-                          } else { messagetoc64 = "!0"; } 
+
+                    }
+                    swap=3;
+                    log_i("Big dataload ended: %d - Payload: %d ",len,payloadsize);
+
+
+                          } else { messagetoc64 = "!0"; }
 
         clientsec.stop(); client.stop(); http.end();
                 } else { messagetoc64 = "!0"; }
         log_i("Loop counter: %d" , crashcounter);
 }
-  
