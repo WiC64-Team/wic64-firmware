@@ -115,3 +115,29 @@ void WiC64disconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
 void WiC64ipconfig(WiFiEvent_t event, WiFiEventInfo_t info) {
   displaystuff("got new IP");
 }
+
+// Missing declarations added in the order gcc complained about them
+
+void stringtohexdump(String data);
+void sendmessage(String messagetoc64);
+void loader(String httpstring);
+String setwlan(void);
+String getudpmsg(void);
+void sendudpmsg(String udpmsg);
+String getWLAN(void);
+String setWLAN_list(void);
+void startudpport(void);
+void getLocalTime(void);
+void settimezone(void);
+String getprefs(void);
+String setprefs(void);
+String setprefsphp(String lastinput);
+void settcpport(void);
+String connecttcp1(void);
+String gettcp1(void);
+String sendtcp1(void);
+String httppost(void);
+void bigloader(String httpstring);
+String getValue(String data, char separator, int index);
+String convertspecial(String passworddata);
+String en_code(String httpstring);

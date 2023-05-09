@@ -1,0 +1,15 @@
+[submodule "components/Adafruit-GFX-Library"]
+	path = components/Adafruit-GFX-Library
+	url = https://github.com/adafruit/Adafruit-GFX-Library
+[submodule "components/Adafruit_BusIO"]
+	path = components/Adafruit_BusIO
+	url = https://github.com/adafruit/Adafruit_BusIO
+[submodule "components/Adafruit_SSD1306"]
+	path = components/Adafruit_SSD1306
+	url = https://github.com/adafruit/Adafruit_SSD1306
+[submodule "components/arduino-esp32"]
+	path = components/arduino
+	url = https://github.com/espressif/arduino-esp32
+[submodule "components/OneButton"]
+	path = components/OneButton
+	url = https://github.com/mathertel/OneButton

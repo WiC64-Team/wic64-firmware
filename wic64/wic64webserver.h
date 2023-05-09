@@ -3,13 +3,15 @@
 void handleRoot() {
 
   String compilerdate = __DATE__ " " __TIME__;
-  String compilervars = ((__FILE__), (__TIMESTAMP__), ARDUINO / 10000, ARDUINO % 10000 / 100, ARDUINO % 100 / 10 ? ARDUINO % 100 : ARDUINO % 10, esp_get_idf_version());
+  // TODO: FIXME: -Werror=unused-value
+  // Disabled compilervars for now
+  //String compilervars = ((__FILE__), (__TIMESTAMP__), ARDUINO / 10000, ARDUINO % 10000 / 100, ARDUINO % 100 / 10 ? ARDUINO % 100 : ARDUINO % 10, esp_get_idf_version());
 
   String HTML = "<html><head><title>WiC64 - by KiWi</title></head><body>"
                 "<center><h1><strong>WiC64</strong></h1></center>\n"
                 "<hr />\n"
                 "<p>WiC64 core :"
-                + compilerdate + compilervars + " - <a href=\"/update\"><b>Firmware update</b></a>  -                        <a href=\"/developer\"><b>Switch to DEV-Channel</b></a>  -                        <a href=\"/downgrade\"><b>Downgrade firmware to previous version</b></a>"
+                + compilerdate + " - <a href=\"/update\"><b>Firmware update</b></a>  -                        <a href=\"/developer\"><b>Switch to DEV-Channel</b></a>  -                        <a href=\"/downgrade\"><b>Downgrade firmware to previous version</b></a>"
                                                 "<hr />\n"
                                                 "<br><br><br><br>"
                 + wic64hostname + "<br>" + localip + "<br><br><br>"

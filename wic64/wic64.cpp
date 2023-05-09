@@ -107,10 +107,12 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Fonts/FreeSerif9pt7b.h>
+#include <OneButton.h>
+
 #include "wic64.h"
 #include "wic64webserver.h"
 #include "wic64display.h"
-#include "OneButton.h"
+
 OneButton button(specialbutton, false, false);
 
 
