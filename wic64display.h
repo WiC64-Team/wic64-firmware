@@ -1,44 +1,64 @@
 void displaystuff(String act) {
   if (displayattached == true) {
-        if (displayrotate == false) {display.setRotation(0); } else { display.setRotation(2); }      // For U2 Users
-        display.setFont(&FreeSerif9pt7b);
-        display.clearDisplay();
-        display.setTextSize(1);
-        display.setTextColor(WHITE);
-        display.setCursor(0,12);
-        display.println(WiFi.localIP());
-        display.setCursor(0,30);
-        display.setFont();
-        display.setTextSize(1);
-        display.print("SSID:");
-        if (WiFi.status() == WL_CONNECTED) { display.print(WiFi.SSID().substring(0, 11)); display.print(" "); display.println(WiFi.RSSI()); } //  }  display.println( map(WiFi.RSSI(), -90, -50, 0, 100)); - % Level - map nicht gut genug -> https://support.randomsolutions.nl/827069-Best-dBm-Values-for-Wifi
-           else {                            display.print("not connected"); display.print(" "); display.println("-"); }
-        act=act+"        "; display.print(act.substring(0, 16)); display.println(crashcounter,HEX);
-        display.println(" WiC64 - (C) 2022 by ");
-        display.println("GMP KiWi L.Jones YPS ");
-        String stats = __DATE__ " " __TIME__; display.println(stats);
-        display.display();
-        }
+    if (displayrotate == false) {
+      display.setRotation(0);
+    } else {
+      display.setRotation(2);
+    }  // For U2 Users
+    display.setFont(&FreeSerif9pt7b);
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 12);
+    display.println(WiFi.localIP());
+    display.setCursor(0, 30);
+    display.setFont();
+    display.setTextSize(1);
+    display.print("SSID:");
+    if (WiFi.status() == WL_CONNECTED) {
+      display.print(WiFi.SSID().substring(0, 11));
+      display.print(" ");
+      display.println(WiFi.RSSI());
+    }  //  }  display.println( map(WiFi.RSSI(), -90, -50, 0, 100)); - % Level - map nicht gut genug -> https://support.randomsolutions.nl/827069-Best-dBm-Values-for-Wifi
+    else {
+      display.print("not connected");
+      display.print(" ");
+      display.println("-");
+    }
+    act = act + "        ";
+    display.print(act.substring(0, 16));
+    display.println(crashcounter, HEX);
+    display.println("   WiC64(c)2023 by   ");
+    display.println("GMP KiWi  L.Jones YPS");
+    //String stats = __DATE__ " " __TIME__; display.println(stats);
+    fwvHEX = String(firmwareversion.toInt(), HEX);
+    String stats = __DATE__ "  FW:$" + fwvHEX;
+    display.println(stats);
+    display.display();
+  }
 }
 
 void displaydisabled(String act) {
   if (displayattached == true) {
-        if (displayrotate == false) {display.setRotation(0); } else { display.setRotation(2); }      // For U2 Users
-        display.setFont(&FreeSerif9pt7b);
-        display.clearDisplay();
-        display.setTextSize(1);
-        display.setTextColor(WHITE);
-        display.setCursor(0,12);
-        display.println("WiC64 is");
-        display.println("");
-        display.println(act);
-        display.display();
-
-        }
+    if (displayrotate == false) {
+      display.setRotation(0);
+    } else {
+      display.setRotation(2);
+    }  // For U2 Users
+    display.setFont(&FreeSerif9pt7b);
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 12);
+    display.println("WiC64 is");
+    display.println("");
+    display.println(act);
+    display.display();
+  }
 }
 
 // 'wic64', 128x64px -> http://http://javl.github.io/image2cpp/     .BMP Mono 128x64 as source
-const unsigned char bitmap_wic64 [] PROGMEM = {
+const unsigned char bitmap_wic64[] PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -106,7 +126,7 @@ const unsigned char bitmap_wic64 [] PROGMEM = {
 };
 
 // 'wic64_2', 128x64px -> http://http://javl.github.io/image2cpp/     .BMP Mono 128x64 as source
-const unsigned char bitmap_wic64_2 [] PROGMEM = {
+const unsigned char bitmap_wic64_2[] PROGMEM = {
   0x00, 0x00, 0x00, 0x0f, 0x80, 0xf8, 0x0f, 0x80, 0xf8, 0x0f, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x0f, 0x80, 0xf8, 0x0f, 0x80, 0xf8, 0x0f, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x0f, 0x80, 0xf8, 0x0f, 0x80, 0xf8, 0x0f, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00,
