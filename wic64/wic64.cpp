@@ -109,6 +109,10 @@
 #include <Fonts/FreeSerif9pt7b.h>
 #include <OneButton.h>
 
+#ifdef ARDUINO_ARCH_ESP32
+  #include "esp32-hal-log.h"
+#endif
+
 #include "wic64.h"
 #include "wic64webserver.h"
 #include "wic64display.h"
