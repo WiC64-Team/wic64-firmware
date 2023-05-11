@@ -5,7 +5,7 @@
 
 extern Display *display;
 
-Connection::Connection() {
+Connection::Connection(Display *display) { 
     WiFi.mode(WIFI_STA);
     WiFi.setHostname(("WiC64-" + WiFi.macAddress()).c_str());
 

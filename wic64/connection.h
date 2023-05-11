@@ -2,6 +2,7 @@
 #define WIC64_CONNECTION_H
 
 #include "WiFi.h"
+#include "display.h"
 
 class Connection {
     private:        
@@ -10,7 +11,7 @@ class Connection {
         static void onGotIp(WiFiEvent_t event, WiFiEventInfo_t info);
 
     public:
-        Connection();
+        Connection(Display *display);
         bool isConnected(void);
         void connect(void);
 };

@@ -13,7 +13,6 @@ Display::Display() {
   display = new Adafruit_SSD1306(WIDTH, HEIGHT, &Wire, RESET_PIN_NOT_CONNECTED);
 
   log_i("Allocating SSD1306 buffer");
-
   if (!display->begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     log_e("SSD1306 buffer allocation failed");
     display = NULL;
