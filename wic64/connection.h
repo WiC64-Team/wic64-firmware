@@ -5,7 +5,8 @@
 #include "display.h"
 
 class Connection {
-    private:        
+    private:
+        static String getStoredSSID(void);
         static void onConnected(WiFiEvent_t event, WiFiEventInfo_t info);
         static void onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
         static void onGotIp(WiFiEvent_t event, WiFiEventInfo_t info);
