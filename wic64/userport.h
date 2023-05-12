@@ -22,8 +22,8 @@ class Userport {
         const gpio_num_t PB6 = GPIO_NUM_23;
         const gpio_num_t PB7 = GPIO_NUM_25;
 
-        const uint64_t PORT_MASK =  1ULL<<PB0 | 1ULL<<PB1 | 1ULL<<PB2 | 1ULL<<PB3 |
-                                    1ULL<<PB4 | 1ULL<<PB5 | 1ULL<<PB6 | 1ULL<<PB7;
+        const uint64_t PORT_MASK = 1ULL<<PB0 | 1ULL<<PB1 | 1ULL<<PB2 | 1ULL<<PB3 |
+                                   1ULL<<PB4 | 1ULL<<PB5 | 1ULL<<PB6 | 1ULL<<PB7;
 
         const gpio_num_t PORT_PIN[8] = { PB0, PB1, PB2, PB3, PB4, PB5, PB6, PB7 };
 
@@ -76,12 +76,12 @@ class Userport {
         uint16_t size;
         uint16_t pos;
 
-        void input(void);
-        void output(void);
+        void setPortToInput(void);
+        void setPortToOutput(void);
 
-        void read(void);
-        void write(void);
-        void handshake();
+        void readNextByte(void);
+        void writeNextByte(void);
+        void sendHandshakeSignal();
 
     public:
         Userport(void);

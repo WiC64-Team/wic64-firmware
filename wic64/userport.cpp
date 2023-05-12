@@ -26,7 +26,7 @@ void Userport::connect() {
     gpio_config(&flag2_config);
     SET_HIGH(HANDSHAKE_LINE_ESP_TO_C64);
 
-    input();
+    setPortToInput();
     connected = true;
 }
 
@@ -37,7 +37,7 @@ void Userport::disconnect() {
     flag2_config.mode = GPIO_MODE_INPUT;
     gpio_config(&flag2_config);
 
-    input();
+    setPortToInput();
     connected = false;
 }
 
@@ -49,40 +49,40 @@ bool Userport::isReadyToReceive() {
     return isConnected() && IS_HIGH(DATA_DIRECTION_LINE);
 }
 
-void Userport::input() {
+void Userport::setPortToInput() {
     port_config.mode = GPIO_MODE_INPUT;
     gpio_config(&port_config);
 }
 
-void Userport::output() {
+void Userport::setPortToOutput() {
     port_config.mode = GPIO_MODE_OUTPUT;
     gpio_config(&port_config);
 }
 
-void Userport::handshake() {
+void Userport::sendHandshakeSignal() {
     SET_HIGH(HANDSHAKE_LINE_ESP_TO_C64);
     ets_delay_us(5);
     SET_LOW(HANDSHAKE_LINE_ESP_TO_C64);
 }
 
-void Userport::read() {
+void Userport::readNextByte() {
     buffer[pos] = 0;
     for (uint8_t bit=0; bit<8; bit++) {
         if(IS_HIGH(PORT_PIN[bit])) {
             buffer[pos] |= (1<<bit);
         }
     }
+    sendHandshakeSignal();
     pos++;
-    handshake();
 }
 
-void Userport::write() {
+void Userport::writeNextByte() {
     uint8_t byte = buffer[pos];
     for (uint8_t bit=0; bit<8; bit++) {
         (byte & (1<<bit))
             ? SET_HIGH(PORT_PIN[bit])
             : SET_LOW(PORT_PIN[bit]);
     }
+    sendHandshakeSignal();
     pos++;
-    handshake();
 }
