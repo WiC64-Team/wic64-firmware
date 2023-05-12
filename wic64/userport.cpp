@@ -24,6 +24,7 @@ void Userport::connect() {
 
     flag2_config.mode = GPIO_MODE_OUTPUT;
     gpio_config(&flag2_config);
+    SET_HIGH(HANDSHAKE_LINE_ESP_TO_C64);
 
     input();
     connected = true;
@@ -40,9 +41,12 @@ void Userport::disconnect() {
     connected = false;
 }
 
-bool Userport::isReady() {
-    if (!isConnected()) return false;
-    return ((GPIO.in >> PA2) & 1); // TODO: && notInTransfer
+bool Userport::isReadyToSend(void) {
+    return isConnected() && IS_LOW(DATA_DIRECTION_LINE);
+}
+
+bool Userport::isReadyToReceive() {
+    return isConnected() && IS_HIGH(DATA_DIRECTION_LINE);
 }
 
 void Userport::input() {
@@ -56,28 +60,28 @@ void Userport::output() {
 }
 
 void Userport::handshake() {
-    GPIO.out_w1ts = (1 << FLAG2);
-    delayMicroseconds(5);
-    GPIO.out_w1tc = (1 << FLAG2);
+    SET_HIGH(HANDSHAKE_LINE_ESP_TO_C64);
+    ets_delay_us(5);
+    SET_LOW(HANDSHAKE_LINE_ESP_TO_C64);
 }
 
-void Userport::read() { // PC2 irq from peer?
+void Userport::read() {
     buffer[pos] = 0;
-    for (uint8_t i=0; i<8; i++) {
-        if((GPIO.in >> PORT_PIN[i]) & 1) {
-            buffer[pos] |= (1<<i);
+    for (uint8_t bit=0; bit<8; bit++) {
+        if(IS_HIGH(PORT_PIN[bit])) {
+            buffer[pos] |= (1<<bit);
         }
     }
     pos++;
     handshake();
 }
 
-void Userport::write() { // PC2 irq from peer?
+void Userport::write() {
     uint8_t byte = buffer[pos];
-    for (uint8_t i=0; i<8; i++) {
-        (byte & (1<<i))
-            ? GPIO.out_w1ts = (1<<PORT_PIN[i])
-            : GPIO.out_w1tc = (1<<PORT_PIN[i]);
+    for (uint8_t bit=0; bit<8; bit++) {
+        (byte & (1<<bit))
+            ? SET_HIGH(PORT_PIN[bit])
+            : SET_LOW(PORT_PIN[bit]);
     }
     pos++;
     handshake();

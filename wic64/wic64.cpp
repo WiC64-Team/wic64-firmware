@@ -17,6 +17,6 @@ void setup() {
 }
 
 void loop() {
-  // needed until we are busy enough to avoid the watchdog to bite...
-  vTaskDelay(1);
+  // needed until we are busy enough to avoid the watchdog
+  vTaskDelay(pdMS_TO_TICKS(1000));
 }
