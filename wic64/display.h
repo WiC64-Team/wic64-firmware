@@ -10,7 +10,7 @@
 
 class Display {
     public:
-        Display();        
+        Display();
         void setRotation(uint8_t rotation);
         void setIp(String ip);
         void resetIp(void);
@@ -18,38 +18,34 @@ class Display {
         void setRSSI(int8_t rssi);
         void setStatus(String status);
 
-    private:        
-        Adafruit_SSD1306 *display;
-        uint8_t rotation = 0;
-        String ip = "";
-        String ssid = "";
-        String status = "";  
-        
-        // 7 chars max required for rssi, + nullbyte ("-127dBm\0")        
-        static const uint8_t MAX_CHARS_FOR_RSSI = 8; 
-        char rssi[MAX_CHARS_FOR_RSSI+1] = "";  
-        
-        // 21 characters per line available using builtin font
-        static const uint8_t MAX_CHARS_PER_LINE = 21;
-        char line[MAX_CHARS_PER_LINE+1] = ""; 
-        
-        char* abbreviated(String string);
-        char* abbreviated(String string, uint8_t width);        
-        
-        void printStatusAndRSSI(void);
-        void update(void);  
-
+    private:
         const int I2C_SDA_PIN = 13;
         const int I2C_SCL_PIN = 15;
         const int8_t RESET_PIN_NOT_CONNECTED = -1;
 
         const uint8_t WIDTH = 128;
-        const uint8_t HEIGHT = 64;    
+        const uint8_t HEIGHT = 64;
 
         const GFXfont* FONT_BUILTIN = NULL;         // builtin 6x8 font
         const GFXfont* FONT_BIG = &FreeSerif9pt7b;  // big font used for IP
+        static const uint8_t MAX_CHARS_FOR_RSSI = 8;
+        static const uint8_t MAX_CHARS_PER_LINE = 21;
 
-        const unsigned char logo[1024] PROGMEM = {
+        Adafruit_SSD1306 *display;
+        uint8_t rotation = 0;
+        String ip = "";
+        String ssid = "";
+        String status = "";
+
+        char rssi[MAX_CHARS_FOR_RSSI+1] = "";
+        char line[MAX_CHARS_PER_LINE+1] = "";
+
+        void update(void);
+        char* abbreviated(String string);
+        char* abbreviated(String string, uint8_t width);
+        void printStatusAndRSSI(void);
+
+        const unsigned char logo[128*64/8] PROGMEM = {
             0x00, 0x00, 0x00, 0x0f, 0x80, 0xf8, 0x0f, 0x80, 0xf8, 0x0f, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x0f, 0x80, 0xf8, 0x0f, 0x80, 0xf8, 0x0f, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x0f, 0x80, 0xf8, 0x0f, 0x80, 0xf8, 0x0f, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00,
@@ -115,7 +111,6 @@ class Display {
             0x00, 0x00, 0x00, 0x0f, 0x80, 0xf8, 0x0f, 0xff, 0xf8, 0x00, 0x00, 0x7c, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
-
 };
 
 #endif // WIC64_DISPLAY_H

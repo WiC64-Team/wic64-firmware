@@ -14,19 +14,17 @@ Display::Display() {
 
   log_i("Allocating SSD1306 buffer");
   if (!display->begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    log_e("SSD1306 buffer allocation failed");
+    log_e("Could not allocate buffer for SSD1306");
     display = NULL;
     return;
   }
 
-  resetIp();
-
-  display->clearDisplay();
-  display->drawBitmap(0, 0, logo, 128, 64, WHITE);
-  display->display();
-
   display->setTextColor(WHITE);
   display->setTextSize(1);
+
+  display->clearDisplay();
+  display->drawBitmap(0, 0, logo, WIDTH, HEIGHT, WHITE);
+  display->display();
 }
 
 void Display::setRotation(uint8_t rotation) {
@@ -41,6 +39,7 @@ void Display::setIp(String ip) {
 
 void Display::resetIp(void) {
   this->ip = "0.0.0.0";
+  update();
 }
 
 void Display::setSSID(String ssid) {
