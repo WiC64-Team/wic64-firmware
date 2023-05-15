@@ -34,14 +34,14 @@ class Userport {
          * PA2   : Direction: HIGH = C64 => ESP, LOW = ESP => C64
          */
 
-        const gpio_num_t PC2   = GPIO_NUM_14;
-        const gpio_num_t PA2   = GPIO_NUM_27;
-        const gpio_num_t FLAG2 = GPIO_NUM_26;
+        static const gpio_num_t PC2   = GPIO_NUM_14;
+        static const gpio_num_t PA2   = GPIO_NUM_27;
+        static const gpio_num_t FLAG2 = GPIO_NUM_26;
 
         // synomyms for readability
-        const gpio_num_t HANDSHAKE_LINE_C64_TO_ESP = PC2;
-        const gpio_num_t HANDSHAKE_LINE_ESP_TO_C64 = FLAG2;
-        const gpio_num_t DATA_DIRECTION_LINE = PA2;
+        static const gpio_num_t HANDSHAKE_LINE_C64_TO_ESP = PC2;
+        static const gpio_num_t HANDSHAKE_LINE_ESP_TO_C64 = FLAG2;
+        static const gpio_num_t DATA_DIRECTION_LINE = PA2;
 
         gpio_config_t port_config = {
             .pin_bit_mask = PORT_MASK,
@@ -51,26 +51,26 @@ class Userport {
             .intr_type = GPIO_INTR_DISABLE,
         };
 
-        gpio_config_t pc2_and_pa2_config = {
-            .pin_bit_mask = (1ULL<<PC2 | 1ULL<<PA2),
-            .mode = GPIO_MODE_INPUT,
-            .pull_up_en = GPIO_PULLUP_DISABLE,
-            .pull_down_en = GPIO_PULLDOWN_DISABLE,
-            .intr_type = GPIO_INTR_DISABLE,
+        enum TRANSFER_TYPE {
+            TRANSFER_TYPE_NONE,
+            TRANSFER_TYPE_SEND,
+            TRANSFER_TYPE_RECEIVE
         };
 
-        gpio_config_t flag2_config = {
-            .pin_bit_mask = (1ULL<<FLAG2),
-            .mode = GPIO_MODE_INPUT,
-            .pull_up_en = GPIO_PULLUP_DISABLE,
-            .pull_down_en = GPIO_PULLDOWN_DISABLE,
-            .intr_type = GPIO_INTR_DISABLE,
+        enum TRANSFER_STATE {
+            TRANSFER_STATE_NONE,
+            TRANSFER_STATE_PENDING,
+            TRANSFER_STATE_RUNNING,
         };
 
         bool connected = false;
 
         uint16_t timeout;
-        void (* timeoutHandler)();
+        void (*onTimeoutCallback)();
+        void (*onSuccessCallback)(void);
+
+        TRANSFER_TYPE type = TRANSFER_TYPE_NONE;
+        TRANSFER_STATE state = TRANSFER_STATE_NONE;
 
         uint8_t *buffer;
         uint16_t size;
@@ -83,20 +83,32 @@ class Userport {
         void writeNextByte(void);
         void sendHandshakeSignal();
 
+        void startTransfer(TRANSFER_TYPE type, uint8_t *data, uint16_t size, void (*onSuccess)(void));
+        void finishTransfer(void);
+
     public:
         Userport(void);
 
         void setTimeout(uint16_t ms);
-        void onTimeout(void (* onTimeout)());
-
-        bool isConnected(void);
-        bool isReadyToSend(void);
-        bool isReadyToReceive(void);
+        void onTimeout(void (*onTimeout)());
 
         void connect(void);
         void disconnect(void);
+        bool isConnected(void);
 
-        void send(uint8_t *data, uint16_t size, void (* onSuccess)());
-        void receive(uint8_t *data, uint16_t size, void (* onSuccess)(uint8_t* data, uint16_t size));
+        bool isIdle(void);
+        bool isReadyToSend(void);
+        bool isReadyToReceive(void);
+        bool isTransferPending(void);
+        bool isSending(void);
+        bool isReceiving(void);
+
+        void setTransferRunning(void);
+
+        void send(uint8_t *data, uint16_t size, void (*onSuccess)(void));
+        void receive(uint8_t *data, uint16_t size, void (*onSuccess)(void));
+
+        static void IRAM_ATTR onDataDirectionChanged(void);
+        static void IRAM_ATTR onHandshakeSignalReceived(void);
 };
 #endif // WIC64_USERPORT_H

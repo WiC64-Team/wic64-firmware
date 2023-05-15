@@ -11,7 +11,7 @@ void Userport::setTimeout(uint16_t ms) {
 }
 
 void Userport::onTimeout(void (* onTimeout)()) {
-    timeoutHandler = onTimeout;
+    onTimeoutCallback = onTimeout;
 }
 
 bool Userport::isConnected() {
@@ -19,25 +19,32 @@ bool Userport::isConnected() {
 }
 
 void Userport::connect() {
-    pc2_and_pa2_config.mode = GPIO_MODE_INPUT;
-    gpio_config(&pc2_and_pa2_config);
+    gpio_set_direction(PA2, GPIO_MODE_INPUT);
+    gpio_pullup_en(PA2);
 
-    flag2_config.mode = GPIO_MODE_OUTPUT;
-    gpio_config(&flag2_config);
-    SET_HIGH(HANDSHAKE_LINE_ESP_TO_C64);
+    gpio_set_direction(PC2, GPIO_MODE_INPUT);
+    gpio_pulldown_en(PC2);
+
+    gpio_set_direction(FLAG2, GPIO_MODE_OUTPUT);
 
     setPortToInput();
+
+    attachInterrupt(DATA_DIRECTION_LINE, onDataDirectionChanged, CHANGE);
     connected = true;
 }
 
 void Userport::disconnect() {
-    pc2_and_pa2_config.mode = GPIO_MODE_INPUT;
-    gpio_config(&pc2_and_pa2_config);
+    gpio_set_direction(PA2, GPIO_MODE_INPUT);
+    gpio_pullup_dis(PA2);
 
-    flag2_config.mode = GPIO_MODE_INPUT;
-    gpio_config(&flag2_config);
+    gpio_set_direction(PC2, GPIO_MODE_INPUT);
+    gpio_pulldown_dis(PC2);
+
+    gpio_set_direction(FLAG2, GPIO_MODE_INPUT);
 
     setPortToInput();
+
+    detachInterrupt(DATA_DIRECTION_LINE);
     connected = false;
 }
 
@@ -49,14 +56,36 @@ bool Userport::isReadyToReceive() {
     return isConnected() && IS_HIGH(DATA_DIRECTION_LINE);
 }
 
+bool Userport::isIdle(void) {
+    return !isSending() && !isReceiving();
+}
+
+bool Userport::isTransferPending(void) {
+    return state == TRANSFER_STATE_PENDING;
+}
+
+bool Userport::isSending(void) {
+    return type == TRANSFER_TYPE_SEND;
+}
+
+bool Userport::isReceiving(void) {
+    return type == TRANSFER_TYPE_RECEIVE;
+}
+
+void Userport::setTransferRunning() {
+    this->state = TRANSFER_STATE_RUNNING;
+}
+
 void Userport::setPortToInput() {
     port_config.mode = GPIO_MODE_INPUT;
     gpio_config(&port_config);
+    log_d("done");
 }
 
 void Userport::setPortToOutput() {
     port_config.mode = GPIO_MODE_OUTPUT;
     gpio_config(&port_config);
+    log_d("done");
 }
 
 void Userport::sendHandshakeSignal() {
@@ -73,7 +102,10 @@ void Userport::readNextByte() {
         }
     }
     sendHandshakeSignal();
-    pos++;
+
+    if (++pos == size) {
+        finishTransfer();
+    }
 }
 
 void Userport::writeNextByte() {
@@ -84,5 +116,65 @@ void Userport::writeNextByte() {
             : SET_LOW(PORT_PIN[bit]);
     }
     sendHandshakeSignal();
-    pos++;
+
+    if (++pos == size) {
+        finishTransfer();
+    }
+}
+
+void Userport::startTransfer(TRANSFER_TYPE type, uint8_t *data, uint16_t size, void (*onSuccess)(void)) {
+    log_d("%s %d bytes...",
+        type == TRANSFER_TYPE_SEND ? "Sending" : "Expecting to receive", size);
+
+    this->type = type;
+    this->buffer = data;
+    this->size = size;
+    this->onSuccessCallback = onSuccess;
+    this->pos = 0;
+
+    state = (type == TRANSFER_TYPE_SEND)
+        ? TRANSFER_STATE_PENDING
+        : TRANSFER_STATE_RUNNING;
+
+    attachInterrupt(HANDSHAKE_LINE_C64_TO_ESP, Userport::onHandshakeSignalReceived, RISING);
+}
+
+void Userport::finishTransfer(void) {
+    log_d("Transfer complete, %d bytes %s",
+        pos, type == TRANSFER_TYPE_SEND ? "sent" : "received");
+
+    detachInterrupt(HANDSHAKE_LINE_C64_TO_ESP);
+    type = TRANSFER_TYPE_NONE;
+    state = TRANSFER_STATE_NONE;
+
+    log_d("Calling onSuccess()...");
+    onSuccessCallback();
+}
+
+void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(void)) {
+    startTransfer(TRANSFER_TYPE_SEND, data, size, onSuccess);
+}
+
+void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(void)) {
+    startTransfer(TRANSFER_TYPE_RECEIVE, data, size, onSuccess);
+}
+
+extern Userport *userport;
+
+void Userport::onDataDirectionChanged(void) {
+    IS_HIGH(Userport::DATA_DIRECTION_LINE)
+        ? userport->setPortToInput()
+        : userport->setPortToOutput();
+
+    if (userport->isTransferPending()) {
+        log_d("Sending additional handshake to confirm change of data direction");
+        userport->sendHandshakeSignal();
+        userport->setTransferRunning();
+    }
+}
+
+void IRAM_ATTR Userport::onHandshakeSignalReceived(void) {
+    userport->isReceiving()
+        ? userport->readNextByte()
+        : userport->writeNextByte();
 }
