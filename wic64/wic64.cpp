@@ -1,10 +1,7 @@
-#ifdef ARDUINO_ARCH_ESP32
-  #include "esp32-hal-log.h"
-#endif
-
 #include "display.h"
 #include "connection.h"
 #include "userport.h"
+#include "util.h"
 
 Display *display;
 Connection *connection;
@@ -17,11 +14,11 @@ uint8_t request[REQUEST_SIZE];
 uint8_t response[RESPONSE_SIZE] = { 0x00, 0x04, 0xde, 0xad, 0xbe, 0xef };
 
 void responseSent() {
-  log_buf_d(response, (size_t) RESPONSE_SIZE);
+  hexdump("Response:", response, RESPONSE_SIZE);
 }
 
 void requestReceived() {
-  log_buf_d(request, (size_t) REQUEST_SIZE);
+  hexdump("Request:", request, REQUEST_SIZE);
   userport->send(response, RESPONSE_SIZE, responseSent);
 }
 
@@ -32,10 +29,8 @@ void setup() {
 }
 
 void loop() {
-  if(userport->isIdle() && userport->isReadyToReceive()) {
+  if (userport->isReadyToReceive()) {
     userport->receive(request, REQUEST_SIZE, requestReceived);
   }
-
-  // needed until we are busy enough to avoid the watchdog
   vTaskDelay(1);
 }
