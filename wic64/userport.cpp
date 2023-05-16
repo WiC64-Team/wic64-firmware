@@ -49,11 +49,11 @@ void Userport::disconnect() {
 }
 
 bool Userport::isReadyToSend(void) {
-    return isConnected() && IS_LOW(DATA_DIRECTION_LINE);
+    return isConnected() && isIdle() && IS_LOW(DATA_DIRECTION_LINE);
 }
 
 bool Userport::isReadyToReceive() {
-    return isConnected() && IS_HIGH(DATA_DIRECTION_LINE);
+    return isConnected() && isIdle() && IS_HIGH(DATA_DIRECTION_LINE);
 }
 
 bool Userport::isIdle(void) {
@@ -147,8 +147,11 @@ void Userport::finishTransfer(void) {
     type = TRANSFER_TYPE_NONE;
     state = TRANSFER_STATE_NONE;
 
-    log_d("Calling onSuccess()...");
-    onSuccessCallback();
+
+    if (onSuccessCallback != NULL) {
+        log_d("Calling onSuccess()...");
+        onSuccessCallback();
+    }
 }
 
 void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(void)) {
@@ -167,7 +170,7 @@ void Userport::onDataDirectionChanged(void) {
         : userport->setPortToOutput();
 
     if (userport->isTransferPending()) {
-        log_d("Sending additional handshake to confirm change of data direction");
+        log_d("Sending handshake to confirm change of data direction");
         userport->sendHandshakeSignal();
         userport->setTransferRunning();
     }
