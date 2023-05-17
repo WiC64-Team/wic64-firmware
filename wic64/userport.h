@@ -67,7 +67,7 @@ class Userport {
 
         bool connected = false;
 
-        uint16_t timeout = TIMEOUT_DEFAULT_200MS;
+        uint16_t timeout = TIMEOUT_DEFAULT_2000_MS;
         uint32_t timeOfLastActivity;
         TaskHandle_t timeoutTaskHandle = NULL;
 
@@ -87,7 +87,13 @@ class Userport {
         void writeNextByte(void);
         void sendHandshakeSignal();
 
-        void startTransfer(TRANSFER_TYPE type, uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout);
+        void startTransfer(
+            TRANSFER_TYPE type,
+            uint8_t *data,
+            uint16_t size,
+            void (*onSuccess)(void),
+            uint16_t timeout
+        );
         void completeTransfer(void);
         void abortTransfer(const char* reason);
 
@@ -96,7 +102,7 @@ class Userport {
         bool isTimeoutTaskRunning(void);
 
     public:
-        static const uint16_t TIMEOUT_DEFAULT_200MS = 2000;
+        static const uint16_t TIMEOUT_DEFAULT_2000_MS = 2000;
         static const uint16_t TIMEOUT_NONE = 0;
 
         Userport(void);

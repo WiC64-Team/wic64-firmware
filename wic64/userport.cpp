@@ -110,7 +110,14 @@ void Userport::writeNextByte() {
     }
 }
 
-void Userport::startTransfer(TRANSFER_TYPE type, uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout) {
+void Userport::startTransfer(
+        TRANSFER_TYPE type,
+        uint8_t *data,
+        uint16_t size,
+        void (*onSuccess)(void),
+        uint16_t timeout
+    ) {
+
     log_d("%s %d bytes...",
         type == TRANSFER_TYPE_SEND ? "Sending" : "Expecting to receive", size);
 
@@ -192,7 +199,7 @@ bool Userport::hasTimedOut(void) {
 }
 
 void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(void)) {
-    startTransfer(TRANSFER_TYPE_SEND, data, size, onSuccess, TIMEOUT_DEFAULT_200MS);
+    startTransfer(TRANSFER_TYPE_SEND, data, size, onSuccess, TIMEOUT_DEFAULT_2000_MS);
 }
 
 void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout) {
@@ -200,7 +207,7 @@ void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint1
 }
 
 void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(void)) {
-    startTransfer(TRANSFER_TYPE_RECEIVE, data, size, onSuccess, TIMEOUT_DEFAULT_200MS);
+    startTransfer(TRANSFER_TYPE_RECEIVE, data, size, onSuccess, TIMEOUT_DEFAULT_2000_MS);
 }
 
 void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout) {
