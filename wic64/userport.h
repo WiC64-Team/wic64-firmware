@@ -3,6 +3,8 @@
 
 #include <cstdint>
 #include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #define IS_HIGH(PIN) (((GPIO.in >> PIN) & 1) == 1)
 #define IS_LOW(PIN) (((GPIO.in >> PIN) & 1) == 1)
@@ -65,9 +67,9 @@ class Userport {
 
         bool connected = false;
 
-        uint16_t timeout;
-        void (*onTimeoutCallback)();
-        void (*onSuccessCallback)(void);
+        uint16_t timeout = DEFAULT_TIMEOUT;
+        uint32_t timeOfLastActivity;
+        TaskHandle_t timeoutTaskHandle = NULL;
 
         TRANSFER_TYPE type = TRANSFER_TYPE_NONE;
         TRANSFER_STATE state = TRANSFER_STATE_NONE;
@@ -76,6 +78,8 @@ class Userport {
         uint16_t size;
         uint16_t pos;
 
+        void (*onSuccessCallback)(void);
+
         void setPortToInput(void);
         void setPortToOutput(void);
 
@@ -83,21 +87,25 @@ class Userport {
         void writeNextByte(void);
         void sendHandshakeSignal();
 
-        void startTransfer(TRANSFER_TYPE type, uint8_t *data, uint16_t size, void (*onSuccess)(void));
-        void finishTransfer(void);
+        void startTransfer(TRANSFER_TYPE type, uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout);
+        void completeTransfer(void);
+        void abortTransfer(const char* reason);
+
+        void createTimeoutTask(void);
+        void deleteTimeoutTask(void);
+        bool isTimeoutTaskRunning(void);
 
     public:
-        Userport(void);
+        static const uint16_t DEFAULT_TIMEOUT = 2000;
+        static const uint16_t NO_TIMEOUT = 0;
 
-        void setTimeout(uint16_t ms);
-        void onTimeout(void (*onTimeout)());
+        Userport(void);
 
         void connect(void);
         void disconnect(void);
         bool isConnected(void);
 
         bool isIdle(void);
-        bool isReadyToSend(void);
         bool isReadyToReceive(void);
         bool isTransferPending(void);
         bool isSending(void);
@@ -106,7 +114,15 @@ class Userport {
         void setTransferRunning(void);
 
         void send(uint8_t *data, uint16_t size, void (*onSuccess)(void));
+        void send(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout);
+
         void receive(uint8_t *data, uint16_t size, void (*onSuccess)(void));
+        void receive(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout);
+
+        void resetTimeout(void);
+        bool hasTimedOut(void);
+
+        static void timeoutTask(void*);
 
         static void IRAM_ATTR onDataDirectionChanged(void);
         static void IRAM_ATTR onHandshakeSignalReceived(void);
