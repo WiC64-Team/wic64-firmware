@@ -1,7 +1,7 @@
 #include "display.h"
 #include "connection.h"
 #include "userport.h"
-#include "util.h"
+#include "utilities.h"
 
 Display *display;
 Connection *connection;
