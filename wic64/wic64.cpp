@@ -30,7 +30,7 @@ void setup() {
 
 void loop() {
   if (userport->isReadyToReceive()) {
-    userport->receive(request, REQUEST_SIZE, requestReceived, Userport::NO_TIMEOUT);
+    userport->receive(request, REQUEST_SIZE, requestReceived, Userport::TIMEOUT_NONE);
   }
   vTaskDelay(pdMS_TO_TICKS(10));
 }

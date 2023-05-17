@@ -67,7 +67,7 @@ class Userport {
 
         bool connected = false;
 
-        uint16_t timeout = DEFAULT_TIMEOUT;
+        uint16_t timeout = TIMEOUT_DEFAULT_200MS;
         uint32_t timeOfLastActivity;
         TaskHandle_t timeoutTaskHandle = NULL;
 
@@ -96,8 +96,8 @@ class Userport {
         bool isTimeoutTaskRunning(void);
 
     public:
-        static const uint16_t DEFAULT_TIMEOUT = 2000;
-        static const uint16_t NO_TIMEOUT = 0;
+        static const uint16_t TIMEOUT_DEFAULT_200MS = 2000;
+        static const uint16_t TIMEOUT_NONE = 0;
 
         Userport(void);
 

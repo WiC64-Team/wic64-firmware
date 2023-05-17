@@ -127,7 +127,7 @@ void Userport::startTransfer(TRANSFER_TYPE type, uint8_t *data, uint16_t size, v
 
     attachInterrupt(HANDSHAKE_LINE_C64_TO_ESP, Userport::onHandshakeSignalReceived, RISING);
 
-    if (timeout > 0) {
+    if (timeout > TIMEOUT_NONE) {
         createTimeoutTask();
     }
 }
@@ -192,7 +192,7 @@ bool Userport::hasTimedOut(void) {
 }
 
 void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(void)) {
-    startTransfer(TRANSFER_TYPE_SEND, data, size, onSuccess, DEFAULT_TIMEOUT);
+    startTransfer(TRANSFER_TYPE_SEND, data, size, onSuccess, TIMEOUT_DEFAULT_200MS);
 }
 
 void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout) {
@@ -200,7 +200,7 @@ void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint1
 }
 
 void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(void)) {
-    startTransfer(TRANSFER_TYPE_RECEIVE, data, size, onSuccess, DEFAULT_TIMEOUT);
+    startTransfer(TRANSFER_TYPE_RECEIVE, data, size, onSuccess, TIMEOUT_DEFAULT_200MS);
 }
 
 void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout) {
