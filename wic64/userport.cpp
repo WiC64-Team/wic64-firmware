@@ -147,7 +147,6 @@ void Userport::finishTransfer(void) {
     type = TRANSFER_TYPE_NONE;
     state = TRANSFER_STATE_NONE;
 
-
     if (onSuccessCallback != NULL) {
         log_d("Calling onSuccess()...");
         onSuccessCallback();
