@@ -199,12 +199,12 @@ void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint1
     startTransfer(TRANSFER_TYPE_SEND, data, size, onSuccess, timeout);
 }
 
-void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout) {
-    startTransfer(TRANSFER_TYPE_RECEIVE, data, size, onSuccess, timeout);
-}
-
 void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(void)) {
     startTransfer(TRANSFER_TYPE_RECEIVE, data, size, onSuccess, DEFAULT_TIMEOUT);
+}
+
+void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout) {
+    startTransfer(TRANSFER_TYPE_RECEIVE, data, size, onSuccess, timeout);
 }
 
 extern Userport *userport;
