@@ -6,6 +6,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include "service.h"
+
 #define IS_HIGH(PIN) (((GPIO.in >> PIN) & 1) == 1)
 #define IS_LOW(PIN) (((GPIO.in >> PIN) & 1) == 1)
 
@@ -56,7 +58,9 @@ class Userport {
         enum TRANSFER_TYPE {
             TRANSFER_TYPE_NONE,
             TRANSFER_TYPE_SEND,
-            TRANSFER_TYPE_RECEIVE
+            TRANSFER_TYPE_RECEIVE_FULL,
+            TRANSFER_TYPE_RECEIVE_PARTIAL,
+            TRANSFER_TYPE_RECEIVE_REQUEST,
         };
 
         enum TRANSFER_STATE {
@@ -67,32 +71,39 @@ class Userport {
 
         bool connected = false;
 
-        uint16_t timeout = TIMEOUT_DEFAULT_2000_MS;
+        static const uint16_t TIMEOUT_DEFAULT_10MS = 10;
+        uint16_t timeout = TIMEOUT_DEFAULT_10MS;
         uint32_t timeOfLastActivity;
-        TaskHandle_t timeoutTaskHandle = NULL;
 
-        TRANSFER_TYPE type = TRANSFER_TYPE_NONE;
-        TRANSFER_STATE state = TRANSFER_STATE_NONE;
+        TaskHandle_t timeoutTaskHandle;
+        bool timeoutTaskCreated = false;
+
+        TRANSFER_TYPE transferType = TRANSFER_TYPE_NONE;
+        TRANSFER_TYPE previousTransferType = TRANSFER_TYPE_NONE;
+        TRANSFER_STATE transferState = TRANSFER_STATE_NONE;
 
         uint8_t *buffer;
         uint16_t size;
         uint16_t pos;
 
-        void (*onSuccessCallback)(void);
+        void (*onSuccessCallback)(uint8_t* data, uint16_t size);
 
         void setPortToInput(void);
         void setPortToOutput(void);
 
+        void readByte(uint8_t *byte);
         void readNextByte(void);
+
+        void writeByte(uint8_t *byte);
         void writeNextByte(void);
+
         void sendHandshakeSignal();
 
         void startTransfer(
             TRANSFER_TYPE type,
             uint8_t *data,
             uint16_t size,
-            void (*onSuccess)(void),
-            uint16_t timeout
+            void (*onSuccess)(uint8_t* data, uint16_t size)
         );
         void completeTransfer(void);
         void abortTransfer(const char* reason);
@@ -102,33 +113,28 @@ class Userport {
         bool isTimeoutTaskRunning(void);
 
     public:
-        static const uint16_t TIMEOUT_DEFAULT_2000_MS = 2000;
-        static const uint16_t TIMEOUT_NONE = 0;
-
-        Userport(void);
+        Userport(Service *service);
 
         void connect(void);
         void disconnect(void);
         bool isConnected(void);
 
-        bool isIdle(void);
-        bool isReadyToReceive(void);
         bool isTransferPending(void);
-        bool isSending(void);
-        bool isReceiving(void);
-
         void setTransferRunning(void);
 
-        void send(uint8_t *data, uint16_t size, void (*onSuccess)(void));
-        void send(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout);
+        void acceptRequest(void);
 
-        void receive(uint8_t *data, uint16_t size, void (*onSuccess)(void));
-        void receive(uint8_t *data, uint16_t size, void (*onSuccess)(void), uint16_t timeout);
+        void receivePartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
+        void receive(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
+        void send(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
 
         void resetTimeout(void);
         bool hasTimedOut(void);
 
         static void timeoutTask(void*);
+
+        static void createSessionTask(void);
+        static void sessionTask(void*);
 
         static void IRAM_ATTR onDataDirectionChanged(void);
         static void IRAM_ATTR onHandshakeSignalReceived(void);
