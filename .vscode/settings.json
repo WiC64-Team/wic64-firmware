@@ -1,0 +1,5 @@
+{
+    "files.trimTrailingWhitespace": true,
+    "editor.detectIndentation": false,
+    "editor.indentSize": 4,
+}
