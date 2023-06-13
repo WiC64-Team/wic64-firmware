@@ -353,18 +353,18 @@ void loop() {
         Serial.println(lastinput.length());
 
 #endif
-        if (lastinput.charAt(3) == 0) {
+        if (lastinput.charAt(3) == 0) { // TODO: Implement me
           ex = true;
           displaystuff("get FW version");
           sendmessage("WIC64FWV:" + firmwareversion);
         }
-        if (lastinput.charAt(3) == 1) {
+        if (lastinput.charAt(3) == 1) { // TODO: Implement me
           ex = true;
           displaystuff("loading http");
           loader(lastinput);
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
         }
-        if (lastinput.charAt(3) == 2) {
+        if (lastinput.charAt(3) == 2) { // TODO: Implement me
           ex = true;
           displaystuff("config wifi");
           httpstring = lastinput;
@@ -372,7 +372,7 @@ void loop() {
           delay(3000);
           displaystuff("config changed");
         }
-        if (lastinput.charAt(3) == 3) {
+        if (lastinput.charAt(3) == 3) { // TODO: Implement, but only one type of update (official version)
           ex = true;
           displaystuff("FW update 1");
           handleUpdate();
@@ -387,41 +387,41 @@ void loop() {
           displaystuff("FW update 3");
           handleDeveloper2();
         }  // Developer SW update - debug output to serial
-        if (lastinput.charAt(3) == 6) {
+        if (lastinput.charAt(3) == 6) { //  TODO: Implement me
           ex = true;
           displaystuff("get ip");
           String ipaddress = WiFi.localIP().toString();
           sendmessage(ipaddress);
         }
-        if (lastinput.charAt(3) == 7) {
+        if (lastinput.charAt(3) == 7) { // TODO: Ignore me
           ex = true;
           displaystuff("get stats");
           String stats = __DATE__ " " __TIME__;
           sendmessage(stats);
         }
-        if (lastinput.charAt(3) == 8) {
+        if (lastinput.charAt(3) == 8) { // TODO: Implement me
           ex = true;
           displaystuff("set server");
           lastinput.remove(0, 4);
           setserver = lastinput;
           preferences.putString("server", lastinput);
         }
-        if (lastinput.charAt(3) == 9) {
+        if (lastinput.charAt(3) == 9) { // TODO: Implement me, maybe add printf feature later
           ex = true;
           displaystuff("REM");
           Serial.println(lastinput);
         }  // REM Send messages to debug console.
-        if (lastinput.charAt(3) == 10) {
+        if (lastinput.charAt(3) == 10) { // TODO: Implementieren
           ex = true;
           displaystuff("get upd");
           sendmessage(getudpmsg());
         }  // Get UDP data and return them to c64
-        if (lastinput.charAt(3) == 11) {
+        if (lastinput.charAt(3) == 11) { // TODO: Implementieren
           ex = true;
           displaystuff("send udp");
           sendudpmsg(lastinput);
         }  // Send UDP data to IP
-        if (lastinput.charAt(3) == 12) {
+        if (lastinput.charAt(3) == 12) { // TODO: Implementieren
           ex = true;
           displaystuff("scanning wlan");
           sendmessage(getWLAN());
@@ -430,32 +430,32 @@ void loop() {
           ex = true;
           displaystuff("config wifi id");
           httpstring = lastinput;
-          sendmessage(setWLAN_list());
+          sendmessage(setCredentialsAndConnect());
           displaystuff("config wifi set");
         }  // wlan setup via scanlist
-        if (lastinput.charAt(3) == 14) {
+        if (lastinput.charAt(3) == 14) { //TODO: Implementieren
           ex = true;
           displaystuff("change udp port");
           httpstring = lastinput;
           startudpport();
         }
-        if (lastinput.charAt(3) == 15) {
+        if (lastinput.charAt(3) == 15) { // TODO: HTTP GET with additional "HEX encoding" for url query string
           ex = true;
           displaystuff("loading httpchat");
           loader(lastinput);
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
         }  // Chatserver string decoding
-        if (lastinput.charAt(3) == 16) {
+        if (lastinput.charAt(3) == 16) { // TODO: Implement me
           ex = true;
           displaystuff("get ssid");
           sendmessage(WiFi.SSID());
         }
-        if (lastinput.charAt(3) == 17) {
+        if (lastinput.charAt(3) == 17) { // TODO: Implement me
           ex = true;
           displaystuff("get rssi");
           sendmessage(String(WiFi.RSSI()));
         }
-        if (lastinput.charAt(3) == 18) {
+        if (lastinput.charAt(3) == 18) { // TODO: Implement me (gets the default server)
           ex = true;
           displaystuff("get server");
           if (setserver != "") {
@@ -469,25 +469,25 @@ void loop() {
           displaystuff("get external ip");
           loader("XXXXhttp://wic64.com/firmware/stable/ip.php");
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
-        }  // XXXX 4 bytes header for padding !
-        if (lastinput.charAt(3) == 20) {
+        }
+        if (lastinput.charAt(3) == 20) { // TODO: Implement me
           ex = true;
           displaystuff("get mac");
           sendmessage(WiFi.macAddress());
         }
-        if (lastinput.charAt(3) == 21) {
+        if (lastinput.charAt(3) == 21) { // TODO: Implement me
           ex = true;
           displaystuff("get time and date");
           getLocalTime();
           sendmessage(acttime);
         }
-        if (lastinput.charAt(3) == 22) {
+        if (lastinput.charAt(3) == 22) { // TODO: Implement me
           ex = true;
           displaystuff("set timezone");
           httpstring = lastinput;
           settimezone();
         }
-        if (lastinput.charAt(3) == 23) {
+        if (lastinput.charAt(3) == 23) { // TODO: Implement me
           ex = true;
           displaystuff("get timezone");
           sendmessage(String(gmtOffset_sec, DEC));
@@ -506,7 +506,7 @@ void loop() {
           } else sendmessage("0");
         }
 #else
-        if (lastinput.charAt(3) == 24) {
+        if (lastinput.charAt(3) == 24) { // TODO: Implement me
           ex = true;
           displaystuff("check update");
           loader("XXXXhttp://wic64.com/firmware/stable/version.txt");
@@ -520,66 +520,66 @@ void loop() {
         }
 #endif
 
-        if (lastinput.charAt(3) == 25) {
+        if (lastinput.charAt(3) == 25) { // TODO: Implement me
           ex = true;
           displaystuff("read prefs");
           httpstring = lastinput;
           sendmessage(getprefs());
         }
-        if (lastinput.charAt(3) == 26) {
+        if (lastinput.charAt(3) == 26) { // TODO: Implement me
           ex = true;
           displaystuff("save prefs");
           httpstring = lastinput;
           sendmessage(setprefs());
         }
 
-        if (lastinput.charAt(3) == 30) {
+        if (lastinput.charAt(3) == 30) { // TODO: Ignore me
           ex = true;
           displaystuff("get tcp");
           getudpmsg();
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
         }  // Get TCP data and return them to c64 INCOMPLETE
-        if (lastinput.charAt(3) == 31) {
+        if (lastinput.charAt(3) == 31) { // TODO: Ignore me
           ex = true;
           displaystuff("send tcp");
           sendudpmsg(lastinput);
           sendmessage("");
           log_i("tcp send %s", lastinput);
         }  // Get TCP data and return them to c64 INCOMPLETE
-        if (lastinput.charAt(3) == 32) {
+        if (lastinput.charAt(3) == 32) { // TODO: Ignore me
           ex = true;
           displaystuff("set tcp port");
           httpstring = lastinput;
           settcpport();
         }
 
-        if (lastinput.charAt(3) == 33) {
+        if (lastinput.charAt(3) == 33) { // TODO: Ignore me
           ex = true;
           displaystuff("connect tcp1");
           sendmessage(connecttcp1());
         }
-        if (lastinput.charAt(3) == 34) {
+        if (lastinput.charAt(3) == 34) { // TODO: Ignore me
           ex = true;
           displaystuff("get tcp1");
           sendmessage(gettcp1());
         }
-        if (lastinput.charAt(3) == 35) {
+        if (lastinput.charAt(3) == 35) { // TODO: Ignore me
           ex = true;
           displaystuff("send tcp1");
           sendmessage(sendtcp1());
         }
-        if (lastinput.charAt(3) == 36) {
+        if (lastinput.charAt(3) == 36) { // TODO: Ignore me
           ex = true;
           displaystuff("httppost");
           sendmessage(httppost());
         }
-        if (lastinput.charAt(3) == 37) {
+        if (lastinput.charAt(3) == 37) { // TODO: Ignore me
           ex = true;
           displaystuff("loading bighttp");
           bigloader(lastinput);
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
         }
-        if (lastinput.charAt(3) == 38) {
+        if (lastinput.charAt(3) == 38) { // TODO: Not used yet, maybe supply major.minor.patch
           ex = true;
           displaystuff("getVersion");
           String FWLowHigh;
@@ -590,7 +590,7 @@ void loop() {
           sendmessage(FWLowHigh);
         }
 
-        if (lastinput.charAt(3) == 99) {
+        if (lastinput.charAt(3) == 99) { // TODO: Ignore me
           ex = true;
           displaystuff("factory reset");
           WiFi.begin("-", "-");
@@ -1058,7 +1058,7 @@ String getWLAN() {
   }
 }
 
-String setWLAN_list() {  // !! ACHTUNG !! SENSIBLE DATEN WIE PASSWÖRTER AUF SERIELLER SCHNITTSTELLE
+String setCredentialsAndConnect() {  // !! ACHTUNG !! SENSIBLE DATEN WIE PASSWÖRTER AUF SERIELLER SCHNITTSTELLE
 
   lastinput.remove(0, 4);  // Wegschneiden Befehl
   char nr = lastinput.charAt(0) - 48;

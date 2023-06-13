@@ -125,7 +125,7 @@ String setwlan(void);
 String getudpmsg(void);
 void sendudpmsg(String udpmsg);
 String getWLAN(void);
-String setWLAN_list(void);
+String setCredentialsAndConnect(void);
 void startudpport(void);
 void getLocalTime(void);
 void settimezone(void);

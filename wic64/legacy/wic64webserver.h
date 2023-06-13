@@ -3,7 +3,6 @@
 void handleRoot() {
 
   String compilerdate = __DATE__ " " __TIME__;
-  // TODO: FIXME: -Werror=unused-value
   // Disabled compilervars for now
   //String compilervars = ((__FILE__), (__TIMESTAMP__), ARDUINO / 10000, ARDUINO % 10000 / 100, ARDUINO % 100 / 10 ? ARDUINO % 100 : ARDUINO % 10, esp_get_idf_version());
 
