@@ -1,4 +1,3 @@
-.vscode/c_cpp_properties.json
 build/**/*
 dependencies.lock
 sdkconfig.old
