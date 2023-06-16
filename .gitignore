@@ -1,4 +1,4 @@
-build/**/*
+build
 dependencies.lock
 sdkconfig.old
 *.bin
