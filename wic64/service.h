@@ -2,46 +2,34 @@
 #define WIC64_SERVICE_H
 
 #include <cstdint>
-#include "esp_event.h"
 
-#ifdef ___cplusplus
-extern "C" {
-#endif
-
-ESP_EVENT_DECLARE_BASE(SERVICE_EVENTS);
-
-enum {
-    SERVICE_REQUEST_RECEIVED_EVENT
-};
-
-#ifdef ___cplusplus
-}
-#endif
-
+#define LOWBYTE(UINT16) (uint8_t) ((UINT16 >> 0UL) & 0xff)
+#define HIGHBYTE(UINT16) (uint8_t) ((UINT16 >> 8UL) & 0xff)
 class Service {
     public:
-        class Command;
+        class Request;
 
     private:
         static const uint8_t API_V1_ID = 'W';
-        static const uint8_t API_V1_COMMAND_SIZE = 4;
-        static const uint8_t HEADER_SIZE = 3;
+        static const uint8_t API_V1_REQUEST_SIZE = 4;
+        static const uint8_t REQUEST_HEADER_SIZE = 3;
 
-        Command *command;
+        uint8_t* responseData;
+        uint16_t responseSize;
+
+        Request *request;
 
         static void parseRequestHeaderV1(uint8_t *header, uint16_t size);
 
     public:
-        esp_event_loop_handle_t event_loop_handle;
-
-        Service();
+        Service() { };
         bool supports(uint8_t apiId);
 
         void receiveRequest(uint8_t apiId);
-        static void postRequestReceivedEvent(uint8_t* ignoreData, uint16_t ignoreSize);
-        static void onRequestReceived(void* arg, esp_event_base_t base, int32_t id, void* data);
+        static void onRequestReceived(uint8_t* data, uint16_t size);
 
         void sendResponse(uint8_t *data, uint16_t size);
+        static void onResponseSizeSent(uint8_t *data, uint16_t size);
         static void onResponseSent(uint8_t *data, uint16_t size);
 
         class Data {
@@ -57,7 +45,7 @@ class Service {
                 uint16_t size() { return _size; }
         };
 
-        class Command {
+        class Request {
             private:
                 uint8_t _id;
                 uint8_t _argc;
@@ -66,8 +54,8 @@ class Service {
                 int16_t getNextFreeArgumentIndex();
 
             public:
-                Command(uint8_t api, uint8_t id, uint8_t argc);
-                ~Command();
+                Request(uint8_t api, uint8_t id, uint8_t argc);
+                ~Request();
 
                 uint8_t id(void) { return _id; };
                 uint8_t argc(void) { return _argc; };
