@@ -3,28 +3,28 @@
 #include <cstring>
 #include <cstdint>
 #include <cctype>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "esp32-hal-log.h"
 
 void hexdump(const char* title, uint8_t *data, uint32_t size) {
-    const uint8_t newline = 1;
-    const uint8_t nullbyte = 1;
-    const uint8_t bytes_per_line = 16;
-    const uint8_t chars_per_line = (bytes_per_line * 4) + 10 + 1 + 2;
+    if(esp_log_level_get(NULL) < ESP_LOG_VERBOSE) return;
+
+    const uint8_t bytes_per_line = 8;
+    const uint8_t chars_per_line = strlen(title) + 2 + (bytes_per_line * 4) + 10 + 1 + 2;
 
     uint64_t num_lines = (size / bytes_per_line) + ((size % bytes_per_line) ? 1 : 0);
-    uint64_t required = strlen(title) + (2 * newline) + (num_lines * chars_per_line) + nullbyte;
-
-    char *str = (char*) calloc(required, sizeof(char));
-    char *line = str;
-
-    line += snprintf(line, strlen(title)+3, "%s\n\n", title);
 
     uint64_t addr;
     uint64_t data_index;
     char* cursor;
 
     for (uint64_t line_index = 0; line_index < num_lines; line_index++) {
+        char *line = (char*) calloc(chars_per_line, sizeof(char));
         cursor = line;
+
+        cursor += snprintf(line, strlen(title)+3, "%s: ", title);
 
         addr = line_index * bytes_per_line;
         cursor += snprintf(cursor, 9, "%08llx", addr);
@@ -55,11 +55,11 @@ void hexdump(const char* title, uint8_t *data, uint32_t size) {
             }
         }
         cursor += bytes_per_line;
-        cursor += snprintf(cursor, 3, "|\n");
+        cursor += snprintf(cursor, 2, "|");
 
-        line += chars_per_line;
+        log_v("%s", line);
+        vTaskDelay(1);
+
+        free(line);
     }
-
-    log_d("%s", str);
-    free(str);
 }
