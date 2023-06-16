@@ -8,7 +8,33 @@
 extern Userport *userport;
 extern Service *service;
 
+ESP_EVENT_DEFINE_BASE(USERPORT_EVENTS);
+
 Userport::Userport(Service *service) {
+    esp_event_loop_args_t event_loop_args = {
+        .queue_size = 16,
+        .task_name = "USERPORT",
+        .task_priority = 10,
+        .task_stack_size = 8192,
+        .task_core_id = 0
+    };
+
+    esp_event_loop_create(&event_loop_args, &event_loop_handle);
+
+    esp_event_handler_register_with(
+        event_loop_handle,
+        USERPORT_EVENTS,
+        USERPORT_DATA_DIRECTION_CHANGED,
+        onDataDirectionChanged,
+        NULL);
+
+    esp_event_handler_register_with(
+        event_loop_handle,
+        USERPORT_EVENTS,
+        USERPORT_HANDSHAKE_SIGNAL_RECEIVED,
+        onHandshakeSignalReceived,
+        NULL);
+
     connect();
 }
 
@@ -23,8 +49,8 @@ void Userport::connect() {
 
     setPortToInput();
 
-    attachInterrupt(DATA_DIRECTION_LINE, onDataDirectionChanged, CHANGE);
-    attachInterrupt(HANDSHAKE_LINE_C64_TO_ESP, onHandshakeSignalReceived, RISING);
+    attachInterrupt(DATA_DIRECTION_LINE, dataDirectionChangedISR, CHANGE);
+    attachInterrupt(HANDSHAKE_LINE_C64_TO_ESP, handshakeSignalReceivedISR, RISING);
     connected = true;
 
     log_d("Connected, accepting requests");
@@ -52,12 +78,26 @@ bool Userport::isConnected() {
     return connected;
 }
 
+bool Userport::isReadyToReceiveRequest(void) {
+    return IS_HIGH(DATA_DIRECTION_LINE);
+}
+
 bool Userport::isTransferPending(void) {
     return transferState == TRANSFER_STATE_PENDING;
 }
 
 void Userport::setTransferRunning() {
     transferState = TRANSFER_STATE_RUNNING;
+}
+
+bool Userport::isSending(void) {
+    return transferType == TRANSFER_TYPE_SEND_PARTIAL ||
+        transferType == TRANSFER_TYPE_SEND_FULL;
+}
+
+bool Userport::isSending(TRANSFER_TYPE type) {
+    return type == TRANSFER_TYPE_SEND_PARTIAL ||
+        type == TRANSFER_TYPE_SEND_FULL;
 }
 
 void Userport::setPortToInput() {
@@ -122,8 +162,7 @@ void Userport::startTransfer(
         uint16_t size,
         void (*onSuccess)(uint8_t* data, uint16_t size)) {
 
-    log_d("%s %d bytes...",
-        type == TRANSFER_TYPE_SEND ? "Sending" : "Receiving", size);
+    log_d("%s %d bytes...", isSending(type) ? "Sending" : "Receiving", size);
 
     this->transferType = type;
     this->onSuccessCallback = onSuccess;
@@ -132,23 +171,22 @@ void Userport::startTransfer(
     this->size = size;
     this->pos = 0;
 
-    transferState = (type == TRANSFER_TYPE_SEND)
+    transferState = (type == TRANSFER_TYPE_SEND_PARTIAL)
         ? TRANSFER_STATE_PENDING
         : TRANSFER_STATE_RUNNING;
 
     createTimeoutTask();
 
-    if (type == TRANSFER_TYPE_SEND ||
-        type == TRANSFER_TYPE_RECEIVE_PARTIAL ||
+    if (type == TRANSFER_TYPE_RECEIVE_PARTIAL ||
         previousTransferType == TRANSFER_TYPE_RECEIVE_PARTIAL) {
-        log_d("Sending initial handshake signal");
+        log_v("Sending initial handshake signal");
         sendHandshakeSignal();
     }
 }
 
 void Userport::completeTransfer(void) {
-    log_d("Transfer complete, %d bytes %s",
-        pos, transferType == TRANSFER_TYPE_SEND ? "sent" : "received");
+    log_d("%d bytes %s, transfer complete",
+        pos, isSending() ? "sent" : "received");
 
     deleteTimeoutTask();
 
@@ -158,33 +196,28 @@ void Userport::completeTransfer(void) {
     transferType = TRANSFER_TYPE_NONE;
     transferState = TRANSFER_STATE_NONE;
 
-    onSuccessCallback(buffer, size);
-
     if (currentTransferType == TRANSFER_TYPE_RECEIVE_FULL ||
-        currentTransferType == TRANSFER_TYPE_SEND) {
-        log_d("sending final handshake signal");
+        isSending(currentTransferType)) {
+        log_v("Sending final handshake signal");
         sendHandshakeSignal();
     }
+
+    onSuccessCallback(buffer, size);
 }
 
 void Userport::abortTransfer(const char* reason) {
+    log_d("Aborting transfer: %s", reason);
     setPortToInput();
 
     transferType = TRANSFER_TYPE_NONE;
     previousTransferType = TRANSFER_TYPE_NONE;
     transferState = TRANSFER_STATE_NONE;
 
-    log_d("Transfer aborted: %s", reason);
     deleteTimeoutTask();
 }
 
-void Userport::createSessionTask(void) {
-    userport->transferType = TRANSFER_TYPE_RECEIVE_REQUEST;
-    xTaskCreatePinnedToCore(sessionTask, "SESSION", 8192, NULL, 10, NULL, 1);
-}
-
 void Userport::createTimeoutTask(void) {
-    xTaskCreatePinnedToCore(timeoutTask, "TIMEOUT", 4096, NULL, 10, &timeoutTaskHandle, 1);
+    xTaskCreatePinnedToCore(timeoutTask, "TIMEOUT", 4096, NULL, 10, &timeoutTaskHandle, 0);
 
     timeoutTaskCreated = (timeoutTaskHandle != NULL);
 
@@ -238,11 +271,23 @@ void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* 
     startTransfer(TRANSFER_TYPE_RECEIVE_FULL, data, size, onSuccess);
 }
 
-void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size)) {
-    startTransfer(TRANSFER_TYPE_SEND, data, size, onSuccess);
+void Userport::sendPartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size)) {
+    startTransfer(TRANSFER_TYPE_SEND_PARTIAL, data, size, onSuccess);
 }
 
-void Userport::onDataDirectionChanged(void) {
+void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size)) {
+    startTransfer(TRANSFER_TYPE_SEND_FULL, data, size, onSuccess);
+}
+
+void IRAM_ATTR Userport::dataDirectionChangedISR(void) {
+    esp_event_post_to(
+        userport->event_loop_handle,
+        USERPORT_EVENTS,
+        USERPORT_DATA_DIRECTION_CHANGED,
+        NULL, 0, pdMS_TO_TICKS(5000));
+}
+
+void Userport::onDataDirectionChanged(void *arg, esp_event_base_t base, int32_t id, void *data) {
     userport->resetTimeout();
 
     log_d("Change of data direction requested");
@@ -252,18 +297,28 @@ void Userport::onDataDirectionChanged(void) {
         : userport->setPortToOutput();
 
     if (userport->isTransferPending()) {
-        log_d("Sending handshake signal to resume pending transfer");
+        log_d("Sending handshake signal to start pending transfer");
         userport->sendHandshakeSignal();
         userport->setTransferRunning();
     }
 }
 
-void IRAM_ATTR Userport::onHandshakeSignalReceived(void) {
+void IRAM_ATTR Userport::handshakeSignalReceivedISR(void) {
+    esp_event_post_to(
+        userport->event_loop_handle,
+        USERPORT_EVENTS,
+        USERPORT_HANDSHAKE_SIGNAL_RECEIVED,
+        NULL, 0, pdMS_TO_TICKS(5000));
+}
+
+void Userport::onHandshakeSignalReceived(void *arg, esp_event_base_t base, int32_t id, void *data) {
     userport->resetTimeout();
 
     switch(userport->transferType) {
         case TRANSFER_TYPE_NONE:
-            userport->createSessionTask();
+            if (userport->isReadyToReceiveRequest()) {
+                userport->acceptRequest();
+            }
             break;
 
         case TRANSFER_TYPE_RECEIVE_FULL:
@@ -271,18 +326,11 @@ void IRAM_ATTR Userport::onHandshakeSignalReceived(void) {
             userport->readNextByte();
             break;
 
-        case TRANSFER_TYPE_SEND:
+        case TRANSFER_TYPE_SEND_FULL:
+        case TRANSFER_TYPE_SEND_PARTIAL:
             userport->writeNextByte();
             break;
-
-        case TRANSFER_TYPE_RECEIVE_REQUEST:
-            break;
     }
-}
-
-void Userport::sessionTask(void *) {
-    userport->acceptRequest();
-    vTaskDelete(NULL);
 }
 
 void Userport::timeoutTask(void* unused) {

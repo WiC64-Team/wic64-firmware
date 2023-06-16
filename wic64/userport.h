@@ -5,7 +5,7 @@
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-
+#include "esp_event.h"
 #include "service.h"
 
 #define IS_HIGH(PIN) (((GPIO.in >> PIN) & 1) == 1)
@@ -14,6 +14,20 @@
 #define SET_HIGH(PIN) (GPIO.out_w1ts = (1ULL<<PIN))
 #define SET_LOW(PIN) (GPIO.out_w1tc = (1ULL<<PIN))
 
+#ifdef ___cplusplus
+extern "C" {
+#endif
+
+ESP_EVENT_DECLARE_BASE(USERPORT_EVENTS);
+
+enum {
+    USERPORT_DATA_DIRECTION_CHANGED,
+    USERPORT_HANDSHAKE_SIGNAL_RECEIVED,
+};
+
+#ifdef ___cplusplus
+}
+#endif
 class Userport {
     private:
         // Port Register: CIA2 Pin name -> ESP32 pin number
@@ -57,10 +71,10 @@ class Userport {
 
         enum TRANSFER_TYPE {
             TRANSFER_TYPE_NONE,
-            TRANSFER_TYPE_SEND,
+            TRANSFER_TYPE_SEND_FULL,
+            TRANSFER_TYPE_SEND_PARTIAL,
             TRANSFER_TYPE_RECEIVE_FULL,
             TRANSFER_TYPE_RECEIVE_PARTIAL,
-            TRANSFER_TYPE_RECEIVE_REQUEST,
         };
 
         enum TRANSFER_STATE {
@@ -71,8 +85,8 @@ class Userport {
 
         bool connected = false;
 
-        static const uint16_t TIMEOUT_DEFAULT_10MS = 10;
-        uint16_t timeout = TIMEOUT_DEFAULT_10MS;
+        static const uint16_t TIMEOUT_DEFAULT_1000MS = 1000;
+        uint16_t timeout = TIMEOUT_DEFAULT_1000MS;
         uint32_t timeOfLastActivity;
 
         TaskHandle_t timeoutTaskHandle;
@@ -113,19 +127,26 @@ class Userport {
         bool isTimeoutTaskRunning(void);
 
     public:
+        esp_event_loop_handle_t event_loop_handle;
+
         Userport(Service *service);
 
         void connect(void);
         void disconnect(void);
         bool isConnected(void);
+        bool isReadyToReceiveRequest(void);
 
         bool isTransferPending(void);
         void setTransferRunning(void);
+        bool isSending(void);
+        bool isSending(TRANSFER_TYPE type);
 
         void acceptRequest(void);
 
         void receivePartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
         void receive(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
+
+        void sendPartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
         void send(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
 
         void resetTimeout(void);
@@ -133,10 +154,10 @@ class Userport {
 
         static void timeoutTask(void*);
 
-        static void createSessionTask(void);
-        static void sessionTask(void*);
+        static void IRAM_ATTR dataDirectionChangedISR(void);
+        static void onDataDirectionChanged(void* arg, esp_event_base_t base, int32_t id, void* data);
 
-        static void IRAM_ATTR onDataDirectionChanged(void);
-        static void IRAM_ATTR onHandshakeSignalReceived(void);
+        static void IRAM_ATTR handshakeSignalReceivedISR(void);
+        static void onHandshakeSignalReceived(void* arg, esp_event_base_t base, int32_t id, void* data);
 };
 #endif // WIC64_USERPORT_H
