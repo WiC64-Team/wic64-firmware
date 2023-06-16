@@ -3,6 +3,7 @@
 
 #include "service.h"
 #include "userport.h"
+#include "command.h"
 #include "utilities.h"
 
 extern Service *service;
@@ -59,32 +60,33 @@ void Service::onRequestReceived(uint8_t *ignoredData, uint16_t ignoredSize) {
         hexdump(title, argument->data(), argument->size());
     }
 
-    Data* firstArgument = request->argument(0);
-    service->sendResponse(firstArgument->data(), firstArgument->size());
+    service->command = Command::create(request);
+    service->response = service->command->execute();
+
+    service->sendResponse();
 }
 
-void Service::sendResponse(uint8_t *data, uint16_t size) {
-    responseData = data;
-    responseSize = size;
-
+void Service::sendResponse() {
     // For unknown reasons the response size is transferred in
     // big-endian format in API version 1 (high byte first)
     static uint8_t responseSizeBuffer[2];
-    responseSizeBuffer[0] = HIGHBYTE(size);
-    responseSizeBuffer[1] = LOWBYTE(size);
+    responseSizeBuffer[0] = HIGHBYTE(response->size());
+    responseSizeBuffer[1] = LOWBYTE(response->size());
 
-    userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent);
+    if (response->size() > 0) {
+        userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent);
+    }
 }
 
 void Service::onResponseSizeSent(uint8_t* data, uint16_t size) {
     hexdump("Response size", data, size);
-    userport->send(service->responseData, service->responseSize, onResponseSent);
+    userport->send(service->response->data(), service->response->size(), onResponseSent);
 }
 
 void Service::onResponseSent(uint8_t *data, uint16_t size) {
     hexdump("Response", data, size);
-    delete service->request;
-    service->request = NULL;
+    delete service->command;
+    service->command = NULL;
 }
 
 Service::Data::Data(uint16_t size) : _size(size) {
@@ -133,6 +135,10 @@ Service::Data* Service::Request::addArgument(Service::Data *argument) {
 
     _argv[(uint8_t)index] = argument;
     return argument;
+}
+
+Service::Data* Service::Request::argument() {
+    return _argv[0];
 }
 
 Service::Data* Service::Request::argument(uint8_t index) {

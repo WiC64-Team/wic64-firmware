@@ -1,5 +1,12 @@
 idf_component_register(
-	SRCS "wic64.cpp" "display.cpp" "connection.cpp" "userport.cpp" "service.cpp" "utilities.cpp"
+	SRCS "wic64.cpp"
+    SRCS "connection.cpp"
+    SRCS "userport.cpp"
+    SRCS "service.cpp"
+    SRCS "command.cpp"
+    SRCS "command/echo.cpp"
+    SRCS "display.cpp"
+    SRCS "utilities.cpp"
 	INCLUDE_DIRS "."
 	REQUIRES "wic64"
 	REQUIRES "arduino"

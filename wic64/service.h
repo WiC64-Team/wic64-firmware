@@ -3,11 +3,15 @@
 
 #include <cstdint>
 
+
 #define LOWBYTE(UINT16) (uint8_t) ((UINT16 >> 0UL) & 0xff)
 #define HIGHBYTE(UINT16) (uint8_t) ((UINT16 >> 8UL) & 0xff)
+
+class Command;
 class Service {
     public:
         class Request;
+        class Data;
 
     private:
         static const uint8_t API_V1_ID = 'W';
@@ -18,6 +22,8 @@ class Service {
         uint16_t responseSize;
 
         Request *request;
+        Command *command;
+        Data *response;
 
         static void parseRequestHeaderV1(uint8_t *header, uint16_t size);
 
@@ -28,7 +34,7 @@ class Service {
         void receiveRequest(uint8_t apiId);
         static void onRequestReceived(uint8_t* data, uint16_t size);
 
-        void sendResponse(uint8_t *data, uint16_t size);
+        void sendResponse();
         static void onResponseSizeSent(uint8_t *data, uint16_t size);
         static void onResponseSent(uint8_t *data, uint16_t size);
 
@@ -61,6 +67,7 @@ class Service {
                 uint8_t argc(void) { return _argc; };
 
                 Data* addArgument(Data* argument);
+                Data* argument(void);
                 Data* argument(uint8_t index);
         };
 };
