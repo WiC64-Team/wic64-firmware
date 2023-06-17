@@ -135,6 +135,8 @@ u_wic64_push
 loop_send
 		lda (data_pointer),y
 		jsr write_byte		; send bytes to WiC64 in loop
+        lda z_timeout
+        beq push_end
 		iny
 		bne +
 		inc data_pointer+1
@@ -142,8 +144,9 @@ loop_send
 		bne loop_send
 		dec bytes_send+1
 		bne loop_send
-		cli			; enable IRQ
-		rts
+push_end
+    	cli			; enable IRQ
+    	rts
 
 pullthis
 		sta data_pointer
@@ -160,6 +163,8 @@ nonull
 loop_read
 		jsr read_byte		;read byte
 		sta (data_pointer),y
+        lda z_timeout
+        beq pull_end
 		iny
 		bne +
 		inc data_pointer+1
@@ -168,7 +173,7 @@ loop_read
 		dec tmp
 		bne loop_read		; all bytes?
 pull_end
-		cli
+    	cli
 		rts
 
 wic64_pull_strt
