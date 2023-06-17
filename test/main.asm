@@ -36,13 +36,20 @@ loop
     jsr randomize
     jsr status
     jsr echo
+    bcs .timeout
+
     jsr verify
     bcc loop
 
-    +print .error
+    +print .verify_error
     rts
 
-.error !text "?RESPONSE DIFFERS, TEST FAILED", $00
+.timeout
+    +print .timeout_error
+    rts
+
+.verify_error !text "?VERIFY ERROR", $00
+.timeout_error !text "?TRANSFER TIMEOUT", $00
 }
 
 randomize !zone randomize {
@@ -75,15 +82,36 @@ randomize !zone randomize {
 }
 
 echo !zone echo {
+    timeout = $02
     jsr wic64_init
 
+    lda #$02
+    sta z_timeout
     +pointer $a7, request
+
     jsr wic64_push
 
+    lda z_timeout
+    cmp #$00
+    beq .timeout
+
+    lda #$02
+    sta z_timeout
     +pointer $a7, response
+
     jsr wic64_pull
 
+    lda z_timeout
+    cmp #$00
+    beq .timeout
+
     jsr wic64_exit
+
+    clc
+    rts
+
+.timeout
+    sec
     rts
 }
 
