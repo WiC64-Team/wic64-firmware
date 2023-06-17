@@ -3,7 +3,7 @@
 #include "userport.h"
 #include "service.h"
 #include "utilities.h"
-#include "version.cpp"
+#include "version.h"
 
 #include "esp32-hal-log.h"
 

@@ -1,4 +1,4 @@
-wic64/version.cpp
+wic64/version.h
 build
 dependencies.lock
 sdkconfig.old
