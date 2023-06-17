@@ -7,6 +7,7 @@ idf_component_register(
     SRCS "command/echo.cpp"
     SRCS "display.cpp"
     SRCS "utilities.cpp"
+    SRCS "version.cpp"
 	INCLUDE_DIRS "."
 	REQUIRES "wic64"
 	REQUIRES "arduino"
