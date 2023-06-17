@@ -7,6 +7,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp32-hal-log.h"
+#include "utilities.h"
 
 void hexdump(const char* title, uint8_t *data, uint32_t size) {
     if(esp_log_level_get(NULL) < ESP_LOG_VERBOSE) return;
@@ -62,4 +63,14 @@ void hexdump(const char* title, uint8_t *data, uint32_t size) {
 
         free(line);
     }
+}
+
+void log_free_mem(void) {
+    uint32_t free_heap_size = esp_get_free_heap_size();
+    uint32_t minimum_free_heap_size = esp_get_minimum_free_heap_size();
+
+    log_d("Free heap (current) : %d bytes = %dkb",
+        free_heap_size, free_heap_size/1024);
+    log_d("Free heap (minimum) : %d bytes = %dkb",
+        minimum_free_heap_size, minimum_free_heap_size/1024);
 }
