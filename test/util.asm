@@ -28,9 +28,27 @@ clrhome !zone clrhome {
     rts
 }
 
+!macro plot .x, .y {
+    ldy #.x
+    ldx #.y
+    jsr $fff0
+}
+
+!macro wait_raster .line {
+-   lda $d012
+    cmp #.line
+    bne -
+}
+
 !macro print .addr {
     ldx #<.addr
     ldy #>.addr
+    jsr print
+}
+
+!macro print_indirect .ptr {
+    ldx .ptr
+    ldy .ptr+1
     jsr print
 }
 

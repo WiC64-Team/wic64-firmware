@@ -11,6 +11,15 @@
 jmp main
 
 !src "util.asm"
+!src "universal.asm"
+
+!macro status .addr {
+    lda #<.addr
+    sta status_task
+    lda #>.addr
+    sta status_task+1
+    jsr status
+}
 
 main !zone main {
     ; setup SID as simple random source
@@ -32,12 +41,15 @@ main !zone main {
     ; clear screen and home cursor
     jsr clrhome
 
+    lda #$ff
+    sta iterations
+    sta iterations+1
+
 loop
+    +incw iterations
     jsr randomize
-    jsr status
     jsr echo
     bcs .timeout
-
     jsr verify
     bcc loop
 
@@ -50,6 +62,7 @@ loop
 
 .verify_error !text "?VERIFY ERROR", $00
 .timeout_error !text "?TRANSFER TIMEOUT", $00
+iterations !word $0000
 }
 
 randomize !zone randomize {
@@ -63,6 +76,8 @@ randomize !zone randomize {
 +   sta size+1
 
     ; fill input buffer with random bytes for size+1 pages
+    +status .randomizing
+
     +pointer zp1, data
     ldx size+1 ; num pages to fill
 
@@ -79,11 +94,14 @@ randomize !zone randomize {
     bne .next_page
 
     rts
+.randomizing !text "GENERATING", $00
 }
 
 echo !zone echo {
     timeout = $02
     jsr wic64_init
+
+    +status .sending
 
     lda #$02
     sta z_timeout
@@ -94,6 +112,8 @@ echo !zone echo {
     lda z_timeout
     cmp #$00
     beq .timeout
+
+    +status .receiving
 
     lda #$02
     sta z_timeout
@@ -113,9 +133,13 @@ echo !zone echo {
 .timeout
     sec
     rts
+
+.sending !text "SENDING   ", $00
+.receiving !text "RECEIVING ", $00
 }
 
 verify !zone verify {
+    +status .verifying
     +pointer zp1, data
     +pointer zp2, response
 
@@ -142,23 +166,53 @@ verify !zone verify {
 .fail:
     sec
     rts
+
+.verifying !text "VERIFYING ", $00
 }
 
 status !zone status {
-    jsr home
-    +print .prefix
+    sei
+    lda $0400
+    cmp #$20
+    bne +
 
+    jsr home
+    +print .text
+
++   +plot 0, 2
+    +wait_raster $30
+    +print_indirect status_task
+
+    +plot 12, 2
+    +wait_raster $30
     lda size+1
     jsr hexprint
 
-    +print .postfix
+    +plot 4, 4
+    +wait_raster $30
+    lda iterations+1
+    jsr hexprint
+
+    +plot 6, 4
+    +wait_raster $30
+    lda iterations
+    jsr hexprint
+
+    +plot 0, 16
+    cli
     rts
 
-.prefix !text "WIC64 TEST: ECHO ($FF)", $0d, $0d, "SENDING $", $00
-.postfix !text "00 BYTES OF RANDOM DATA", $0d, $0d, $00
+.text
+!text "WIC64 TEST: ECHO ($FF)", $0d, $0d
+!text "           $  00 BYTES OF RANDOM DATA", $0d, $0d
+!text "=> $     SUCCESSFUL TRANSFERS", $0d, $0d, $0d
+!text "-- THIS TEST SHOULD RUN INDEFINITELY --", $0d, $0d, $0d
+!text "IF THE ESP IS RESET, THIS TEST SHOULD", $0d
+!text "TIME OUT AFTER APPROX. TWO SECONDS.", $0d, $0d
+!text "IF THIS TEST IS ABORTED, THE ESP SHOULD", $0d
+!text "TIME OUT AFTER APPROX. ONE SECOND.", $00
+status_task !16 $0000
 }
-
-!src "universal.asm"
 
 request !text "W"
 size    !byte $00, $00
