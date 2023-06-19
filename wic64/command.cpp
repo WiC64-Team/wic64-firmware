@@ -1,5 +1,5 @@
 #include "command.h"
-#include "command/echo.h"
+#include "commands/echo.h"
 
 #define WIC64_COMMAND_ECHO 0xff
 

@@ -4,7 +4,7 @@ idf_component_register(
     SRCS "userport.cpp"
     SRCS "service.cpp"
     SRCS "command.cpp"
-    SRCS "command/echo.cpp"
+    SRCS "commands/echo.cpp"
     SRCS "display.cpp"
     SRCS "utilities.cpp"
     SRCS "version.h"
