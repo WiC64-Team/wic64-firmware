@@ -2,4 +2,5 @@
     "files.trimTrailingWhitespace": true,
     "editor.detectIndentation": false,
     "editor.indentSize": 4,
+    "gitlens.blame.ignoreWhitespace": true,
 }
