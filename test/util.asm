@@ -16,6 +16,45 @@
 .done
 }
 
+!macro decw .addr {
+    dec .addr
+    cmp #$ff
+    bne .done
+    dec .addr+1
+.done
+}
+
+!macro jump_via_rti .addr {
+    ldx #$ff
+    txs
+    lda #>.addr
+    pha
+    lda #<.addr
+    pha
+    lda #$00
+    pha
+    rti
+}
+
+!macro scan .k {
+    sei
+    lda .k
+	sta $dc00
+	lda $dc01
+	and .k+1
+	cmp .k+1
+    cli
+}
+
+!macro random_byte .floor, .ceiling {
+-   lda random_byte
+    cmp #.ceiling
+    bcs -
+    beq -
+    cmp #.floor
+    bcc -
+}
+
 home !zone home {
     lda #$13
     jsr chrout
@@ -71,8 +110,19 @@ print !zone print {
 }
 
 hexprint !zone hexprint {
+    sta .value
+
+    lda zp2
+    sta .zp2
+    lda zp2+1
+    sta .zp2+1
+
+    txa
+    pha
+    tya
     pha
 
+    lda .value
     ldx #<.digits
     stx zp2
     ldx #>.digits
@@ -85,15 +135,28 @@ hexprint !zone hexprint {
     lda (zp2),Y
     jsr chrout
 
-    pla
+    lda .value
 
     and #$0f
     tay
     lda (zp2),Y
     jsr chrout
 
+    pla
+    tay
+    pla
+    tax
+
+    lda .zp2
+    sta zp2
+    lda .zp2+1
+    sta zp2+1
+
+    lda .value
     rts
 
+.value !byte $00
+.zp2 !word $0000
 .digits
     !text "0123456789ABCDEF"
 }
