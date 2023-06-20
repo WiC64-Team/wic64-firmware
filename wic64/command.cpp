@@ -1,17 +1,30 @@
 #include "command.h"
-#include "commands/echo.h"
+#include "commands/commands.h"
 
-#define WIC64_COMMAND_ECHO 0xff
+namespace WiC64 {
 
-Command* Command::create(Service::Request* request) {
-    switch (request->id()) {
-        case WIC64_COMMAND_ECHO:
-            return new Echo(request);
+    Command::Command(Service::Request* request) {
+        m_request = request;
+        m_emptyResponse = new Service::Data(0);
+    }
 
-        default:
-            return new Command::Undefined(request);
+    Command::~Command() {
+        delete m_request;
+        delete m_emptyResponse;
+    }
+
+    bool Command::defined(uint8_t id) {
+        return commands.find(id) != commands.end();
+    }
+
+    Command* Command::create(Service::Request* request) {
+        if (defined(request->id())) {
+            return commands.at(request->id())(request);
+        }
+        return nullptr;
+    }
+
+    Service::Data *Command::execute(void) {
+        return emptyResponse();
     }
 }
-
-Command::Command(Service::Request* request) : m_request{ request }  { }
-Command::~Command() { delete m_request; }

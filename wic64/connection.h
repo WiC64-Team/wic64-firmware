@@ -4,17 +4,19 @@
 #include "WiFi.h"
 #include "display.h"
 
-class Connection {
-    private:
-        static String getStoredSSID(void);
-        static void onConnected(WiFiEvent_t event, WiFiEventInfo_t info);
-        static void onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
-        static void onGotIp(WiFiEvent_t event, WiFiEventInfo_t info);
+namespace WiC64 {
+    class Connection {
+        private:
+            static String getStoredSSID(void);
+            static void onConnected(WiFiEvent_t event, WiFiEventInfo_t info);
+            static void onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
+            static void onGotIp(WiFiEvent_t event, WiFiEventInfo_t info);
 
-    public:
-        Connection(Display *display);
-        bool isConnected(void);
-        void connect(void);
-};
+        public:
+            Connection(Display *display);
+            bool isConnected(void);
+            void connect(void);
+    };
 
+}
 #endif // WIC64_CONNECTION_H

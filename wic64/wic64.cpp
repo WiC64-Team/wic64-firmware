@@ -7,6 +7,8 @@
 
 #include "esp32-hal-log.h"
 
+using namespace WiC64;
+
 Display *display;
 Connection *connection;
 Service *service;

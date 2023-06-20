@@ -28,136 +28,141 @@ enum {
 #ifdef ___cplusplus
 }
 #endif
-class Userport {
-    private:
-        // Port Register: CIA2 Pin name -> ESP32 pin number
-        const gpio_num_t PB0 = GPIO_NUM_16;
-        const gpio_num_t PB1 = GPIO_NUM_17;
-        const gpio_num_t PB2 = GPIO_NUM_18;
-        const gpio_num_t PB3 = GPIO_NUM_19;
-        const gpio_num_t PB4 = GPIO_NUM_21;
-        const gpio_num_t PB5 = GPIO_NUM_22;
-        const gpio_num_t PB6 = GPIO_NUM_23;
-        const gpio_num_t PB7 = GPIO_NUM_25;
 
-        const uint64_t PORT_MASK = 1ULL<<PB0 | 1ULL<<PB1 | 1ULL<<PB2 | 1ULL<<PB3 |
-                                   1ULL<<PB4 | 1ULL<<PB5 | 1ULL<<PB6 | 1ULL<<PB7;
+namespace WiC64 {
 
-        const gpio_num_t PORT_PIN[8] = { PB0, PB1, PB2, PB3, PB4, PB5, PB6, PB7 };
+    class Userport {
+        private:
+            // Port Register: CIA2 Pin name -> ESP32 pin number
+            const gpio_num_t PB0 = GPIO_NUM_16;
+            const gpio_num_t PB1 = GPIO_NUM_17;
+            const gpio_num_t PB2 = GPIO_NUM_18;
+            const gpio_num_t PB3 = GPIO_NUM_19;
+            const gpio_num_t PB4 = GPIO_NUM_21;
+            const gpio_num_t PB5 = GPIO_NUM_22;
+            const gpio_num_t PB6 = GPIO_NUM_23;
+            const gpio_num_t PB7 = GPIO_NUM_25;
 
-        /* Control signals
-         *
-         * PC2   : Handshake: C64 => ESP (ack/strobe: byte read from/written to port) (rising edge)
-         * FLAG2 : Handshake: ESP => C64 (ack/strobe: byte read from/written to port) (falling edge)
-         * PA2   : Direction: HIGH = C64 => ESP, LOW = ESP => C64
-         */
+            const uint64_t PORT_MASK = 1ULL<<PB0 | 1ULL<<PB1 | 1ULL<<PB2 | 1ULL<<PB3 |
+                                    1ULL<<PB4 | 1ULL<<PB5 | 1ULL<<PB6 | 1ULL<<PB7;
 
-        static const gpio_num_t PC2   = GPIO_NUM_14;
-        static const gpio_num_t PA2   = GPIO_NUM_27;
-        static const gpio_num_t FLAG2 = GPIO_NUM_26;
+            const gpio_num_t PORT_PIN[8] = { PB0, PB1, PB2, PB3, PB4, PB5, PB6, PB7 };
 
-        // synomyms for readability
-        static const gpio_num_t HANDSHAKE_LINE_C64_TO_ESP = PC2;
-        static const gpio_num_t HANDSHAKE_LINE_ESP_TO_C64 = FLAG2;
-        static const gpio_num_t DATA_DIRECTION_LINE = PA2;
+            /* Control signals
+            *
+            * PC2   : Handshake: C64 => ESP (ack/strobe: byte read from/written to port) (rising edge)
+            * FLAG2 : Handshake: ESP => C64 (ack/strobe: byte read from/written to port) (falling edge)
+            * PA2   : Direction: HIGH = C64 => ESP, LOW = ESP => C64
+            */
 
-        gpio_config_t port_config = {
-            .pin_bit_mask = PORT_MASK,
-            .mode = GPIO_MODE_INPUT,
-            .pull_up_en = GPIO_PULLUP_DISABLE,
-            .pull_down_en = GPIO_PULLDOWN_DISABLE,
-            .intr_type = GPIO_INTR_DISABLE,
-        };
+            static const gpio_num_t PC2   = GPIO_NUM_14;
+            static const gpio_num_t PA2   = GPIO_NUM_27;
+            static const gpio_num_t FLAG2 = GPIO_NUM_26;
 
-        enum TRANSFER_TYPE {
-            TRANSFER_TYPE_NONE,
-            TRANSFER_TYPE_SEND_FULL,
-            TRANSFER_TYPE_SEND_PARTIAL,
-            TRANSFER_TYPE_RECEIVE_FULL,
-            TRANSFER_TYPE_RECEIVE_PARTIAL,
-        };
+            // synomyms for readability
+            static const gpio_num_t HANDSHAKE_LINE_C64_TO_ESP = PC2;
+            static const gpio_num_t HANDSHAKE_LINE_ESP_TO_C64 = FLAG2;
+            static const gpio_num_t DATA_DIRECTION_LINE = PA2;
 
-        enum TRANSFER_STATE {
-            TRANSFER_STATE_NONE,
-            TRANSFER_STATE_PENDING,
-            TRANSFER_STATE_RUNNING,
-        };
+            gpio_config_t port_config = {
+                .pin_bit_mask = PORT_MASK,
+                .mode = GPIO_MODE_INPUT,
+                .pull_up_en = GPIO_PULLUP_DISABLE,
+                .pull_down_en = GPIO_PULLDOWN_DISABLE,
+                .intr_type = GPIO_INTR_DISABLE,
+            };
 
-        bool connected = false;
+            enum TRANSFER_TYPE {
+                TRANSFER_TYPE_NONE,
+                TRANSFER_TYPE_SEND_FULL,
+                TRANSFER_TYPE_SEND_PARTIAL,
+                TRANSFER_TYPE_RECEIVE_FULL,
+                TRANSFER_TYPE_RECEIVE_PARTIAL,
+            };
 
-        static const uint16_t TIMEOUT_DEFAULT_1000MS = 1000;
-        uint16_t timeout = TIMEOUT_DEFAULT_1000MS;
-        uint32_t timeOfLastActivity;
+            enum TRANSFER_STATE {
+                TRANSFER_STATE_NONE,
+                TRANSFER_STATE_PENDING,
+                TRANSFER_STATE_RUNNING,
+            };
 
-        TaskHandle_t timeoutTaskHandle;
-        bool timeoutTaskCreated = false;
+            bool connected = false;
 
-        TRANSFER_TYPE transferType = TRANSFER_TYPE_NONE;
-        TRANSFER_TYPE previousTransferType = TRANSFER_TYPE_NONE;
-        TRANSFER_STATE transferState = TRANSFER_STATE_NONE;
+            static const uint16_t TIMEOUT_DEFAULT_1000MS = 1000;
+            uint16_t timeout = TIMEOUT_DEFAULT_1000MS;
+            uint32_t timeOfLastActivity;
 
-        uint8_t *buffer;
-        uint16_t size;
-        uint16_t pos;
+            TaskHandle_t timeoutTaskHandle;
+            bool timeoutTaskCreated = false;
 
-        void (*onSuccessCallback)(uint8_t* data, uint16_t size);
+            TRANSFER_TYPE transferType = TRANSFER_TYPE_NONE;
+            TRANSFER_TYPE previousTransferType = TRANSFER_TYPE_NONE;
+            TRANSFER_STATE transferState = TRANSFER_STATE_NONE;
 
-        void setPortToInput(void);
-        void setPortToOutput(void);
+            uint8_t *buffer;
+            uint16_t size;
+            uint16_t pos;
 
-        void readByte(uint8_t *byte);
-        void readNextByte(void);
+            void (*onSuccessCallback)(uint8_t* data, uint16_t size);
 
-        void writeByte(uint8_t *byte);
-        void writeNextByte(void);
+            void setPortToInput(void);
+            void setPortToOutput(void);
 
-        void sendHandshakeSignal();
+            void readByte(uint8_t *byte);
+            void readNextByte(void);
 
-        void startTransfer(
-            TRANSFER_TYPE type,
-            uint8_t *data,
-            uint16_t size,
-            void (*onSuccess)(uint8_t* data, uint16_t size)
-        );
-        void completeTransfer(void);
-        void abortTransfer(const char* reason);
+            void writeByte(uint8_t *byte);
+            void writeNextByte(void);
 
-        void createTimeoutTask(void);
-        void deleteTimeoutTask(void);
-        bool isTimeoutTaskRunning(void);
+            void sendHandshakeSignal();
 
-    public:
-        esp_event_loop_handle_t event_loop_handle;
+            void startTransfer(
+                TRANSFER_TYPE type,
+                uint8_t *data,
+                uint16_t size,
+                void (*onSuccess)(uint8_t* data, uint16_t size)
+            );
+            void completeTransfer(void);
+            void abortTransfer(const char* reason);
 
-        Userport(Service *service);
+            void createTimeoutTask(void);
+            void deleteTimeoutTask(void);
+            bool isTimeoutTaskRunning(void);
 
-        void connect(void);
-        void disconnect(void);
-        bool isConnected(void);
-        bool isReadyToReceiveRequest(void);
+        public:
+            esp_event_loop_handle_t event_loop_handle;
 
-        bool isTransferPending(void);
-        void setTransferRunning(void);
-        bool isSending(void);
-        bool isSending(TRANSFER_TYPE type);
+            Userport(Service *service);
 
-        void acceptRequest(void);
+            void connect(void);
+            void disconnect(void);
+            bool isConnected(void);
+            bool isReadyToReceiveRequest(void);
 
-        void receivePartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
-        void receive(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
+            bool isTransferPending(void);
+            void setTransferRunning(void);
+            bool isSending(void);
+            bool isSending(TRANSFER_TYPE type);
 
-        void sendPartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
-        void send(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
+            void acceptRequest(void);
 
-        void resetTimeout(void);
-        bool hasTimedOut(void);
+            void receivePartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
+            void receive(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
 
-        static void timeoutTask(void*);
+            void sendPartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
+            void send(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
 
-        static void IRAM_ATTR dataDirectionChangedISR(void);
-        static void onDataDirectionChanged(void* arg, esp_event_base_t base, int32_t id, void* data);
+            void resetTimeout(void);
+            bool hasTimedOut(void);
 
-        static void IRAM_ATTR handshakeSignalReceivedISR(void);
-        static void onHandshakeSignalReceived(void* arg, esp_event_base_t base, int32_t id, void* data);
-};
+            static void timeoutTask(void*);
+
+            static void IRAM_ATTR dataDirectionChangedISR(void);
+            static void onDataDirectionChanged(void* arg, esp_event_base_t base, int32_t id, void* data);
+
+            static void IRAM_ATTR handshakeSignalReceivedISR(void);
+            static void onHandshakeSignalReceived(void* arg, esp_event_base_t base, int32_t id, void* data);
+    };
+
+}
 #endif // WIC64_USERPORT_H

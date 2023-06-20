@@ -3,9 +3,10 @@
 
 #include <cstdint>
 
-
 #define LOWBYTE(UINT16) (uint8_t) ((UINT16 >> 0UL) & 0xff)
 #define HIGHBYTE(UINT16) (uint8_t) ((UINT16 >> 8UL) & 0xff)
+
+namespace WiC64 {
 
 class Command;
 class Service {
@@ -25,6 +26,7 @@ class Service {
         Command *command;
         Data *response;
 
+        void deleteCommand(void);
         static void parseRequestHeaderV1(uint8_t *header, uint16_t size);
 
     public:
@@ -71,5 +73,7 @@ class Service {
                 Data* argument(uint8_t index);
         };
 };
+
+}
 
 #endif // WIC64_SERVICE_H
