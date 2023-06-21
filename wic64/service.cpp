@@ -6,11 +6,9 @@
 #include "data.h"
 #include "command.h"
 #include "utilities.h"
-
-extern WiC64::Service *service;
-extern WiC64::Userport *userport;
-
 namespace WiC64 {
+    extern Service *service;
+    extern Userport *userport;
 
     bool Service::supports(uint8_t api) {
         return api == API_V1_ID;

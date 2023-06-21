@@ -4,9 +4,8 @@
 #include "connection.h"
 #include "display.h"
 
-extern WiC64::Display *display;
-
 namespace WiC64 {
+    extern Display *display;
 
     Connection::Connection(Display *display) {
         WiFi.setHostname(("WiC64-" + WiFi.macAddress()).c_str());
@@ -60,5 +59,4 @@ namespace WiC64 {
     void Connection::connect() {
         WiFi.begin();
     }
-
 }

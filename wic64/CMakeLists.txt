@@ -1,7 +1,8 @@
 idf_component_register(
-	INCLUDE_DIRS "."
+    INCLUDE_DIRS "."
 
-	SRCS "wic64.cpp"
+    SRCS "main.cpp"
+    SRCS "wic64.cpp"
     SRCS "connection.cpp"
     SRCS "userport.cpp"
     SRCS "service.cpp"
@@ -13,9 +14,10 @@ idf_component_register(
     SRCS "utilities.cpp"
     SRCS "version.h"
 
-	REQUIRES "wic64"
-	REQUIRES "arduino"
-	REQUIRES "Adafruit-GFX-Library"
-	REQUIRES "Adafruit_BusIO"
-	REQUIRES "Adafruit_SSD1306"
-	REQUIRES "OneButtonComponent")
+    REQUIRES "wic64"
+    REQUIRES "arduino"
+    REQUIRES "Adafruit-GFX-Library"
+    REQUIRES "Adafruit_BusIO"
+    REQUIRES "Adafruit_SSD1306"
+    REQUIRES "OneButtonComponent"
+)

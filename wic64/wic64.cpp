@@ -1,3 +1,6 @@
+#include "esp32-hal-log.h"
+
+#include "wic64.h"
 #include "display.h"
 #include "connection.h"
 #include "userport.h"
@@ -5,26 +8,21 @@
 #include "utilities.h"
 #include "version.h"
 
-#include "esp32-hal-log.h"
-
 using namespace WiC64;
+namespace WiC64 {
+    Display *display;
+    Connection *connection;
+    Service *service;
+    Userport *userport;
 
-Display *display;
-Connection *connection;
-Service *service;
-Userport *userport;
+    WiC64::WiC64() {
+        log_i("Firmware version %s", WIC64_VERSION_STRING);
 
-void setup() {
-    log_i("WiC64 firmware version %s", WIC64_VERSION_STRING);
+        display = new Display();
+        connection = new Connection(display);
+        service = new Service();
+        userport = new Userport(service);
 
-    display    = new Display();
-    connection = new Connection(display);
-    service    = new Service();
-    userport   = new Userport(service);
-
-    userport->connect();
-}
-
-void loop() {
-    vTaskDelay(pdMS_TO_TICKS(1000));
+        userport->connect();
+    }
 }

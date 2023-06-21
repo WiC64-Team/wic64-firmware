@@ -6,12 +6,11 @@
 #include "service.h"
 #include "utilities.h"
 
-extern WiC64::Userport *userport;
-extern WiC64::Service *service;
-
 ESP_EVENT_DEFINE_BASE(USERPORT_EVENTS);
 
 namespace WiC64 {
+    extern Userport *userport;
+    extern Service *service;
 
     Userport::Userport(Service *service) {
         esp_event_loop_args_t event_loop_args = {
