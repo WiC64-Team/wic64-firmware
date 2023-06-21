@@ -107,7 +107,7 @@ menu !zone menu {
 
 .menu
 !text "WIC64 TESTSUITE", $0d, $0d
-!text "(1) BASIC DATA TRANSFER", $0d
+!text "(1) DATA TRANSFER", $0d
 !text "(2) NOISE RESISTANCE", $0d
 !byte $0d
 !text "(RESTORE) ABORT TEST AND RETURN TO MENU"
