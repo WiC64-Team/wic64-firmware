@@ -49,6 +49,9 @@ class Service {
                 Data(uint16_t size);
                 ~Data();
 
+                bool isPresent(void);
+                bool isEmpty(void);
+
                 uint8_t* data() { return m_data; }
                 uint16_t size() { return m_size; }
         };

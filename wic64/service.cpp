@@ -81,7 +81,7 @@ namespace WiC64 {
         responseSizeBuffer[0] = HIGHBYTE(response->size());
         responseSizeBuffer[1] = LOWBYTE(response->size());
 
-        response->size()
+        response->isPresent()
             ? userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent)
             : userport->send(responseSizeBuffer, 2, onResponseSizeSent);
     }
@@ -90,7 +90,7 @@ namespace WiC64 {
         Data *response = service->response;
         log_data("Response size", data, size);
 
-        response->size()
+        response->isPresent()
             ? userport->send(response->data(), response->size(), onResponseSent)
             : service->deleteCommand();
     }
@@ -115,6 +115,14 @@ namespace WiC64 {
         if(m_data != NULL) {
             free(m_data);
         }
+    }
+
+    bool Service::Data::isPresent(void) {
+        return m_size > 0;
+    }
+
+    bool Service::Data::isEmpty(void) {
+        return !isPresent();
     }
 
     Service::Request::Request(uint8_t api, uint8_t id, uint8_t argc) : m_id(id), m_argc(argc) {
