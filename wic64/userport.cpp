@@ -113,13 +113,13 @@ namespace WiC64 {
         log_d("Port set to output");
     }
 
-    void Userport::sendHandshakeSignal() {
+    inline void Userport::sendHandshakeSignal() {
         SET_HIGH(HANDSHAKE_LINE_ESP_TO_C64);
         ets_delay_us(5);
         SET_LOW(HANDSHAKE_LINE_ESP_TO_C64);
     }
 
-    void Userport::readByte(uint8_t *byte) {
+    inline void Userport::readByte(uint8_t *byte) {
         (*byte) = 0;
         for (uint8_t bit=0; bit<8; bit++) {
             if(IS_HIGH(PORT_PIN[bit])) {
@@ -128,17 +128,12 @@ namespace WiC64 {
         }
     }
 
-    void Userport::readNextByte() {
+    inline void Userport::readNextByte() {
         readByte((uint8_t*) buffer+pos);
-
-        if (++pos < size) {
-            sendHandshakeSignal();
-        } else {
-            completeTransfer();
-        }
+        continueTransfer();
     }
 
-    void Userport::writeByte(uint8_t *byte) {
+    inline void Userport::writeByte(uint8_t *byte) {
         uint8_t value = (*byte);
         for (uint8_t bit=0; bit<8; bit++) {
             (value & (1<<bit))
@@ -147,14 +142,9 @@ namespace WiC64 {
         }
     }
 
-    void Userport::writeNextByte() {
+    inline void Userport::writeNextByte() {
         writeByte((uint8_t*) buffer+pos);
-
-        if (++pos < size) {
-            sendHandshakeSignal();
-        } else {
-            completeTransfer();
-        }
+        continueTransfer();
     }
 
     void Userport::startTransfer(
@@ -182,6 +172,14 @@ namespace WiC64 {
             previousTransferType == TRANSFER_TYPE_RECEIVE_PARTIAL) {
             log_v("Sending initial handshake signal");
             sendHandshakeSignal();
+        }
+    }
+
+    inline void Userport::continueTransfer(void) {
+        if (++pos < size) {
+            sendHandshakeSignal();
+        } else {
+            completeTransfer();
         }
     }
 

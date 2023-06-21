@@ -108,13 +108,13 @@ namespace WiC64 {
             void setPortToInput(void);
             void setPortToOutput(void);
 
-            void readByte(uint8_t *byte);
-            void readNextByte(void);
+            inline void readByte(uint8_t *byte);
+            inline void readNextByte(void);
 
-            void writeByte(uint8_t *byte);
-            void writeNextByte(void);
+            inline void writeByte(uint8_t *byte);
+            inline void writeNextByte(void);
 
-            void sendHandshakeSignal();
+            inline void sendHandshakeSignal();
 
             void startTransfer(
                 TRANSFER_TYPE type,
@@ -122,6 +122,7 @@ namespace WiC64 {
                 uint16_t size,
                 void (*onSuccess)(uint8_t* data, uint16_t size)
             );
+            inline void continueTransfer(void);
             void completeTransfer(void);
             void abortTransfer(const char* reason);
 
