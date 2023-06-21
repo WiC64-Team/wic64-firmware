@@ -37,8 +37,6 @@ namespace WiC64 {
             USERPORT_HANDSHAKE_SIGNAL_RECEIVED,
             onHandshakeSignalReceived,
             NULL);
-
-        connect();
     }
 
     void Userport::connect() {

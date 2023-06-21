@@ -21,6 +21,8 @@ void setup() {
     connection = new Connection(display);
     service    = new Service();
     userport   = new Userport(service);
+
+    userport->connect();
 }
 
 void loop() {
