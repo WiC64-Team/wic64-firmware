@@ -42,22 +42,22 @@ class Service {
 
         class Data {
             private:
-                uint8_t *_data;
-                uint16_t _size;
+                uint8_t *m_data;
+                uint16_t m_size;
 
             public:
                 Data(uint16_t size);
                 ~Data();
 
-                uint8_t* data() { return _data; }
-                uint16_t size() { return _size; }
+                uint8_t* data() { return m_data; }
+                uint16_t size() { return m_size; }
         };
 
         class Request {
             private:
-                uint8_t _id;
-                uint8_t _argc;
-                Data** _argv;
+                uint8_t m_id;
+                uint8_t m_argc;
+                Data** m_argv;
 
                 int16_t getNextFreeArgumentIndex();
 
@@ -65,8 +65,8 @@ class Service {
                 Request(uint8_t api, uint8_t id, uint8_t argc);
                 ~Request();
 
-                uint8_t id(void) { return _id; };
-                uint8_t argc(void) { return _argc; };
+                uint8_t id(void) { return m_id; };
+                uint8_t argc(void) { return m_argc; };
 
                 Data* addArgument(Data* argument);
                 Data* argument(void);

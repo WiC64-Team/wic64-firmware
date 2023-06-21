@@ -107,36 +107,36 @@ namespace WiC64 {
         }
     }
 
-    Service::Data::Data(uint16_t size) : _size(size) {
-        _data = (uint8_t*) calloc(_size, sizeof(uint8_t));
+    Service::Data::Data(uint16_t size) : m_size(size) {
+        m_data = (uint8_t*) calloc(m_size, sizeof(uint8_t));
     }
 
     Service::Data::~Data() {
-        if(_data != NULL) {
-            free(_data);
+        if(m_data != NULL) {
+            free(m_data);
         }
     }
 
-    Service::Request::Request(uint8_t api, uint8_t id, uint8_t argc) : _id(id), _argc(argc) {
-        _argv = (Data**) calloc(_argc, sizeof(Data*));
+    Service::Request::Request(uint8_t api, uint8_t id, uint8_t argc) : m_id(id), m_argc(argc) {
+        m_argv = (Data**) calloc(m_argc, sizeof(Data*));
     }
 
     Service::Request::~Request()
     {
-        for (uint8_t i=0; i<_argc; i++) {
-            if (_argv[i] != NULL) {
-                delete _argv[i];
+        for (uint8_t i=0; i<m_argc; i++) {
+            if (m_argv[i] != NULL) {
+                delete m_argv[i];
             }
         }
 
-        if(_argv != NULL) {
-            free(_argv);
+        if(m_argv != NULL) {
+            free(m_argv);
         }
     }
 
     int16_t Service::Request::getNextFreeArgumentIndex() {
-        for (uint8_t i=0; i<_argc; i++) {
-            if (_argv[i] == NULL) {
+        for (uint8_t i=0; i<m_argc; i++) {
+            if (m_argv[i] == NULL) {
                 return i;
             }
         }
@@ -147,19 +147,19 @@ namespace WiC64 {
         int16_t index = getNextFreeArgumentIndex();
 
         if (index == -1) {
-            log_e("All %d arguments have already been added", _argc);
+            log_e("All %d arguments have already been added", m_argc);
             return NULL;
         }
 
-        _argv[(uint8_t)index] = argument;
+        m_argv[(uint8_t)index] = argument;
         return argument;
     }
 
     Service::Data* Service::Request::argument() {
-        return _argv[0];
+        return m_argv[0];
     }
 
     Service::Data* Service::Request::argument(uint8_t index) {
-        return _argv[index];
+        return m_argv[index];
     }
 }
