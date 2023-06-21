@@ -185,12 +185,19 @@ status !zone status {
     rts
 
 .text
-!text "WIC64 TEST: ECHO ($FF)", $0d, $0d
-!text "           $  00 BYTES OF RANDOM DATA", $0d, $0d
-!text "$     SUCCESSFUL TRANSFERS", $0d, $0d, $0d
-!text "-- THIS TEST SHOULD RUN INDEFINITELY --", $0d, $0d, $0d
+!text "WIC64 TEST: DATA TRANSFER (ECHO $FF)", $0d
+!text $0d
+!text "           $  00 BYTES OF RANDOM DATA", $0d
+!text $0d
+!text "$     SUCCESSFUL TRANSFERS", $0d
+!text $0d
+!text $0d
+!text "-- THIS TEST SHOULD RUN INDEFINITELY --", $0d
+!text $0d
+!text $0d
 !text "IF THE ESP IS RESET, THIS TEST SHOULD", $0d
-!text "TIME OUT AFTER APPROX. TWO SECONDS.", $0d, $0d
+!text "TIME OUT AFTER APPROX. TWO SECONDS.", $0d
+!text $0d
 !text "IF THIS TEST IS ABORTED, THE ESP SHOULD", $0d
 !text "TIME OUT AFTER APPROX. ONE SECOND.", $00
 .task !16 $0000
