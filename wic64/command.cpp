@@ -3,9 +3,9 @@
 
 namespace WiC64 {
 
-    Command::Command(Service::Request* request) {
+    Command::Command(Request* request) {
         m_request = request;
-        m_emptyResponse = new Service::Data(0);
+        m_emptyResponse = new Data(0);
     }
 
     Command::~Command() {
@@ -17,14 +17,14 @@ namespace WiC64 {
         return commands.find(id) != commands.end();
     }
 
-    Command* Command::create(Service::Request* request) {
+    Command* Command::create(Request* request) {
         if (defined(request->id())) {
             return commands.at(request->id())(request);
         }
         return nullptr;
     }
 
-    Service::Data *Command::execute(void) {
+    Data *Command::execute(void) {
         return emptyResponse();
     }
 }

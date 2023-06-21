@@ -3,6 +3,7 @@
 
 #include "service.h"
 #include "userport.h"
+#include "data.h"
 #include "command.h"
 #include "utilities.h"
 
@@ -37,7 +38,7 @@ namespace WiC64 {
             return;
         }
 
-        service->request = new Service::Request(api, id, argc);
+        service->request = new Request(api, id, argc);
 
         log_d("request=0x%02X argc=%d size=%d",
             service->request->id(),
@@ -105,69 +106,5 @@ namespace WiC64 {
             delete command;
             command = NULL;
         }
-    }
-
-    Service::Data::Data(uint16_t size) : m_size(size) {
-        m_data = (uint8_t*) calloc(m_size, sizeof(uint8_t));
-    }
-
-    Service::Data::~Data() {
-        if(m_data != NULL) {
-            free(m_data);
-        }
-    }
-
-    bool Service::Data::isPresent(void) {
-        return m_size > 0;
-    }
-
-    bool Service::Data::isEmpty(void) {
-        return !isPresent();
-    }
-
-    Service::Request::Request(uint8_t api, uint8_t id, uint8_t argc) : m_id(id), m_argc(argc) {
-        m_argv = (Data**) calloc(m_argc, sizeof(Data*));
-    }
-
-    Service::Request::~Request()
-    {
-        for (uint8_t i=0; i<m_argc; i++) {
-            if (m_argv[i] != NULL) {
-                delete m_argv[i];
-            }
-        }
-
-        if(m_argv != NULL) {
-            free(m_argv);
-        }
-    }
-
-    int16_t Service::Request::getNextFreeArgumentIndex() {
-        for (uint8_t i=0; i<m_argc; i++) {
-            if (m_argv[i] == NULL) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    Service::Data* Service::Request::addArgument(Service::Data *argument) {
-        int16_t index = getNextFreeArgumentIndex();
-
-        if (index == -1) {
-            log_e("All %d arguments have already been added", m_argc);
-            return NULL;
-        }
-
-        m_argv[(uint8_t)index] = argument;
-        return argument;
-    }
-
-    Service::Data* Service::Request::argument() {
-        return m_argv[0];
-    }
-
-    Service::Data* Service::Request::argument(uint8_t index) {
-        return m_argv[index];
     }
 }

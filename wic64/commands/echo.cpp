@@ -3,7 +3,7 @@
 
 namespace WiC64 {
 
-Service::Data* Echo::execute(void) {
+Data* Echo::execute(void) {
     return request()->argument();
 }
 

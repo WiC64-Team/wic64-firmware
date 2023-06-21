@@ -5,6 +5,8 @@ idf_component_register(
     SRCS "connection.cpp"
     SRCS "userport.cpp"
     SRCS "service.cpp"
+    SRCS "data.cpp"
+    SRCS "request.cpp"
     SRCS "command.cpp"
     SRCS "commands/echo.cpp"
     SRCS "display.cpp"
