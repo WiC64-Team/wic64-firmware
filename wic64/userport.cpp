@@ -249,15 +249,15 @@ namespace WiC64 {
 
     void Userport::acceptRequest(void) {
         uint8_t api;
-
-        log_d("Accepting request...");
         readByte(&api);
 
-        log_d("Received API id 0x%02X (%c)", api, api);
+        log_d("Received API id 0x%02x", api);
 
         if (!service->supports(api)) {
-            vTaskDelay(pdMS_TO_TICKS(10)); // FIXME: Task WDT triggers without this during resistance test (?)
-            abortTransfer("Unknown API id requested");
+            // delay required to avoid task timeouts when dealing with line noise
+            vTaskDelay(pdMS_TO_TICKS(10));
+
+            abortTransfer("Undefined API id");
         }
 
         service->receiveRequest(api);
