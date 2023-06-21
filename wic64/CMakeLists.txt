@@ -1,4 +1,6 @@
 idf_component_register(
+	INCLUDE_DIRS "."
+
 	SRCS "wic64.cpp"
     SRCS "connection.cpp"
     SRCS "userport.cpp"
@@ -8,7 +10,7 @@ idf_component_register(
     SRCS "display.cpp"
     SRCS "utilities.cpp"
     SRCS "version.h"
-	INCLUDE_DIRS "."
+
 	REQUIRES "wic64"
 	REQUIRES "arduino"
 	REQUIRES "Adafruit-GFX-Library"
