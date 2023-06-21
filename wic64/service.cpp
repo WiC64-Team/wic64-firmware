@@ -76,21 +76,23 @@ namespace WiC64 {
     void Service::sendResponse() {
         // For unknown reasons the response size is transferred in
         // big-endian format in API version 1 (high byte first)
+
         static uint8_t responseSizeBuffer[2];
         responseSizeBuffer[0] = HIGHBYTE(response->size());
         responseSizeBuffer[1] = LOWBYTE(response->size());
 
-        if (response->size() > 0) {
-            userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent);
-        }
-        else {
-            service->deleteCommand();
-        }
+        response->size()
+            ? userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent)
+            : userport->send(responseSizeBuffer, 2, onResponseSizeSent);
     }
 
     void Service::onResponseSizeSent(uint8_t* data, uint16_t size) {
+        Data *response = service->response;
         log_data("Response size", data, size);
-        userport->send(service->response->data(), service->response->size(), onResponseSent);
+
+        response->size()
+            ? userport->send(response->data(), response->size(), onResponseSent)
+            : service->deleteCommand();
     }
 
     void Service::onResponseSent(uint8_t *data, uint16_t size) {
