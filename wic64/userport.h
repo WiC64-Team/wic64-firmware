@@ -31,6 +31,8 @@ enum {
 
 namespace WiC64 {
 
+typedef void (*callback_t) (uint8_t* data, uint16_t size);
+
     class Userport {
         private:
             // Port Register: CIA2 Pin name -> ESP32 pin number
@@ -103,7 +105,8 @@ namespace WiC64 {
             uint16_t size;
             uint16_t pos;
 
-            void (*onSuccessCallback)(uint8_t* data, uint16_t size);
+            callback_t onSuccessCallback;
+            callback_t onFailureCallback;
 
             void setPortToInput(void);
             void setPortToOutput(void);
@@ -120,7 +123,8 @@ namespace WiC64 {
                 TRANSFER_TYPE type,
                 uint8_t *data,
                 uint16_t size,
-                void (*onSuccess)(uint8_t* data, uint16_t size)
+                callback_t onSuccess,
+                callback_t onFailure
             );
             inline void continueTransfer(void);
             void completeTransfer(void);
@@ -147,11 +151,13 @@ namespace WiC64 {
 
             void acceptRequest(void);
 
-            void receivePartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
-            void receive(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
+            void receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess);
+            void receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
+            void receive(uint8_t *data, uint16_t size, callback_t onSuccess);
+            void receive(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
 
-            void sendPartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
-            void send(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size));
+            void sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess);
+            void send(uint8_t *data, uint16_t size, callback_t onSuccess);
 
             void resetTimeout(void);
             bool hasTimedOut(void);

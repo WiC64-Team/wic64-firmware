@@ -150,12 +150,14 @@ namespace WiC64 {
             TRANSFER_TYPE type,
             uint8_t *data,
             uint16_t size,
-            void (*onSuccess)(uint8_t* data, uint16_t size)) {
+            callback_t onSuccess,
+            callback_t onFailure) {
 
         log_d("%s %d bytes...", isSending(type) ? "Sending" : "Receiving", size);
 
         this->transferType = type;
         this->onSuccessCallback = onSuccess;
+        this->onFailureCallback = onFailure;
 
         this->buffer = data;
         this->size = size;
@@ -200,7 +202,9 @@ namespace WiC64 {
             sendHandshakeSignal();
         }
 
-        onSuccessCallback(buffer, size);
+        if (onSuccessCallback != NULL) {
+            onSuccessCallback(buffer, size);
+        }
     }
 
     void Userport::abortTransfer(const char* reason) {
@@ -210,6 +214,10 @@ namespace WiC64 {
         transferType = TRANSFER_TYPE_NONE;
         previousTransferType = TRANSFER_TYPE_NONE;
         transferState = TRANSFER_STATE_NONE;
+
+        if (onFailureCallback != NULL) {
+            onFailureCallback(buffer, pos);
+        }
 
         deleteTimeoutTask();
     }
@@ -262,20 +270,28 @@ namespace WiC64 {
         service->receiveRequest(api);
     }
 
-    void Userport::receivePartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size)) {
-        startTransfer(TRANSFER_TYPE_RECEIVE_PARTIAL, data, size, onSuccess);
+    void Userport::receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess) {
+        startTransfer(TRANSFER_TYPE_RECEIVE_PARTIAL, data, size, onSuccess, NULL);
     }
 
-    void Userport::receive(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size)) {
-        startTransfer(TRANSFER_TYPE_RECEIVE_FULL, data, size, onSuccess);
+    void Userport::receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure) {
+        startTransfer(TRANSFER_TYPE_RECEIVE_PARTIAL, data, size, onSuccess, onFailure);
     }
 
-    void Userport::sendPartial(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size)) {
-        startTransfer(TRANSFER_TYPE_SEND_PARTIAL, data, size, onSuccess);
+    void Userport::receive(uint8_t *data, uint16_t size, callback_t onSuccess) {
+        startTransfer(TRANSFER_TYPE_RECEIVE_FULL, data, size, onSuccess, NULL);
     }
 
-    void Userport::send(uint8_t *data, uint16_t size, void (*onSuccess)(uint8_t* data, uint16_t size)) {
-        startTransfer(TRANSFER_TYPE_SEND_FULL, data, size, onSuccess);
+    void Userport::receive(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure) {
+        startTransfer(TRANSFER_TYPE_RECEIVE_FULL, data, size, onSuccess, onFailure);
+    }
+
+    void Userport::sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess) {
+        startTransfer(TRANSFER_TYPE_SEND_PARTIAL, data, size, onSuccess, NULL);
+    }
+
+    void Userport::send(uint8_t *data, uint16_t size, callback_t onSuccess) {
+        startTransfer(TRANSFER_TYPE_SEND_FULL, data, size, onSuccess, NULL);
     }
 
     void IRAM_ATTR Userport::dataDirectionChangedISR(void) {
