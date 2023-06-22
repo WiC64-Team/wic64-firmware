@@ -1,7 +1,8 @@
-#ifndef WIC64_COMMAND_ECHO_H
-#define WIC64_COMMAND_ECHO_H
+#ifndef WIC64_ECHO_H
+#define WIC64_ECHO_H
 
 #include "command.h"
+#include "data.h"
 
 namespace WiC64 {
     class Echo : public Command {
@@ -10,4 +11,4 @@ namespace WiC64 {
             Data* execute(void);
     };
 }
-#endif // WIC64_COMMAND_ECHO_H
+#endif // WIC64_ECHO_H
