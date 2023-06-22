@@ -14,8 +14,11 @@ namespace WiC64 {
 
         public:
             Connection(Display *display);
+
             bool isConnected(void);
             void connect(void);
+
+            const char* getIP();
     };
 
 }
