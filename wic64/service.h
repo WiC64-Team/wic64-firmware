@@ -32,6 +32,7 @@ class Service {
         bool supports(uint8_t apiId);
 
         void receiveRequest(uint8_t apiId);
+        static void onRequestAborted(uint8_t* data, uint16_t bytes_received);
         static void onRequestReceived(uint8_t* data, uint16_t size);
 
         void sendResponse();

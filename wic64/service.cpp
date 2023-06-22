@@ -49,8 +49,17 @@ namespace WiC64 {
                 log_e("Could not add single argument to V1 request");
                 return;
             }
-            userport->receive(argument->data(), argument->size(), onRequestReceived);
+            userport->receive(argument->data(), argument->size(), onRequestReceived, onRequestAborted);
         }
+    }
+
+    void Service::onRequestAborted(uint8_t *data, uint16_t bytes_received) {
+        log_e("Received %d bytes, %d expected",
+            bytes_received, service->request->argument(0)->size());
+        log_d("Freeing memory allocated for request");
+
+        delete service->request;
+        service->request = NULL;
     }
 
     void Service::onRequestReceived(uint8_t *ignoredData, uint16_t ignoredSize) {
