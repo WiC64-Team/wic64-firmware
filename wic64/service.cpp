@@ -28,28 +28,28 @@ namespace WiC64 {
 
         uint8_t api = API_V1_ID;
         uint8_t id = header[2];
-        uint16_t arg_size = (*((uint16_t*) header)) - API_V1_REQUEST_SIZE;
-        uint8_t argc = (size > 0) ? 1 : 0;
 
         if (!Command::defined(id)) {
             log_d("Undefined command id requested: 0x%02x, aborting", id);
             return;
         }
 
-        service->request = new Request(api, id, argc);
+        uint16_t argument_size = (*((uint16_t*) header)) - API_V1_REQUEST_SIZE;
+        bool has_argument = (argument_size > 0);
+
+        service->request = new Request(api, id, has_argument ? 1 : 0);
 
         log_d("request=0x%02X argc=%d size=%d",
             service->request->id(),
             service->request->argc(),
-            arg_size);
+            argument_size);
 
-        if (service->request->argc()) {
-            Data* argument = service->request->addArgument(new Data(arg_size));
-            if(argument == NULL) {
-                log_e("Could not add single argument to V1 request");
-                return;
-            }
+        if (service->request->hasArguments()) {
+            Data* argument = service->request->addArgument(new Data(argument_size));
             userport->receive(argument->data(), argument->size(), onRequestReceived, onRequestAborted);
+        }
+        else {
+            service->onRequestReceived(NULL, 0);
         }
     }
 
@@ -60,6 +60,10 @@ namespace WiC64 {
 
         delete service->request;
         service->request = NULL;
+    }
+
+    void Service::onRequestReceived(void) {
+        onRequestReceived(NULL, 0);
     }
 
     void Service::onRequestReceived(uint8_t *ignoredData, uint16_t ignoredSize) {
