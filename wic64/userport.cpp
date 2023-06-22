@@ -196,14 +196,19 @@ namespace WiC64 {
         transferType = TRANSFER_TYPE_NONE;
         transferState = TRANSFER_STATE_NONE;
 
+        /* TODO: Figure out why calling back after handshake causes false positives
+         * of "Unknown API id". Might need to add TRANSFER_STATE_COMPLETING, as it feels
+         * more correct to call back after completing the transfer.
+        */
+
+        if (onSuccessCallback != NULL) {
+            onSuccessCallback(buffer, size);
+        }
+
         if (currentTransferType == TRANSFER_TYPE_RECEIVE_FULL ||
             isSending(currentTransferType)) {
             log_v("Sending final handshake signal");
             sendHandshakeSignal();
-        }
-
-        if (onSuccessCallback != NULL) {
-            onSuccessCallback(buffer, size);
         }
     }
 
