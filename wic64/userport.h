@@ -105,8 +105,8 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             uint16_t size;
             uint16_t pos;
 
-            callback_t onSuccessCallback;
-            callback_t onFailureCallback;
+            callback_t onSuccessCallback = NULL;
+            callback_t onFailureCallback = NULL;
 
             void setPortToInput(void);
             void setPortToOutput(void);

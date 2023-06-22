@@ -222,6 +222,7 @@ namespace WiC64 {
 
         if (onFailureCallback != NULL) {
             onFailureCallback(buffer, pos);
+            onFailureCallback = NULL;
         }
 
         deleteTimeoutTask();
