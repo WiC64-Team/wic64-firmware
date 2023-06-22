@@ -24,7 +24,7 @@
 .done
 }
 
-!macro jump_via_rti .addr {
+!macro jmp_via_rti .addr {
     ldx #$ff
     txs
     lda #>.addr
@@ -107,6 +107,31 @@ print !zone print {
 
 .done
     rts
+}
+
+!macro newline {
+    lda #$0d
+    jsr chrout
+}
+
+!macro paragraph {
+    lda #$0d
+    jsr chrout
+    jsr chrout
+}
+
+!macro restart_or_return_prompt .restart_addr {
+    +print restart_or_return_text
+
+.scan_any_key
+    +scan key_none
+    beq .scan_any_key
+
+.except_runstop
+    +scan key_stop
+    bne .scan_any_key
+
+    jmp .restart_addr
 }
 
 hexprint !zone hexprint {

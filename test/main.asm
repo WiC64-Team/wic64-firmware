@@ -5,6 +5,8 @@
 
 red = $1c
 green = $1e
+ron = $12
+roff = $92
 
 * = $0801 ; 10 SYS 2064 ($0810)
 !byte $0c, $08, $0a, $00, $9e, $20, $32, $30, $36, $34, $00, $00, $00
@@ -12,11 +14,13 @@ green = $1e
 * = $0810
 jmp setup
 
-key_none !byte %00000000, %11111111
-key_one  !byte %01111111, %00000001
-key_two  !byte %01111111, %00001000
-key_stop !byte %01111111, %10000000
+key_none  !byte %00000000, %11111111
+key_one   !byte %01111111, %00000001
+key_two   !byte %01111111, %00001000
+key_three !byte %11111101, %00000001
+key_stop  !byte %01111111, %10000000
 
+!src "version.asm"
 !src "universal.asm"
 !src "util.asm"
 
@@ -54,12 +58,13 @@ setup !zone setup {
 
 nmi !zone nmi {
     +scan key_stop
-    beq .back_to_menu
+    beq .menu
 
-    +jump_via_rti quit
+.quit
+    +jmp_via_rti quit
 
-.back_to_menu
-   +jump_via_rti menu
+.menu
+   +jmp_via_rti menu
 }
 
 irq !zone irq {
@@ -85,7 +90,11 @@ menu !zone menu {
     ; clear screen and home cursor
     jsr clrhome
 
-    +print .menu
+    ; print menu
+    +print .menu_title
+    +print version
+    +paragraph
+    +print .menu_text
 
 .scan:
     +scan key_none
@@ -103,24 +112,44 @@ menu !zone menu {
     jsr test_resistance
     jmp menu
 
++   +scan key_three
+    beq +
+
+    jsr test_get_ip
+    jmp menu
+
 +   jmp .scan
 
-.menu
-!text "WIC64 TESTSUITE", $0d, $0d
-!text "(1) DATA TRANSFER", $0d
-!text "(2) NOISE RESISTANCE", $0d
-!byte $0d
-!text "(RESTORE) ABORT TEST AND RETURN TO MENU"
+.menu_title
+!text "WIC64 TEST VER. ", $00
+
+.menu_text
+!text "", ron, "1", roff, " DATA TRANSFER", $0d
+!text "", ron, "2", roff, " NOISE RESISTANCE", $0d
+!text "", ron, "3", roff, " GET IP ADDRESS", $0d
 !byte $00
 }
 
 !src "tests/echo.asm"
 !src "tests/noise.asm"
+!src "tests/get_ip.asm"
+
+verify_error_text
+!text red, "          => VERIFY ERROR <=", green, $0d, $0d, $00
+
+timeout_error_text
+!text red, "       => TRANSFER TIMED OUT <=", green, $0d, $0d, $00
+
+restart_or_return_text
+!text "  -- PRESS ANY KEY TO RESTART TEST --", $0d
+!text $0d
+restore_text
+!text " -- PRESS RESTORE TO RETURN TO MENU --", $00
 
 request
 request_api  !text "W"
 request_size !byte $00, $00
-request_id   !byte $ff
+request_id   !byte $00
 request_data ; Up to 16kb of random payload data
 
 * = * + $4000

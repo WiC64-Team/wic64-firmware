@@ -22,27 +22,15 @@ test_echo !zone test_echo {
     jsr verify
     bcc .next_iteration
 
-    +print .verify_error
+    +print verify_error_text
     jmp .prompt
 
 .timeout
-    +print .timeout_error
+    +print timeout_error_text
 
 .prompt
-    +print .press_any_key
+    +restart_or_return_prompt .restart
 
-.scan_any_key
-    +scan key_none
-    beq .scan_any_key
-
-    jmp .restart
-
-.verify_error !text red, "=> VERIFY ERROR", green, $0d, $00
-.timeout_error !text red, "=> TRANSFER TIMEOUT", green, $0d, $00
-
-.press_any_key
-!text $0d, "  -- PRESS ANY KEY TO RESTART TEST --", $0d, $0d
-!text      " -- PRESS RESTORE TO RETURN TO MENU --", $00
 iterations !word $0000
 
 randomize !zone randomize {
@@ -85,6 +73,9 @@ echo !zone echo {
     lda #$02
     sta z_timeout
     +pointer $a7, request
+
+    lda #$ff
+    sta request_id
 
     jsr wic64_push
 
@@ -199,7 +190,7 @@ status !zone status {
 !text "TIME OUT AFTER APPROX. TWO SECONDS.", $0d
 !text $0d
 !text "IF THIS TEST IS ABORTED, THE ESP SHOULD", $0d
-!text "TIME OUT AFTER APPROX. ONE SECOND.", $00
+!text "TIME OUT AFTER APPROX. ONE SECOND.", $0d, $00
 .task !16 $0000
 }
 

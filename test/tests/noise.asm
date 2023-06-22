@@ -44,7 +44,6 @@ test_resistance !zone test_resistance {
     dex
     bne .next_page
 
-
     ldx #$10
     ldy #$00
 .next
@@ -126,6 +125,8 @@ test_resistance !zone test_resistance {
 
     jsr home
     +print .text
+    +paragraph
+    +print restore_text
 
 +   +plot 1, 4
     +wait_raster $30
@@ -156,7 +157,7 @@ test_resistance !zone test_resistance {
 !text "FAILING.", $0d
 !text $0d
 !text "THIS ALSO APPLIES WHEN THE ESP IS RESET", $0d
-!text "MANUALLY WHILE THIS TEST IS RUNNING."
+!text "MANUALLY WHILE THIS TEST IS RUNNING.", $0d
 !text $00
 }
 
