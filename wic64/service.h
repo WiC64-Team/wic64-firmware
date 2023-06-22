@@ -24,7 +24,7 @@ class Service {
         Command *command;
         Data *response;
 
-        void deleteCommand(void);
+        void finalizeRequest(void);
         static void parseRequestHeaderV1(uint8_t *header, uint16_t size);
 
     public:

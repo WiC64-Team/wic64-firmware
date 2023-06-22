@@ -100,18 +100,22 @@ namespace WiC64 {
 
         response->isPresent()
             ? userport->send(response->data(), response->size(), onResponseSent)
-            : service->deleteCommand();
+            : service->finalizeRequest();
     }
 
     void Service::onResponseSent(uint8_t *data, uint16_t size) {
         log_data("Response", data, size);
-        service->deleteCommand();
+        service->finalizeRequest();
     }
 
-    void Service::deleteCommand(void) {
+    void Service::finalizeRequest(void) {
+        log_d("Request handled successfully, freeing allocated memory");
+
         if (command != NULL) {
             delete command;
             command = NULL;
         }
+
+        log_free_mem();
     }
 }
