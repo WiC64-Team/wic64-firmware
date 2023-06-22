@@ -24,7 +24,7 @@ class Service {
         Command *command;
         Data *response;
 
-        void finalizeRequest(void);
+        void finalizeRequest(const char* result);
         static void parseRequestHeaderV1(uint8_t *header, uint16_t size);
 
     public:
@@ -33,11 +33,12 @@ class Service {
 
         void receiveRequest(uint8_t apiId);
         static void onRequestAborted(uint8_t* data, uint16_t bytes_received);
-        static void onRequestReceived(uint8_t* data, uint16_t size);
         void onRequestReceived(void);
+        static void onRequestReceived(uint8_t* data, uint16_t size);
 
         void sendResponse();
         static void onResponseSizeSent(uint8_t *data, uint16_t size);
+        static void onResponseAborted(uint8_t* data, uint16_t bytes_send);
         static void onResponseSent(uint8_t *data, uint16_t size);
 };
 

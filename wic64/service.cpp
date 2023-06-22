@@ -49,7 +49,7 @@ namespace WiC64 {
             userport->receive(argument->data(), argument->size(), onRequestReceived, onRequestAborted);
         }
         else {
-            service->onRequestReceived(NULL, 0);
+            service->onRequestReceived();
         }
     }
 
@@ -103,17 +103,22 @@ namespace WiC64 {
         log_data("Response size", data, size);
 
         response->isPresent()
-            ? userport->send(response->data(), response->size(), onResponseSent)
-            : service->finalizeRequest();
+            ? userport->send(response->data(), response->size(), onResponseSent, onResponseAborted)
+            : service->finalizeRequest("Request handled successfully");
+    }
+
+    void Service::onResponseAborted(uint8_t *data, uint16_t bytes_sent) {
+        log_e("Sent %d of %d bytes", bytes_sent, service->response->size());
+        service->finalizeRequest("Aborted while sending response");
     }
 
     void Service::onResponseSent(uint8_t *data, uint16_t size) {
         log_data("Response", data, size);
-        service->finalizeRequest();
+        service->finalizeRequest("Request handled successfully");
     }
 
-    void Service::finalizeRequest(void) {
-        log_d("Request handled successfully, freeing allocated memory");
+    void Service::finalizeRequest(const char* result) {
+        log_d("%s => freeing allocated memory", result);
 
         if (command != NULL) {
             delete command;
