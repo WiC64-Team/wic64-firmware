@@ -10,6 +10,7 @@ idf_component_register(
     SRCS "request.cpp"
     SRCS "command.cpp"
     SRCS "commands/echo.cpp"
+    SRCS "commands/getIP.cpp"
     SRCS "display.cpp"
     SRCS "utilities.cpp"
     SRCS "version.h"
