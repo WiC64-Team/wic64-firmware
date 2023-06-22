@@ -296,8 +296,16 @@ namespace WiC64 {
         startTransfer(TRANSFER_TYPE_SEND_PARTIAL, data, size, onSuccess, NULL);
     }
 
+    void Userport::sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure) {
+        startTransfer(TRANSFER_TYPE_SEND_PARTIAL, data, size, onSuccess, onFailure);
+    }
+
     void Userport::send(uint8_t *data, uint16_t size, callback_t onSuccess) {
         startTransfer(TRANSFER_TYPE_SEND_FULL, data, size, onSuccess, NULL);
+    }
+
+    void Userport::send(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure) {
+        startTransfer(TRANSFER_TYPE_SEND_FULL, data, size, onSuccess, onFailure);
     }
 
     void IRAM_ATTR Userport::dataDirectionChangedISR(void) {

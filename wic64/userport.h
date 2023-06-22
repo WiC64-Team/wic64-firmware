@@ -157,7 +157,9 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             void receive(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
 
             void sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess);
+            void sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
             void send(uint8_t *data, uint16_t size, callback_t onSuccess);
+            void send(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
 
             void resetTimeout(void);
             bool hasTimedOut(void);
