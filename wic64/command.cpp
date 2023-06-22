@@ -5,7 +5,7 @@ namespace WiC64 {
 
     Command::Command(Request* request) {
         m_request = request;
-        m_emptyResponse = new Data(0);
+        m_emptyResponse = new Data();
     }
 
     Command::~Command() {
