@@ -32,7 +32,12 @@ namespace WiC64 {
         return -1;
     }
 
-    Data* Request::addArgument(Data *argument) {
+    bool Request::hasArguments(void) {
+        return m_argc > 0;
+    }
+
+    Data *Request::addArgument(Data *argument)
+    {
         int16_t index = getNextFreeArgumentIndex();
 
         if (index == -1) {

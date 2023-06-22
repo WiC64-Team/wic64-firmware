@@ -20,6 +20,7 @@ namespace WiC64 {
             uint8_t id(void) { return m_id; };
             uint8_t argc(void) { return m_argc; };
 
+            bool hasArguments(void);
             Data* addArgument(Data* argument);
             Data* argument(void);
             Data* argument(uint8_t index);
