@@ -5,17 +5,16 @@
 #include "display.h"
 
 namespace WiC64 {
+    extern Connection *connection;
     extern Display *display;
 
-    Connection::Connection(Display *display) {
+    Connection::Connection() {
+        WiFi.mode(WIFI_STA);
         WiFi.setHostname(("WiC64-" + WiFi.macAddress()).c_str());
 
         WiFi.onEvent(onConnected, ARDUINO_EVENT_WIFI_STA_CONNECTED);
         WiFi.onEvent(onDisconnected, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
         WiFi.onEvent(onGotIp, ARDUINO_EVENT_WIFI_STA_GOT_IP);
-
-        WiFi.mode(WIFI_STA);
-        connect();
     }
 
     String Connection::getStoredSSID(void) {
@@ -29,7 +28,7 @@ namespace WiC64 {
             log_e("esp_wifi_get_config() failed: %s", esp_err_to_name(esp_err));
             return "";
         }
-        return String((char*)wifi_config.sta.ssid);
+        return String((char*) wifi_config.sta.ssid);
     }
 
     void Connection::onConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -45,7 +44,7 @@ namespace WiC64 {
         display->resetIp();
         display->setStatus("Connecting...");
 
-        WiFi.begin();
+        connection->connect();
     }
 
     void Connection::onGotIp(WiFiEvent_t event, WiFiEventInfo_t info) {

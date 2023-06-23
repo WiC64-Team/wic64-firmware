@@ -2,7 +2,7 @@
 #define WIC64_CONNECTION_H
 
 #include "WiFi.h"
-#include "display.h"
+#include "WString.h"
 
 namespace WiC64 {
     class Connection {
@@ -13,7 +13,7 @@ namespace WiC64 {
             static void onGotIp(WiFiEvent_t event, WiFiEventInfo_t info);
 
         public:
-            Connection(Display *display);
+            Connection();
 
             bool isConnected(void);
             void connect(void);
