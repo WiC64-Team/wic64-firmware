@@ -7,7 +7,7 @@ namespace WiC64 {
     Data::Data() { }
 
     Data::Data(uint16_t size) : m_size(size) {
-        m_data = (uint8_t*) calloc(m_size > 0 ? size : 1, sizeof(uint8_t));
+        m_data = (uint8_t*) calloc(m_size > 0 ? size : 1, sizeof(uint8_t) + 1);
         m_allocated = m_data != NULL;
     }
 
