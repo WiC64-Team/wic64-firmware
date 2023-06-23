@@ -12,7 +12,7 @@ namespace WiC64 {
     extern Userport *userport;
     extern Service *service;
 
-    Userport::Userport(Service *service) {
+    Userport::Userport() {
         esp_event_loop_args_t event_loop_args = {
             .queue_size = 16,
             .task_name = "USERPORT",
@@ -195,12 +195,12 @@ namespace WiC64 {
 
         transferType = TRANSFER_TYPE_NONE;
         transferState = TRANSFER_STATE_NONE;
+        onFailureCallback = NULL;
 
         /* TODO: Figure out why calling back after handshake causes false positives
          * of "Unknown API id". Might need to add TRANSFER_STATE_COMPLETING, as it feels
          * more correct to call back after completing the transfer.
         */
-
         if (onSuccessCallback != NULL) {
             onSuccessCallback(buffer, size);
         }

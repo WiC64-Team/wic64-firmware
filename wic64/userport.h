@@ -6,7 +6,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_event.h"
-#include "service.h"
 
 #define IS_HIGH(PIN) (((GPIO.in >> PIN) & 1) == 1)
 #define IS_LOW(PIN) (((GPIO.in >> PIN) & 1) == 1)
@@ -32,9 +31,10 @@ enum {
 namespace WiC64 {
 
 typedef void (*callback_t) (uint8_t* data, uint16_t size);
-
     class Userport {
         private:
+            static const char* TAG;
+
             // Port Register: CIA2 Pin name -> ESP32 pin number
             const gpio_num_t PB0 = GPIO_NUM_16;
             const gpio_num_t PB1 = GPIO_NUM_17;
@@ -137,7 +137,7 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
         public:
             esp_event_loop_handle_t event_loop_handle;
 
-            Userport(Service *service);
+            Userport();
 
             void connect(void);
             void disconnect(void);
