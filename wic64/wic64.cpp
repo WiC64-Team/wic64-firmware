@@ -3,6 +3,7 @@
 #include "wic64.h"
 #include "display.h"
 #include "connection.h"
+#include "client.h"
 #include "userport.h"
 #include "service.h"
 #include "utilities.h"
@@ -12,6 +13,7 @@ using namespace WiC64;
 namespace WiC64 {
     Display *display;
     Connection *connection;
+    Client *client;
     Service *service;
     Userport *userport;
 
@@ -19,10 +21,12 @@ namespace WiC64 {
         log_i("Firmware version %s", WIC64_VERSION_STRING);
 
         display = new Display();
-        connection = new Connection(display);
+        connection = new Connection();
+        client = new Client();
         service = new Service();
-        userport = new Userport(service);
+        userport = new Userport();
 
+        connection->connect();
         userport->connect();
     }
 }
