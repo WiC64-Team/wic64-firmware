@@ -2,7 +2,6 @@
 #define WIC64_CONNECTION_H
 
 #include "WiFi.h"
-#include "WString.h"
 
 namespace WiC64 {
     class Connection {
@@ -18,7 +17,8 @@ namespace WiC64 {
             bool isConnected(void);
             void connect(void);
 
-            const char* getIP();
+            const char* ipAddress();
+            const char* macAddress();
     };
 
 }

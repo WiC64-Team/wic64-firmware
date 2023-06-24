@@ -59,7 +59,7 @@ namespace WiC64 {
         WiFi.begin();
     }
 
-    const char* Connection::getIP() {
+    const char* Connection::ipAddress() {
         static char ip[16];
         strncpy(ip, WiFi.localIP().toString().c_str(), 16);
         return ip;
