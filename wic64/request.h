@@ -7,6 +7,7 @@
 namespace WiC64 {
     class Request {
         private:
+            uint8_t m_api;
             uint8_t m_id;
             uint8_t m_argc;
             Data** m_argv;
@@ -17,6 +18,7 @@ namespace WiC64 {
             Request(uint8_t api, uint8_t id, uint8_t argc);
             ~Request();
 
+            uint8_t api() { return m_api; }
             uint8_t id(void) { return m_id; };
             uint8_t argc(void) { return m_argc; };
 

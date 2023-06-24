@@ -6,12 +6,11 @@
 #include "data.h"
 
 namespace WiC64 {
-    Request::Request(uint8_t api, uint8_t id, uint8_t argc) : m_id(id), m_argc(argc) {
+    Request::Request(uint8_t api, uint8_t id, uint8_t argc) : m_api(api), m_id(id), m_argc(argc) {
         m_argv = (Data**) calloc(m_argc, sizeof(Data*));
     }
 
-    Request::~Request()
-    {
+    Request::~Request() {
         for (uint8_t i=0; i<m_argc; i++) {
             if (m_argv[i] != NULL) {
                 delete m_argv[i];
