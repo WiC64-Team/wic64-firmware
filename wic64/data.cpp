@@ -38,6 +38,6 @@ namespace WiC64 {
     }
 
     uint16_t Data::sizeToReport() {
-        return (m_sizeToReport != -1) ? m_sizeToReport : m_size;
+        return (m_sizeToReport > -1) ? m_sizeToReport : m_size;
     }
 }
