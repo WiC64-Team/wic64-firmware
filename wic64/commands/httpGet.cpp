@@ -2,6 +2,7 @@
 #include "httpGet.h"
 #include "client.h"
 #include "connection.h"
+#include "settings.h"
 #include "utilities.h"
 
 #include "WString.h"
@@ -11,6 +12,7 @@ namespace WiC64 {
 
     extern Client *client;
     extern Connection *connection;
+    extern Settings *settings;
 
     HttpGet::~HttpGet() {
         if (m_response != NULL) {
@@ -21,11 +23,11 @@ namespace WiC64 {
     void HttpGet::expandURL(String &url) {
         // replace "%mac" with the mac address, remove colons first
         if (url.indexOf("%mac") != -1) {
-            ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address");
+            ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address and adding security token");
 
             String mac(connection->macAddress());
             mac.replace(":", "");
-            url.replace("%mac", mac);
+            url.replace("%mac", mac + settings->securityToken());
         }
     }
 
