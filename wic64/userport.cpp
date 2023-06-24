@@ -164,7 +164,7 @@ namespace WiC64 {
         this->size = size;
         this->pos = 0;
 
-        transferState = (type == TRANSFER_TYPE_SEND_PARTIAL)
+        transferState = isSending()
             ? TRANSFER_STATE_PENDING
             : TRANSFER_STATE_RUNNING;
 
