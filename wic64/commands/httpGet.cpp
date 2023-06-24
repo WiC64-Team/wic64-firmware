@@ -40,7 +40,7 @@ namespace WiC64 {
         ESP_LOGI(TAG, "Fetching URL [%s]", url.c_str());
         m_response = client->get(url);
 
-        if (isVersion1() && url.endsWith(".prg")) {
+        if (isVersion1() && url.endsWith(".prg") && m_response->size() > 2) {
             m_response->sizeToReport(m_response->size() - 2);
         }
 
