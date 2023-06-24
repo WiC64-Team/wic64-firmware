@@ -3,6 +3,7 @@ idf_component_register(
 
     SRCS "main.cpp"
     SRCS "wic64.cpp"
+    SRCS "settings.cpp"
     SRCS "connection.cpp"
     SRCS "client.cpp"
     SRCS "userport.cpp"

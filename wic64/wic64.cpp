@@ -1,4 +1,5 @@
 #include "wic64.h"
+#include "settings.h"
 #include "display.h"
 #include "connection.h"
 #include "client.h"
@@ -13,6 +14,7 @@
 using namespace WiC64;
 namespace WiC64 {
 
+    Settings *settings;
     Display *display;
     Connection *connection;
     Client *client;
@@ -22,9 +24,10 @@ namespace WiC64 {
     const char* WiC64::TAG = "WIC64";
 
     WiC64::WiC64() {
-        log_level(ESP_LOG_DEBUG);
+        log_level(ESP_LOG_VERBOSE);
         ESP_LOGW(TAG, "Firmware version %s", WIC64_VERSION_STRING);
 
+        settings = new Settings();
         display = new Display();
         connection = new Connection();
         client = new Client();

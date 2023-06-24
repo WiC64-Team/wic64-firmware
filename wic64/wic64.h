@@ -2,15 +2,11 @@
 #define WIC64_H
 
 #include <cstdint>
-#include <Preferences.h>
 #include "esp_log.h"
 
 namespace WiC64 {
     class WiC64 {
         public: static const char* TAG;
-
-        private:
-            Preferences preferences;
 
         public:
             static const uint8_t API_V1 = 'W';
