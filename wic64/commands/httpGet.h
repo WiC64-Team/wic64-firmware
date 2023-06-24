@@ -7,6 +7,8 @@
 
 namespace WiC64 {
     class HttpGet : public Command {
+        public: static const char* TAG;
+
         private:
             Data* m_response;
 

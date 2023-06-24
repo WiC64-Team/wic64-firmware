@@ -12,6 +12,8 @@ namespace WiC64 {
 
 class Command;
 class Service {
+    public: static const char* TAG;
+
     private:
         static const uint8_t REQUEST_HEADER_SIZE = 3;
 
@@ -28,7 +30,7 @@ class Service {
         Command *command;
         Data *response;
 
-        void finalizeRequest(const char* result);
+        void finalizeRequest(const char* message, bool success);
         static void parseRequestHeaderVersion1(uint8_t *header, uint16_t size);
 
     public:

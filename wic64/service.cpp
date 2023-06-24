@@ -8,6 +8,8 @@
 #include "command.h"
 #include "utilities.h"
 namespace WiC64 {
+    const char* Service::TAG = "SERVICE";
+
     extern Service *service;
     extern Userport *userport;
 
@@ -24,14 +26,14 @@ namespace WiC64 {
     }
 
     void Service::parseRequestHeaderVersion1(uint8_t *header, uint16_t size) {
-        log_d("Parsing api version 1 request header...");
-        log_data("Header", (uint8_t*) header, size);
+        ESP_LOGD(TAG, "Parsing api version 1 request header...");
+        ESP_LOG_HEXV(TAG, "Header", (uint8_t*) header, size);
 
         uint8_t api = WiC64::API_V1;
         uint8_t id = header[2];
 
         if (!Command::defined(id)) {
-            log_d("Undefined command id requested: 0x%02x, aborting", id);
+            ESP_LOGD(TAG, "Undefined command id requested: 0x%02x, aborting", id);
             return;
         }
 
@@ -40,12 +42,13 @@ namespace WiC64 {
 
         service->request = new Request(api, id, has_argument ? 1 : 0);
 
-        log_d("request=0x%02X argc=%d size=%d",
+        ESP_LOGD(TAG, "request=0x%02X argc=%d size=%d",
             service->request->id(),
             service->request->argc(),
             argument_size);
 
         if (service->request->hasArguments()) {
+            ESP_LOGI(TAG, "Receiving request argument");
             Data* argument = service->request->addArgument(new Data(argument_size));
             userport->receive(argument->data(), argument->size(), onRequestReceived, onRequestAborted);
         }
@@ -55,9 +58,9 @@ namespace WiC64 {
     }
 
     void Service::onRequestAborted(uint8_t *data, uint16_t bytes_received) {
-        log_e("Received %d bytes, %d expected",
+        ESP_LOGW(TAG, "Received only %d bytes of %d bytes expected",
             bytes_received, service->request->argument(0)->size());
-        log_d("Freeing memory allocated for request");
+        ESP_LOGW(TAG, "Aborted while receiving request => Freeing allocated memory");
 
         delete service->request;
         service->request = NULL;
@@ -70,14 +73,15 @@ namespace WiC64 {
     void Service::onRequestReceived(uint8_t *ignoredData, uint16_t ignoredSize) {
         Request *request = service->request;
 
-        log_d("Handling request 0x%02X:", request->id());
-        log_v("Request arguments...");
+        ESP_LOGI(TAG, "Request received successfully");
+        ESP_LOGI(TAG, "Handling request 0x%02X:", request->id());
+        ESP_LOGV(TAG, "Request arguments...");
 
         for (uint8_t i=0; i<request->argc(); i++) {
             Data* argument = request->argument(i);
             static char title[12+1];
-            snprintf(title, 12, "Argument %hhu", i);
-            log_data(title, argument->data(), argument->size());
+            snprintf(title, 12, "argument %hhu", i);
+            ESP_LOG_HEXV(TAG, title, argument->data(), argument->size());
         }
 
         service->command = Command::create(request);
@@ -91,8 +95,14 @@ namespace WiC64 {
         // big-endian format in API version 1 (high byte first)
 
         static uint8_t responseSizeBuffer[2];
+
         responseSizeBuffer[0] = HIGHBYTE(response->sizeToReport());
         responseSizeBuffer[1] = LOWBYTE(response->sizeToReport());
+
+        ESP_LOGI(TAG, "Sending response size %d [0x%02x, 0x%02x]",
+            response->sizeToReport(),
+            responseSizeBuffer[0],
+            responseSizeBuffer[1]);
 
         response->isPresent()
             ? userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent)
@@ -101,25 +111,25 @@ namespace WiC64 {
 
     void Service::onResponseSizeSent(uint8_t* data, uint16_t size) {
         Data *response = service->response;
-        log_data("Response size", data, size);
 
         response->isPresent()
             ? userport->send(response->data(), response->size(), onResponseSent, onResponseAborted)
-            : service->finalizeRequest("Request handled successfully");
+            : service->finalizeRequest("Request handled successfully", true);
     }
 
     void Service::onResponseAborted(uint8_t *data, uint16_t bytes_sent) {
-        log_e("Sent %d of %d bytes", bytes_sent, service->response->size());
-        service->finalizeRequest("Aborted while sending response");
+        ESP_LOGW(TAG, "Sent only %d of %d bytes", bytes_sent, service->response->size());
+        service->finalizeRequest("Aborted while sending response", false);
     }
 
     void Service::onResponseSent(uint8_t *data, uint16_t size) {
-        log_data("Response", data, size);
-        service->finalizeRequest("Request handled successfully");
+        ESP_LOG_HEXV(TAG, "response", data, size);
+        service->finalizeRequest("Request handled successfully", true);
     }
 
-    void Service::finalizeRequest(const char* result) {
-        log_d("%s => freeing allocated memory", result);
+    void Service::finalizeRequest(const char* message, bool success) {
+        esp_log_level_t level = success ? ESP_LOG_INFO : ESP_LOG_WARN;
+        ESP_LOG_LEVEL(level, TAG, "%s => freeing allocated memory", message);
 
         if (command != NULL) {
             delete command;

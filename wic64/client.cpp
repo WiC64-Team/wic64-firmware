@@ -2,7 +2,7 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_http_client.h"
-#include "esp32-hal-log.h"
+#include "esp_log.h"
 #include "WString.h"
 
 #include "client.h"
@@ -12,31 +12,32 @@
 #define MIN(a,b) ((a) < (b) ? a : b)
 
 namespace WiC64 {
-
     extern Client* client;
+
+    const char* Client::TAG = "CLIENT";
 
     esp_err_t Client::event_handler(esp_http_client_event_t *evt) {
         int bytes_received = 0;
 
         switch(evt->event_id) {
             case HTTP_EVENT_ERROR:
-                log_d("HTTP_EVENT_ERROR");
+                ESP_LOGD(TAG, "HTTP_EVENT_ERROR");
                 break;
 
             case HTTP_EVENT_ON_CONNECTED:
-                log_d("HTTP_EVENT_ON_CONNECTED");
+                ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
                 break;
 
             case HTTP_EVENT_HEADER_SENT:
-                log_d("HTTP_EVENT_HEADER_SENT");
+                ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
                 break;
 
             case HTTP_EVENT_ON_HEADER:
-                log_d("HTTP_EVENT_ON_HEADER: %s: %s", evt->header_key, evt->header_value);
+                ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER: %s: %s", evt->header_key, evt->header_value);
                 break;
 
             case HTTP_EVENT_ON_DATA:
-                log_d("HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
+                ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
 
                 bytes_received = MIN(evt->data_len, (0x10000 - client->size()));
 
@@ -47,11 +48,11 @@ namespace WiC64 {
                 break;
 
             case HTTP_EVENT_ON_FINISH:
-                log_d("HTTP_EVENT_ON_FINISH");
+                ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
                 break;
 
             case HTTP_EVENT_DISCONNECTED:
-                log_d("HTTP_EVENT_DISCONNECTED");
+                ESP_LOGD(TAG, "HTTP_EVENT_DISCONNECTED");
                 break;
         }
         return ESP_OK;
@@ -61,7 +62,7 @@ namespace WiC64 {
         m_buffer = (uint8_t*) calloc(0x10000, sizeof(uint8_t));
 
         if (m_buffer == NULL) {
-            log_e("Failed to allocate response buffer");
+            ESP_LOGE(TAG, "Failed to allocate response buffer");
         }
     }
 
@@ -89,9 +90,9 @@ namespace WiC64 {
 
         if (result == ESP_OK) {
             status = esp_http_client_get_status_code(client);
-             log_i("HTTP GET Status = %d, content_length = %d", status, m_size);
+            ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", status, m_size);
         } else {
-            log_e("HTTP GET failed: %s", esp_err_to_name(result));
+            ESP_LOGE(TAG, "HTTP GET failed: %s", esp_err_to_name(result));
         }
 
         esp_http_client_cleanup(client);

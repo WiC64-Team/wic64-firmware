@@ -11,6 +11,8 @@
 namespace WiC64 {
     class Display {
         public:
+            static const char* TAG;
+
             Display();
             void setRotation(uint8_t rotation);
             void setIp(String ip);

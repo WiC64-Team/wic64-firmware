@@ -3,7 +3,6 @@
 
 #include <map>
 #include <functional>
-#include "esp32-hal-log.h"
 
 #include "wic64.h"
 #include "service.h"

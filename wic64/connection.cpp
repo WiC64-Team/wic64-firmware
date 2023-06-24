@@ -5,6 +5,8 @@
 #include "display.h"
 
 namespace WiC64 {
+    const char* Connection::TAG = "CONNECTION";
+
     extern Connection *connection;
     extern Display *display;
 
@@ -25,7 +27,7 @@ namespace WiC64 {
         esp_wifi_init(&wifi_init_config);
 
         if ((esp_err = esp_wifi_get_config(WIFI_IF_STA, &wifi_config)) != ESP_OK) {
-            log_e("esp_wifi_get_config() failed: %s", esp_err_to_name(esp_err));
+            ESP_LOGE(TAG, "esp_wifi_get_config() failed: %s", esp_err_to_name(esp_err));
             return "";
         }
         return String((char*) wifi_config.sta.ssid);

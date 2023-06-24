@@ -11,6 +11,8 @@
 
 namespace WiC64 {
     class Client {
+        public: static const char* TAG;
+
         private:
             uint8_t* m_buffer;
             int m_size = 0;

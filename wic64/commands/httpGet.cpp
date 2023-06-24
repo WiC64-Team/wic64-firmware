@@ -3,9 +3,11 @@
 #include "client.h"
 #include "connection.h"
 #include "utilities.h"
+
 #include "WString.h"
 
 namespace WiC64 {
+    const char* HttpGet::TAG = "HTTPGET";
 
     extern Client *client;
     extern Connection *connection;
@@ -19,7 +21,8 @@ namespace WiC64 {
     void HttpGet::expandURL(String &url) {
         // replace "%mac" with the mac address, remove colons first
         if (url.indexOf("%mac") != -1) {
-            log_d("Replacing \"%%mac\" with MAC address and scurity token");
+            ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address");
+
             String mac(connection->macAddress());
             mac.replace(":", "");
             url.replace("%mac", mac);
@@ -28,11 +31,11 @@ namespace WiC64 {
 
     Data* HttpGet::execute(void) {
         String url((char*) request()->argument()->data());
-        log_d("Received URL [%s]", url.c_str());
+        ESP_LOGI(TAG, "Received URL [%s]", url.c_str());
 
         expandURL(url);
 
-        log_d("Fetching URL [%s]", url.c_str());
+        ESP_LOGI(TAG, "Fetching URL [%s]", url.c_str());
         m_response = client->get(url);
 
         if (isVersion1() && url.endsWith(".prg")) {

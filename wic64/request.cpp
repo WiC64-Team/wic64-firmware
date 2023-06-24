@@ -1,11 +1,13 @@
 #include <cstdint>
 #include <cstdlib>
-#include "esp32-hal-log.h"
+#include "esp_log.h"
 
 #include "request.h"
 #include "data.h"
 
 namespace WiC64 {
+    const char* Request::TAG = "REQUEST";
+
     Request::Request(uint8_t api, uint8_t id, uint8_t argc) : m_api(api), m_id(id), m_argc(argc) {
         m_argv = (Data**) calloc(m_argc, sizeof(Data*));
     }
@@ -40,7 +42,7 @@ namespace WiC64 {
         int16_t index = getNextFreeArgumentIndex();
 
         if (index == -1) {
-            log_e("All %d arguments have already been added", m_argc);
+            ESP_LOGE(TAG, "All %d arguments have already been added", m_argc);
             return NULL;
         }
 

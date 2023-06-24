@@ -5,6 +5,8 @@
 
 namespace WiC64 {
     class Connection {
+        public: static const char* TAG;
+
         private:
             static String getStoredSSID(void);
             static void onConnected(WiFiEvent_t event, WiFiEventInfo_t info);

@@ -32,9 +32,9 @@ namespace WiC64 {
 
 typedef void (*callback_t) (uint8_t* data, uint16_t size);
     class Userport {
-        private:
-            static const char* TAG;
+        public: static const char* TAG;
 
+        private:
             // Port Register: CIA2 Pin name -> ESP32 pin number
             const gpio_num_t PB0 = GPIO_NUM_16;
             const gpio_num_t PB1 = GPIO_NUM_17;

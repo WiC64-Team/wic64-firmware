@@ -6,6 +6,8 @@
 
 namespace WiC64 {
     class Request {
+        public: static const char* TAG;
+
         private:
             uint8_t m_api;
             uint8_t m_id;
