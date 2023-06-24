@@ -11,13 +11,15 @@
 
 using namespace WiC64;
 namespace WiC64 {
+
     Display *display;
     Connection *connection;
     Client *client;
     Service *service;
     Userport *userport;
 
-    WiC64::WiC64() {
+    WiC64::WiC64()
+    {
         log_i("Firmware version %s", WIC64_VERSION_STRING);
 
         display = new Display();

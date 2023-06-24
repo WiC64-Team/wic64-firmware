@@ -13,9 +13,13 @@ namespace WiC64 {
 class Command;
 class Service {
     private:
-        static const uint8_t API_V1_ID = 'W';
-        static const uint8_t API_V1_REQUEST_SIZE = 4;
         static const uint8_t REQUEST_HEADER_SIZE = 3;
+
+        // In API Version1 the request size is not the argument size,
+        // but rather the size of the entire payload, so we need to
+        // subtract 4 to get the actual size of the argument
+        // => api byte + lowbyte size + highbyte size + command id = 4
+        static const uint8_t API_V1_ARGUMENT_SIZE_CORRECTION = 4;
 
         uint8_t* responseData;
         uint16_t responseSize;
@@ -25,7 +29,7 @@ class Service {
         Data *response;
 
         void finalizeRequest(const char* result);
-        static void parseRequestHeaderV1(uint8_t *header, uint16_t size);
+        static void parseRequestHeaderVersion1(uint8_t *header, uint16_t size);
 
     public:
         Service() { };

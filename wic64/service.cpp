@@ -1,6 +1,7 @@
 #include "esp32-hal.h"
 #include "esp_event.h"
 
+#include "wic64.h"
 #include "service.h"
 #include "userport.h"
 #include "data.h"
@@ -11,22 +12,22 @@ namespace WiC64 {
     extern Userport *userport;
 
     bool Service::supports(uint8_t api) {
-        return api == API_V1_ID;
+        return api == WiC64::API_V1;
     }
 
     void Service::receiveRequest(uint8_t api) {
         static uint8_t header[REQUEST_HEADER_SIZE];
 
-        if (api == API_V1_ID) {
-            userport->receivePartial(header, REQUEST_HEADER_SIZE, parseRequestHeaderV1);
+        if (api == WiC64::API_V1) {
+            userport->receivePartial(header, REQUEST_HEADER_SIZE, parseRequestHeaderVersion1);
         }
     }
 
-    void Service::parseRequestHeaderV1(uint8_t *header, uint16_t size) {
-        log_d("Parsing v1 request header...");
+    void Service::parseRequestHeaderVersion1(uint8_t *header, uint16_t size) {
+        log_d("Parsing api version 1 request header...");
         log_data("Header", (uint8_t*) header, size);
 
-        uint8_t api = API_V1_ID;
+        uint8_t api = WiC64::API_V1;
         uint8_t id = header[2];
 
         if (!Command::defined(id)) {
@@ -34,7 +35,7 @@ namespace WiC64 {
             return;
         }
 
-        uint16_t argument_size = (*((uint16_t*) header)) - API_V1_REQUEST_SIZE;
+        uint16_t argument_size = (*((uint16_t*) header)) - API_V1_ARGUMENT_SIZE_CORRECTION;
         bool has_argument = (argument_size > 0);
 
         service->request = new Request(api, id, has_argument ? 1 : 0);
