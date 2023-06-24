@@ -9,7 +9,7 @@ namespace WiC64 {
             bool m_allocated = false;
             uint8_t *m_data = NULL;
             uint16_t m_size = 0;
-            uint32_t m_sizeToReport = -1;
+            int32_t m_sizeToReport = -1;
 
         public:
             Data();
