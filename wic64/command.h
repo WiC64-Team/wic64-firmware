@@ -3,8 +3,9 @@
 
 #include <map>
 #include <functional>
-
 #include "esp32-hal-log.h"
+
+#include "wic64.h"
 #include "service.h"
 
 #define WIC64_COMMANDS const std::map<uint8_t, std::function<Command* (Request *request)>> commands
@@ -24,6 +25,9 @@ namespace WiC64 {
 
             Command(Request* request);
             virtual ~Command();
+
+            bool isVersion1() { return m_request->api() == WiC64::API_V1; }
+            bool isVersion2() { return m_request->api() == WiC64::API_V2; }
 
             Request* request(void) { return m_request; }
             Data* emptyResponse(void) { return m_emptyResponse; }
