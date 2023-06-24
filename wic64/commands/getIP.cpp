@@ -12,6 +12,6 @@ namespace WiC64 {
     }
 
     Data* GetIP::execute(void) {
-        return m_response = new Data(connection->getIP());
+        return m_response = new Data(connection->ipAddress());
     }
 }
