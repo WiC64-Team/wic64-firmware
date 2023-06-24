@@ -90,8 +90,8 @@ namespace WiC64 {
         // big-endian format in API version 1 (high byte first)
 
         static uint8_t responseSizeBuffer[2];
-        responseSizeBuffer[0] = HIGHBYTE(response->size());
-        responseSizeBuffer[1] = LOWBYTE(response->size());
+        responseSizeBuffer[0] = HIGHBYTE(response->sizeToReport());
+        responseSizeBuffer[1] = LOWBYTE(response->sizeToReport());
 
         response->isPresent()
             ? userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent)

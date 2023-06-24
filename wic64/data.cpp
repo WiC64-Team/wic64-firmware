@@ -36,4 +36,8 @@ namespace WiC64 {
     bool Data::isEmpty(void) {
         return !isPresent();
     }
+
+    uint16_t Data::sizeToReport() {
+        return (m_sizeToReport != -1) ? m_sizeToReport : m_size;
+    }
 }
