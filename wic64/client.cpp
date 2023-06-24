@@ -3,6 +3,7 @@
 #include "esp_system.h"
 #include "esp_http_client.h"
 #include "esp32-hal-log.h"
+#include "WString.h"
 
 #include "client.h"
 #include "utilities.h"
@@ -31,21 +32,18 @@ namespace WiC64 {
                 break;
 
             case HTTP_EVENT_ON_HEADER:
-                log_d("HTTP_EVENT_ON_HEADER, %s: %s", evt->header_key, evt->header_value);
+                log_d("HTTP_EVENT_ON_HEADER: %s: %s", evt->header_key, evt->header_value);
                 break;
 
             case HTTP_EVENT_ON_DATA:
                 log_d("HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
-                /*
-                *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
-                *  However, event handler can also be used in case chunked encoding is used.
-                */
-                //if (!esp_http_client_is_chunked_response(evt->client)) {
-                    bytes_received = MIN(evt->data_len, (0x10000 - client->size()));
-                    if (bytes_received) {
-                        memcpy(client->buffer() + client->size(), evt->data, bytes_received);
-                    }
-                    client->size(client->size() + bytes_received);
+
+                bytes_received = MIN(evt->data_len, (0x10000 - client->size()));
+
+                if (bytes_received) {
+                    memcpy(client->buffer() + client->size(), evt->data, bytes_received);
+                }
+                client->size(client->size() + bytes_received);
                 break;
 
             case HTTP_EVENT_ON_FINISH:
@@ -67,15 +65,14 @@ namespace WiC64 {
         }
     }
 
-    Data *Client::get(const char *url)
-    {
+    Data *Client::get(String url) {
         int status;
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
         esp_http_client_config_t config = {
-            .url = url,
+            .url = url.c_str(),
             .event_handler = event_handler,
         };
 
@@ -96,6 +93,8 @@ namespace WiC64 {
         } else {
             log_e("HTTP GET failed: %s", esp_err_to_name(result));
         }
+
+        esp_http_client_cleanup(client);
 
         return new Data(m_buffer, (uint16_t) m_size);
     }

@@ -3,6 +3,7 @@
 
 #include "command.h"
 #include "data.h"
+#include "WString.h"
 
 namespace WiC64 {
     class HttpGet : public Command {
@@ -11,6 +12,8 @@ namespace WiC64 {
 
         public:
             using Command::Command;
+            static void expandURL(String &url);
+
             ~HttpGet();
             Data* execute(void);
     };

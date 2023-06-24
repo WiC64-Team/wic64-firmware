@@ -5,6 +5,7 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_http_client.h"
+#include "WString.h"
 
 #include "data.h"
 
@@ -21,7 +22,7 @@ namespace WiC64 {
             uint8_t* buffer() { return m_buffer; }
 
             Client();
-            Data* get(const char* url);
+            Data* get(String url);
     };
 }
 
