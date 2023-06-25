@@ -42,7 +42,7 @@ get_ip !zone get_ip {
 
     jsr wic64_init
 
-    lda #$02
+    lda #timeout
     sta z_timeout
     +pointer $a7, request
 
@@ -52,7 +52,7 @@ get_ip !zone get_ip {
     cmp #$00
     beq .timeout
 
-    lda #$02
+    lda #timeout
     sta z_timeout
     +pointer $a7, response
 

@@ -1,6 +1,8 @@
 !addr zp1 = $22
 !addr zp2 = $50
 
+timeout = $03
+
 !addr random_byte = $d41b
 
 red = $1c
@@ -121,7 +123,7 @@ menu !zone menu {
 +   jmp .scan
 
 .menu_title
-!text "WIC64 TEST VER. ", $00
+!text "WIC64 TEST FW ", $00
 
 .menu_text
 !text "", ron, "1", roff, " DATA TRANSFER", $0d

@@ -17,7 +17,7 @@ test_echo !zone test_echo {
     +incw iterations
     jsr randomize
     jsr echo
-    bcs .timeout
+    bcs .timed_out
 
     jsr verify
     bcc .next_iteration
@@ -25,7 +25,7 @@ test_echo !zone test_echo {
     +print verify_error_text
     jmp .prompt
 
-.timeout
+.timed_out
     +print timeout_error_text
 
 .prompt
@@ -70,7 +70,7 @@ echo !zone echo {
 
     +status .sending
 
-    lda #$02
+    lda #timeout
     sta z_timeout
     +pointer $a7, request
 
@@ -85,7 +85,7 @@ echo !zone echo {
 
     +status .receiving
 
-    lda #$02
+    lda #timeout
     sta z_timeout
     +pointer $a7, response
 
