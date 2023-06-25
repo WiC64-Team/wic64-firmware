@@ -14,12 +14,11 @@ namespace WiC64 {
             static const char* TAG;
 
             Display();
-            void setRotation(uint8_t rotation);
-            void setIp(String ip);
-            void resetIp(void);
-            void setSSID(String ssid);
-            void setRSSI(int8_t rssi);
-            void setStatus(String status);
+            void rotation(uint8_t rotation);
+            void ip(String ip);
+            void SSID(String ssid);
+            void RSSI(int8_t rssi);
+            void status(String status);
 
         private:
             const int I2C_SDA_PIN = 13;
@@ -35,13 +34,13 @@ namespace WiC64 {
             static const uint8_t MAX_CHARS_PER_LINE = 21;
 
             Adafruit_SSD1306 *display;
-            uint8_t rotation = 0;
-            String ip = "";
-            String ssid = "";
-            String status = "";
+            uint8_t m_rotation = 0;
+            String m_ip = "";
+            String m_ssid = "";
+            String m_status = "";
 
-            char rssi[MAX_CHARS_FOR_RSSI+1] = "";
-            char line[MAX_CHARS_PER_LINE+1] = "";
+            char m_rssi_buffer[MAX_CHARS_FOR_RSSI+1] = "";
+            char m_line_buffer[MAX_CHARS_PER_LINE+1] = "";
 
             void update(void);
             char* abbreviated(String string);

@@ -37,19 +37,19 @@ namespace WiC64 {
         ESP_LOGI(TAG, "WiFi connected");
         ESP_LOGI(TAG, "SSID: %s %ddbm", getStoredSSID().c_str(), WiFi.RSSI());
 
-        display->setSSID(getStoredSSID());
-        display->setRSSI(WiFi.RSSI());
-        display->resetIp();
-        display->setStatus("Connected");
+        display->SSID(getStoredSSID());
+        display->RSSI(WiFi.RSSI());
+        display->ip("0.0.0.0");
+        display->status("Connected");
     }
 
     void Connection::onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
         ESP_LOGI(TAG, "WiFi not connected");
 
-        display->setSSID(getStoredSSID());
-        display->setRSSI(WiFi.RSSI());
-        display->resetIp();
-        display->setStatus("Connecting...");
+        display->SSID(getStoredSSID());
+        display->RSSI(WiFi.RSSI());
+        display->ip("0.0.0.0");
+        display->status("Connecting...");
 
         connection->connect();
     }
@@ -59,7 +59,7 @@ namespace WiC64 {
         ESP_LOGI(TAG, "MASK: %s", WiFi.subnetMask().toString().c_str());
         ESP_LOGI(TAG, "GATE: %s", WiFi.gatewayIP().toString().c_str());
         ESP_LOGI(TAG, "DNS1: %s", WiFi.dnsIP().toString().c_str());
-        display->setIp(connection->ipAddress());
+        display->ip(connection->ipAddress());
     }
 
     bool Connection::isConnected() {

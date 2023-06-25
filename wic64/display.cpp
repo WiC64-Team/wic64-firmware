@@ -32,33 +32,28 @@ namespace WiC64 {
         display->display();
     }
 
-    void Display::setRotation(uint8_t rotation) {
-        this->rotation = rotation;
+    void Display::rotation(uint8_t rotation) {
+        m_rotation = rotation;
         update();
     }
 
-    void Display::setIp(String ip) {
-        this->ip = ip;
+    void Display::ip(String ip) {
+        m_ip = ip;
         update();
     }
 
-    void Display::resetIp(void) {
-        this->ip = "0.0.0.0";
+    void Display::SSID(String ssid) {
+        m_ssid = ssid;
         update();
     }
 
-    void Display::setSSID(String ssid) {
-        this->ssid = ssid;
+    void Display::RSSI(int8_t rssi) {
+        snprintf(m_rssi_buffer, MAX_CHARS_FOR_RSSI, "%ddBm", rssi);
         update();
     }
 
-    void Display::setRSSI(int8_t rssi) {
-        snprintf(this->rssi, MAX_CHARS_FOR_RSSI, "%ddBm", rssi);
-        update();
-    }
-
-    void Display::setStatus(String status) {
-        this->status = status;
+    void Display::status(String status) {
+        m_status = status;
         update();
     }
 
@@ -71,33 +66,33 @@ namespace WiC64 {
             width = MAX_CHARS_PER_LINE;
         }
 
-        return strncpy(line, string.c_str(), width);
+        return strncpy(m_line_buffer, string.c_str(), width);
     }
 
     void Display::printStatusAndRSSI(void) {
-        uint8_t rssi_width = strlen(rssi);
-        display->print(abbreviated(status, MAX_CHARS_PER_LINE - rssi_width - 1));
+        uint8_t rssi_width = strlen(m_rssi_buffer);
+        display->print(abbreviated(m_status, MAX_CHARS_PER_LINE - rssi_width - 1));
 
-        uint8_t abbreviated_status_width = strlen(line);
+        uint8_t abbreviated_status_width = strlen(m_line_buffer);
         uint8_t gap = MAX_CHARS_PER_LINE - abbreviated_status_width - rssi_width;
 
         while(gap--) display->print(" ");
-        display->println(rssi);
+        display->println(m_rssi_buffer);
     }
 
     void Display::update() {
         if (display == NULL) return;
 
         display->clearDisplay();
-        display->setRotation(rotation);
+        display->setRotation(m_rotation);
 
         display->setFont(FONT_BIG);
         display->setCursor(0, 12);
-        display->println(ip);
+        display->println(m_ip);
 
         display->setFont(FONT_BUILTIN);
         display->setCursor(0, 20);
-        display->println(abbreviated(ssid));
+        display->println(abbreviated(m_ssid));
 
         printStatusAndRSSI();
 
