@@ -105,8 +105,13 @@ namespace WiC64 {
             responseSizeBuffer[1]);
 
         response->isPresent()
-            ? userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent)
-            : userport->send(responseSizeBuffer, 2, onResponseSizeSent);
+            ? userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent, onResponseSizeAborted)
+            : userport->send(responseSizeBuffer, 2, onResponseSizeSent, onResponseSizeAborted);
+    }
+
+    void Service::onResponseSizeAborted(uint8_t *data, uint16_t bytes_sent) {
+        ESP_LOGW(TAG, "Sent only %d of 2 bytes", bytes_sent);
+        service->finalizeRequest("Aborted while sending response size", false);
     }
 
     void Service::onResponseSizeSent(uint8_t* data, uint16_t size) {

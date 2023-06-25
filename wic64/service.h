@@ -43,6 +43,7 @@ class Service {
         static void onRequestReceived(uint8_t* data, uint16_t size);
 
         void sendResponse();
+        static void onResponseSizeAborted(uint8_t *data, uint16_t size);
         static void onResponseSizeSent(uint8_t *data, uint16_t size);
         static void onResponseAborted(uint8_t* data, uint16_t bytes_send);
         static void onResponseSent(uint8_t *data, uint16_t size);
