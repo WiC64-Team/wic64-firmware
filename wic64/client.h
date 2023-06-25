@@ -14,8 +14,10 @@ namespace WiC64 {
         public: static const char* TAG;
 
         private:
-            uint8_t* m_buffer;
+            esp_http_client_handle_t m_handle = NULL;
+            uint8_t* m_buffer = NULL;
             int m_size = 0;
+
             static esp_err_t event_handler(esp_http_client_event_t *evt);
 
         public:
@@ -25,6 +27,7 @@ namespace WiC64 {
 
             Client();
             Data* get(String url);
+            void cleanup(void);
     };
 }
 
