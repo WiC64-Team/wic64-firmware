@@ -38,4 +38,10 @@ namespace WiC64 {
         ESP_LOG_LEVEL(ESP_LOG_DEBUG, WiC64::TAG, "Free heap (minimum) : %d bytes = %dkb",
             minimum_free_heap_size, minimum_free_heap_size/1024);
     }
+
+    void log_task_list(const char* tag, esp_log_level_t level) {
+        static char stats[1024];
+        vTaskList(stats);
+        ESP_LOG_LEVEL(level, tag, "\n%s", stats);
+    }
 }

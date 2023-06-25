@@ -13,5 +13,6 @@
 namespace WiC64 {
     void log_hex(const char* tag, esp_log_level_t level, const char* title, uint8_t *data, uint32_t size);
     void log_free_mem(void);
+    void log_task_list(const char* tag, esp_log_level_t level);
 }
 #endif // WIC64_UTILITIES_H
