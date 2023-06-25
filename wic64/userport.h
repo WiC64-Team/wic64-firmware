@@ -86,6 +86,7 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
                 TRANSFER_STATE_NONE,
                 TRANSFER_STATE_PENDING,
                 TRANSFER_STATE_RUNNING,
+                TRANSFER_STATE_TERMINATING,
             };
 
             bool connected = false;

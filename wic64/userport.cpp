@@ -194,22 +194,17 @@ namespace WiC64 {
         TRANSFER_TYPE currentTransferType = transferType;
         previousTransferType = currentTransferType;
 
+        transferState = isSending() ? TRANSFER_STATE_TERMINATING : TRANSFER_STATE_NONE;
         transferType = TRANSFER_TYPE_NONE;
-        transferState = TRANSFER_STATE_NONE;
         onFailureCallback = NULL;
 
-        /* TODO: Figure out why calling back after handshake causes false positives
-         * of "Unknown API id". Might need to add TRANSFER_STATE_COMPLETING, as it feels
-         * more correct to call back after completing the transfer.
-        */
-        if (onSuccessCallback != NULL) {
-            onSuccessCallback(buffer, size);
+        if (currentTransferType != TRANSFER_TYPE_RECEIVE_PARTIAL) {
+            ESP_LOGD(TAG, "Sending final handshake signal");
+            sendHandshakeSignal();
         }
 
-        if (currentTransferType == TRANSFER_TYPE_RECEIVE_FULL ||
-            isSending(currentTransferType)) {
-            ESP_LOGV(TAG, "Sending final handshake signal");
-            sendHandshakeSignal();
+        if (onSuccessCallback != NULL) {
+            onSuccessCallback(buffer, size);
         }
     }
 
@@ -346,6 +341,12 @@ namespace WiC64 {
 
     void Userport::onHandshakeSignalReceived(void *arg, esp_event_base_t base, int32_t id, void *data) {
         userport->resetTimeout();
+
+        if (userport->transferState == TRANSFER_STATE_TERMINATING) {
+            userport->transferState = TRANSFER_STATE_NONE;
+            ESP_LOGD(TAG, "Received final handshake");
+            return;
+        }
 
         switch(userport->transferType) {
             case TRANSFER_TYPE_NONE:
