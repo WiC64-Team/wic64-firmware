@@ -29,13 +29,13 @@ namespace WiC64 {
         ESP_LOG_BUFFER_HEXDUMP(tag, data, max, level);
     }
 
-    void log_free_mem(void) {
+    void log_free_mem(const char* tag, esp_log_level_t level) {
         uint32_t free_heap_size = esp_get_free_heap_size();
         uint32_t minimum_free_heap_size = esp_get_minimum_free_heap_size();
 
-        ESP_LOG_LEVEL(ESP_LOG_DEBUG, WiC64::TAG, "Free heap (current) : %d bytes = %dkb",
+        ESP_LOG_LEVEL(level, tag, "Free heap (current) : %d bytes = %dkb",
             free_heap_size, free_heap_size/1024);
-        ESP_LOG_LEVEL(ESP_LOG_DEBUG, WiC64::TAG, "Free heap (minimum) : %d bytes = %dkb",
+        ESP_LOG_LEVEL(level, tag, "Free heap (minimum) : %d bytes = %dkb",
             minimum_free_heap_size, minimum_free_heap_size/1024);
     }
 

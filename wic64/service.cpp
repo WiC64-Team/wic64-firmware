@@ -148,6 +148,6 @@ namespace WiC64 {
             command = NULL;
         }
 
-        log_free_mem();
+        log_free_mem(TAG, level);
     }
 }
