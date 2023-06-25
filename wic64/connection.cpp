@@ -16,7 +16,7 @@ namespace WiC64 {
 
         WiFi.onEvent(onConnected, ARDUINO_EVENT_WIFI_STA_CONNECTED);
         WiFi.onEvent(onDisconnected, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
-        WiFi.onEvent(onGotIp, ARDUINO_EVENT_WIFI_STA_GOT_IP);
+        WiFi.onEvent(onGotIpAddress, ARDUINO_EVENT_WIFI_STA_GOT_IP);
     }
 
     String Connection::getStoredSSID(void) {
@@ -34,6 +34,9 @@ namespace WiC64 {
     }
 
     void Connection::onConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
+        ESP_LOGI(TAG, "WiFi connected");
+        ESP_LOGI(TAG, "=> SSID: %s %ddbm", getStoredSSID().c_str(), WiFi.RSSI());
+
         display->setSSID(getStoredSSID());
         display->setRSSI(WiFi.RSSI());
         display->resetIp();
@@ -41,6 +44,8 @@ namespace WiC64 {
     }
 
     void Connection::onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
+        ESP_LOGI(TAG, "WiFi connection lost");
+
         display->setSSID(getStoredSSID());
         display->setRSSI(WiFi.RSSI());
         display->resetIp();
@@ -49,8 +54,9 @@ namespace WiC64 {
         connection->connect();
     }
 
-    void Connection::onGotIp(WiFiEvent_t event, WiFiEventInfo_t info) {
-        display->setIp(WiFi.localIP().toString());
+    void Connection::onGotIpAddress(WiFiEvent_t event, WiFiEventInfo_t info) {
+        ESP_LOGI(TAG, "=> ADDR: %s", connection->ipAddress());
+        display->setIp(connection->ipAddress());
     }
 
     bool Connection::isConnected() {
@@ -58,6 +64,7 @@ namespace WiC64 {
     }
 
     void Connection::connect() {
+        ESP_LOGI(TAG, "Connecting to WiFi network...");
         WiFi.begin();
     }
 

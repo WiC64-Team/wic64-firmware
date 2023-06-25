@@ -6,21 +6,23 @@ namespace WiC64 {
     const char* Display::TAG = "DISPLAY";
 
     Display::Display() {
-        ESP_LOGI(TAG, "Initializing I2C interface");
+        ESP_LOGD(TAG, "Initializing I2C interface");
             if (!Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN)) {
             ESP_LOGE(TAG, "Could not initialize I2C interface");
             return;
         }
 
-        ESP_LOGI(TAG, "Creating display instance");
+        ESP_LOGD(TAG, "Creating display instance");
         display = new Adafruit_SSD1306(WIDTH, HEIGHT, &Wire, RESET_PIN_NOT_CONNECTED);
 
-        ESP_LOGI(TAG, "Allocating SSD1306 buffer");
+        ESP_LOGD(TAG, "Allocating SSD1306 buffer");
         if (!display->begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
             ESP_LOGE(TAG, "Could not allocate buffer for SSD1306");
             display = NULL;
             return;
         }
+
+        ESP_LOGI(TAG, "Display initialized");
 
         display->setTextColor(WHITE);
         display->setTextSize(1);

@@ -11,7 +11,7 @@ namespace WiC64 {
             static String getStoredSSID(void);
             static void onConnected(WiFiEvent_t event, WiFiEventInfo_t info);
             static void onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
-            static void onGotIp(WiFiEvent_t event, WiFiEventInfo_t info);
+            static void onGotIpAddress(WiFiEvent_t event, WiFiEventInfo_t info);
 
         public:
             Connection();

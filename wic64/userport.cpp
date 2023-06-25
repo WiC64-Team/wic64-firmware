@@ -54,7 +54,7 @@ namespace WiC64 {
         attachInterrupt(HANDSHAKE_LINE_C64_TO_ESP, handshakeSignalReceivedISR, RISING);
         connected = true;
 
-        ESP_LOGI(TAG, "Connected, accepting requests");
+        ESP_LOGI(TAG, "Userport connected, accepting requests");
     }
 
     void Userport::disconnect() {
@@ -72,7 +72,7 @@ namespace WiC64 {
         detachInterrupt(HANDSHAKE_LINE_C64_TO_ESP);
         connected = false;
 
-        ESP_LOGI(TAG, "Disconnected");
+        ESP_LOGI(TAG, "Userport disconnected");
     }
 
     bool Userport::isConnected() {
@@ -209,7 +209,7 @@ namespace WiC64 {
     }
 
     void Userport::abortTransfer(const char* reason) {
-        ESP_LOGE(TAG, "Aborting transfer: %s", reason);
+        ESP_LOGW(TAG, "Aborting transfer: %s", reason);
         setPortToInput();
 
         transferType = TRANSFER_TYPE_NONE;
