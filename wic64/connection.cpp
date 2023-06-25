@@ -44,7 +44,7 @@ namespace WiC64 {
     }
 
     void Connection::onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-        ESP_LOGI(TAG, "WiFi connection lost");
+        ESP_LOGI(TAG, "WiFi not connected");
 
         display->setSSID(getStoredSSID());
         display->setRSSI(WiFi.RSSI());

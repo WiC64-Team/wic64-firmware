@@ -58,9 +58,11 @@ namespace WiC64 {
     }
 
     void Service::onRequestAborted(uint8_t *data, uint16_t bytes_received) {
-        ESP_LOGW(TAG, "Received only %d bytes of %d bytes expected",
+        ESP_LOGW(TAG, "Received %d bytes of %d bytes",
             bytes_received, service->request->argument(0)->size());
-        ESP_LOGW(TAG, "Aborted while receiving request => Freeing allocated memory");
+
+        ESP_LOGW(TAG, "Aborted while receiving request");
+        ESP_LOGW(TAG, "Freeing allocated memory");
 
         delete service->request;
         service->request = NULL;
@@ -133,8 +135,13 @@ namespace WiC64 {
     }
 
     void Service::finalizeRequest(const char* message, bool success) {
-        esp_log_level_t level = success ? ESP_LOG_INFO : ESP_LOG_WARN;
-        ESP_LOG_LEVEL(level, TAG, "%s => freeing allocated memory", message);
+        esp_log_level_t level;
+
+        level = success ? ESP_LOG_INFO : ESP_LOG_WARN;
+        ESP_LOG_LEVEL(level, TAG, "%s", message);
+
+        level = success ? ESP_LOG_DEBUG : ESP_LOG_WARN;
+        ESP_LOG_LEVEL(level, TAG, "Freeing allocated memory");
 
         if (command != NULL) {
             delete command;
