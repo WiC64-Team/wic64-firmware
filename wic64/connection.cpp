@@ -72,13 +72,13 @@ namespace WiC64 {
     }
 
     const char* Connection::ipAddress() {
-        static char ip[16];
+        static char ip[16+1];
         strncpy(ip, WiFi.localIP().toString().c_str(), 16);
         return ip;
     }
 
     const char *Connection::macAddress() {
-        static char mac[18];
+        static char mac[18+1];
         strncpy(mac, WiFi.macAddress().c_str(), 18);
         return mac;
     }
