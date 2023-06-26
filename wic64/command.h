@@ -13,10 +13,12 @@
 namespace WiC64 {
     class Command {
         private:
-            Request* m_request;
-            Data* m_emptyResponse;
+            Request* m_request = NULL;
+            Data* m_response = NULL;
+            bool m_response_ready = false;
 
         public:
+            const static char* TAG;
             class Undefined;
 
             static bool defined(uint8_t id);
@@ -29,9 +31,11 @@ namespace WiC64 {
             bool isVersion2() { return m_request->api() == WiC64::API_V2; }
 
             Request* request(void) { return m_request; }
-            Data* emptyResponse(void) { return m_emptyResponse; }
+            Data* response(void) { return m_response; }
+            bool isResponseReady() { return m_response_ready; }
 
-            virtual Data* execute(void);
+            virtual void execute(void);
+            virtual void responseReady();
     };
 
     extern WIC64_COMMANDS;

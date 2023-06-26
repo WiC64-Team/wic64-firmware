@@ -8,26 +8,33 @@
 #include "WString.h"
 
 #include "data.h"
+#include "command.h"
+#include "commands/httpGet.h"
 
 namespace WiC64 {
     class Client {
         public: static const char* TAG;
 
         private:
-            esp_http_client_handle_t m_handle = NULL;
-            uint8_t* m_buffer = NULL;
-            int m_size = 0;
 
-            static esp_err_t event_handler(esp_http_client_event_t *evt);
+            esp_http_client_handle_t m_client = NULL;
+            QueueHandle_t m_queue = NULL;
+
+            bool m_keepAlive = false;
+
+            esp_http_client_handle_t handle() { return m_client; }
+            QueueHandle_t queue() { return m_queue; }
+            void keepAlive(bool keepAlive) { m_keepAlive = keepAlive; }
+
+            void close(void);
+            void closeUnlessKeptAlive();
+
+            static esp_err_t eventHandler(esp_http_client_event_t *evt);
+            static void queueTask(void* content_length_ptr);
 
         public:
-            int size() { return m_size; }
-            void size(int size ) { m_size = size; }
-            uint8_t* buffer() { return m_buffer; }
-
             Client();
-            Data* get(String url);
-            void cleanup(void);
+            void get(Command *command, String url);
     };
 }
 

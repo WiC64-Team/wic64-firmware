@@ -14,16 +14,21 @@ namespace WiC64 {
     extern Connection *connection;
     extern Settings *settings;
 
-    HttpGet::~HttpGet() {
-        if (m_response != NULL) {
-            delete m_response;
+    void HttpGet::analyze(const String &url) {
+        m_isProgramFile = isVersion1() && url.endsWith(".prg");
+    }
+
+    void HttpGet::sanitize(String &url)
+    {
+        if (url.indexOf(" ") != -1) {
+            ESP_LOGW(TAG, "Removing spaces");
+            url.replace(" ", "");
         }
     }
 
-    void HttpGet::expandURL(String &url) {
-        // replace "%mac" with the mac address, remove colons first
+    void HttpGet::expand(String& url) {
         if (url.indexOf("%mac") != -1) {
-            ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address and adding security token");
+            ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address and security token");
 
             String mac(connection->macAddress());
             mac.replace(":", "");
@@ -31,19 +36,25 @@ namespace WiC64 {
         }
     }
 
-    Data* HttpGet::execute(void) {
-        String url((char*) request()->argument()->data());
+    void HttpGet::execute(void) {
+        String url = String((char*) request()->argument()->data());
+
         ESP_LOGI(TAG, "Received URL [%s]", url.c_str());
 
-        expandURL(url);
+        analyze(url);
+        sanitize(url);
+        expand(url);
 
         ESP_LOGI(TAG, "Fetching URL [%s]", url.c_str());
-        m_response = client->get(url);
+        client->get(this, url);
 
-        if (isVersion1() && url.endsWith(".prg") && m_response->size() > 2) {
-            m_response->sizeToReport(m_response->size() - 2);
+        // client will call responseReady() when appropriate
+    }
+
+    void HttpGet::responseReady(void) {
+        if (isProgramFile() && response()->size() > 2) {
+            response()->sizeToReport(response()->size() - 2);
         }
-
-        return m_response;
+        Command::responseReady();
     }
 }

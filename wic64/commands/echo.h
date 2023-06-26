@@ -8,7 +8,7 @@ namespace WiC64 {
     class Echo : public Command {
         public:
             using Command::Command;
-            Data* execute(void);
+            void execute(void);
     };
 }
 #endif // WIC64_ECHO_H

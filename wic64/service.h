@@ -2,17 +2,37 @@
 #define WIC64_SERVICE_H
 
 #include <cstdint>
+#include "esp_event.h"
 #include "data.h"
 #include "request.h"
 
-#define LOWBYTE(UINT16) (uint8_t) ((UINT16 >> 0UL) & 0xff)
-#define HIGHBYTE(UINT16) (uint8_t) ((UINT16 >> 8UL) & 0xff)
+#define LOWBYTE(UINT16) (uint8_t)((UINT16 >> 0UL) & 0xff)
+#define HIGHBYTE(UINT16) (uint8_t)((UINT16 >> 8UL) & 0xff)
 
-namespace WiC64 {
+#ifdef ___cplusplus
+extern "C"
+{
+#endif
 
-class Command;
-class Service {
-    public: static const char* TAG;
+    ESP_EVENT_DECLARE_BASE(SERVICE_EVENTS);
+
+    enum
+    {
+        SERVICE_RESPONSE_READY,
+    };
+
+#ifdef ___cplusplus
+}
+#endif
+
+namespace WiC64
+{
+
+    class Command;
+    class Service
+    {
+    public:
+        static const char *TAG;
 
     private:
         static const uint8_t REQUEST_HEADER_SIZE = 3;
@@ -23,31 +43,41 @@ class Service {
         // => api byte + lowbyte size + highbyte size + command id = 4
         static const uint8_t API_V1_ARGUMENT_SIZE_CORRECTION = 4;
 
-        uint8_t* responseData;
-        uint16_t responseSize;
+        Request *request = NULL;
+        Command *command = NULL;
+        Data *response = NULL;
 
-        Request *request;
-        Command *command;
-        Data *response;
+        int32_t bytes_remaining = 0;
+        uint16_t items_remaining = 0;
 
-        void finalizeRequest(const char* message, bool success);
+        void finalizeRequest(const char *message, bool success);
         static void parseRequestHeaderVersion1(uint8_t *header, uint16_t size);
 
     public:
-        Service() { };
+        esp_event_loop_handle_t event_loop_handle;
+
+        Service();
         bool supports(uint8_t apiId);
 
         void receiveRequest(uint8_t apiId);
-        static void onRequestAborted(uint8_t* data, uint16_t bytes_received);
-        void onRequestReceived(void);
-        static void onRequestReceived(uint8_t* data, uint16_t size);
+        static void onRequestAborted(uint8_t *data, uint16_t bytes_received);
+        static void onRequestReceived(uint8_t *data, uint16_t size);
+        void onRequestReceived(void) { onRequestReceived(NULL, 0); }
+        static void onResponseReady(void *arg, esp_event_base_t base, int32_t id, void *data);
 
         void sendResponse();
         static void onResponseSizeAborted(uint8_t *data, uint16_t size);
         static void onResponseSizeSent(uint8_t *data, uint16_t size);
-        static void onResponseAborted(uint8_t* data, uint16_t bytes_send);
+
+        void prepareQueuedSend();
+        static void sendQueuedResponseData(uint8_t *data, uint16_t size);
+        static void sendQueuedResponseData() { sendQueuedResponseData(NULL, 0); }
+
+        static void onResponseAborted(uint8_t *data, uint16_t bytes_send);
         static void onResponseSent(uint8_t *data, uint16_t size);
-};
+
+        esp_event_loop_handle_t eventLoop() { return event_loop_handle; }
+    };
 
 }
 

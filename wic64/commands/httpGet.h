@@ -8,16 +8,19 @@
 namespace WiC64 {
     class HttpGet : public Command {
         public: static const char* TAG;
-
         private:
-            Data* m_response;
+            bool m_isProgramFile = false;
 
         public:
             using Command::Command;
-            static void expandURL(String &url);
+            bool isProgramFile() { return m_isProgramFile; }
 
-            ~HttpGet();
-            Data* execute(void);
+            void analyze(const String& url);
+            void sanitize(String& url);
+            void expand(String& url);
+
+            void execute(void);
+            void responseReady(void);
     };
 }
 #endif // WIC64_HTTPGET_H

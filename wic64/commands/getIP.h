@@ -6,14 +6,9 @@
 
 namespace WiC64 {
     class GetIP : public Command {
-        private:
-            Data* m_response;
-
         public:
             using Command::Command;
-            ~GetIP();
-
-            Data* execute(void);
+            void execute(void);
     };
 }
 

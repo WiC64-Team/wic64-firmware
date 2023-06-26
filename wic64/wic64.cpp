@@ -12,8 +12,8 @@
 #include "esp_log.h"
 
 using namespace WiC64;
-namespace WiC64 {
 
+namespace WiC64 {
     Settings *settings;
     Display *display;
     Connection *connection;
@@ -24,7 +24,7 @@ namespace WiC64 {
     const char* WiC64::TAG = "WIC64";
 
     WiC64::WiC64() {
-        log_level(ESP_LOG_VERBOSE);
+        loglevel(ESP_LOG_INFO);
         ESP_LOGW(TAG, "Firmware version %s", WIC64_VERSION_STRING);
 
         settings = new Settings();
@@ -36,9 +36,11 @@ namespace WiC64 {
 
         connection->connect();
         userport->connect();
+
+        log_free_mem(TAG, ESP_LOG_WARN);
     }
 
-    void WiC64::log_level(esp_log_level_t level) {
+    void WiC64::loglevel(esp_log_level_t level) {
         esp_log_level_set(WiC64::TAG, level);
         esp_log_level_set(Userport::TAG, level);
         esp_log_level_set(Service::TAG, level);
@@ -46,6 +48,7 @@ namespace WiC64 {
         esp_log_level_set(Display::TAG, level);
         esp_log_level_set(Client::TAG, level);
         esp_log_level_set(Request::TAG, level);
+        esp_log_level_set(Command::TAG, level);
         esp_log_level_set(HttpGet::TAG, level);
     }
 }

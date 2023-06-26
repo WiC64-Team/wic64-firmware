@@ -1,7 +1,8 @@
 #include "echo.h"
 
 namespace WiC64 {
-    Data* Echo::execute(void) {
-        return request()->argument();
+    void Echo::execute(void) {
+        response()->data(request()->argument()->data(), request()->argument()->size());
+        responseReady();
     }
 }

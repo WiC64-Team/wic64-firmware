@@ -3,6 +3,9 @@
 
 #include <cstdint>
 
+#define MAX(a,b) ((a) > (b) ? a : b)
+#define MIN(a,b) ((a) < (b) ? a : b)
+
 #define WIC64_MAX_HEXDUMP_SIZE 512
 #define ESP_LOG_HEXE(tag, title, data, size) log_hex(tag, ESP_LOG_ERROR, title, data, size)
 #define ESP_LOG_HEXW(tag, title, data, size) log_hex(tag, ESP_LOG_WARN, title, data, size)

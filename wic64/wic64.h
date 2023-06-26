@@ -4,6 +4,13 @@
 #include <cstdint>
 #include "esp_log.h"
 
+#define WIC64_QUEUE_ITEM_SIZE 128
+#define WIC64_QUEUE_SIZE (0x10000 / WIC64_QUEUE_ITEM_SIZE)
+
+#define WIC64_QUEUE_ITEMS_REQUIRED(size) \
+    (size / WIC64_QUEUE_ITEM_SIZE) + \
+    ((size % WIC64_QUEUE_ITEM_SIZE) ? 1 : 0)
+
 namespace WiC64 {
     class WiC64 {
         public: static const char* TAG;
@@ -12,7 +19,7 @@ namespace WiC64 {
             static const uint8_t API_V1 = 'W';
             static const uint8_t API_V2 = 'I';
 
-            static void log_level(esp_log_level_t level);
+            static void loglevel(esp_log_level_t level);
 
             WiC64();
     };
