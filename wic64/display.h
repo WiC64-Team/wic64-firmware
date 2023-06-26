@@ -15,10 +15,10 @@ namespace WiC64 {
 
             Display();
             void rotation(uint8_t rotation);
-            void ip(String ip);
-            void SSID(String ssid);
+            void ip(const String& ip);
+            void SSID(const String& ssid);
             void RSSI(int8_t rssi);
-            void status(String status);
+            void status(const String& status);
 
         private:
             const int I2C_SDA_PIN = 13;
@@ -43,8 +43,8 @@ namespace WiC64 {
             char m_line_buffer[MAX_CHARS_PER_LINE+1] = "";
 
             void update(void);
-            char* abbreviated(String string);
-            char* abbreviated(String string, uint8_t width);
+            char* abbreviated(const String& string);
+            char* abbreviated(const String& string, uint8_t width);
             void printStatusAndRSSI(void);
 
             const unsigned char logo[128*64/8] PROGMEM = {

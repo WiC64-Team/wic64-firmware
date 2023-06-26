@@ -37,12 +37,12 @@ namespace WiC64 {
         update();
     }
 
-    void Display::ip(String ip) {
+    void Display::ip(const String& ip) {
         m_ip = ip;
         update();
     }
 
-    void Display::SSID(String ssid) {
+    void Display::SSID(const String&ssid) {
         m_ssid = ssid;
         update();
     }
@@ -52,16 +52,16 @@ namespace WiC64 {
         update();
     }
 
-    void Display::status(String status) {
+    void Display::status(const String& status) {
         m_status = status;
         update();
     }
 
-    char *Display::abbreviated(String string) {
+    char *Display::abbreviated(const String& string) {
         return abbreviated(string, MAX_CHARS_PER_LINE);
     }
 
-    char *Display::abbreviated(String string, uint8_t width) {
+    char *Display::abbreviated(const String &string, uint8_t width) {
         if (width > MAX_CHARS_PER_LINE) {
             width = MAX_CHARS_PER_LINE;
         }
