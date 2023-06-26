@@ -50,33 +50,37 @@ namespace WiC64
         int32_t bytes_remaining = 0;
         uint16_t items_remaining = 0;
 
-        void finalizeRequest(const char *message, bool success);
-        static void parseRequestHeaderVersion1(uint8_t *header, uint16_t size);
-
     public:
         esp_event_loop_handle_t event_loop_handle;
 
         Service();
-        bool supports(uint8_t apiId);
+        esp_event_loop_handle_t eventLoop() { return event_loop_handle; }
 
+        bool supports(uint8_t apiId);
         void receiveRequest(uint8_t apiId);
+
+        static void parseRequestHeaderVersion1(uint8_t *header, uint16_t size);
         static void onRequestAborted(uint8_t *data, uint16_t bytes_received);
         static void onRequestReceived(uint8_t *data, uint16_t size);
         void onRequestReceived(void) { onRequestReceived(NULL, 0); }
+
         static void onResponseReady(void *arg, esp_event_base_t base, int32_t id, void *data);
+        void sendResponse(void);
 
-        void sendResponse();
-        static void onResponseSizeAborted(uint8_t *data, uint16_t size);
-        static void onResponseSizeSent(uint8_t *data, uint16_t size);
+        void sendResponseHeader(void);
+        static void onResponseHeaderAborted(uint8_t *data, uint16_t size);
+        static void onResponseHeaderSent(uint8_t *data, uint16_t size);
 
-        void prepareQueuedSend();
+        void sendQueuedResponse(void);
         static void sendQueuedResponseData(uint8_t *data, uint16_t size);
         static void sendQueuedResponseData() { sendQueuedResponseData(NULL, 0); }
+
+        void sendStaticResponse(void);
 
         static void onResponseAborted(uint8_t *data, uint16_t bytes_send);
         static void onResponseSent(uint8_t *data, uint16_t size);
 
-        esp_event_loop_handle_t eventLoop() { return event_loop_handle; }
+        void finalizeRequest(const char *message, bool success);
     };
 
 }

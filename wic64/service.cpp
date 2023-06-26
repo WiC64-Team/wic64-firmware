@@ -114,6 +114,10 @@ namespace WiC64 {
     }
 
     void Service::sendResponse() {
+        sendResponseHeader();
+    }
+
+    void Service::sendResponseHeader() {
         response = command->response();
 
         // For unknown reasons the response size is transferred in
@@ -129,39 +133,34 @@ namespace WiC64 {
             responseSizeBuffer[1]);
 
         response->isPresent()
-            ? userport->sendPartial(responseSizeBuffer, 2, onResponseSizeSent, onResponseSizeAborted)
-            : userport->send(responseSizeBuffer, 2, onResponseSizeSent, onResponseSizeAborted);
+            ? userport->sendPartial(responseSizeBuffer, 2, onResponseHeaderSent, onResponseHeaderAborted)
+            : userport->send(responseSizeBuffer, 2, onResponseHeaderSent, onResponseHeaderAborted);
     }
 
-    void Service::onResponseSizeAborted(uint8_t *data, uint16_t bytes_sent) {
+    void Service::onResponseHeaderAborted(uint8_t *data, uint16_t bytes_sent) {
         ESP_LOGW(TAG, "Sent only %d of 2 bytes", bytes_sent);
         service->finalizeRequest("Aborted while sending response size", false);
     }
 
-    void Service::onResponseSizeSent(uint8_t* data, uint16_t size) {
+    void Service::onResponseHeaderSent(uint8_t* data, uint16_t size) {
         Data *response = service->response;
 
-        if (response->isEmpty()) {
-            service->finalizeRequest("Request handled successfully", true);
-        }
-        else {
-            if (response->isQueued()) {
-                service->prepareQueuedSend();
-                service->sendQueuedResponseData();
-            }
-            else {
-                userport->send(response->data(), response->size(), onResponseSent, onResponseAborted);
-            }
-        }
+        response->isEmpty()
+            ? service->finalizeRequest("Request handled successfully", true)
+            : response->isQueued()
+                ? service->sendQueuedResponse()
+                : service->sendStaticResponse();
     }
 
-    void Service::prepareQueuedSend() {
+    void Service::sendQueuedResponse() {
         Data *response = command->response();
 
         ESP_LOGD(TAG, "Preparing queued send of %d bytes", response->size());
 
         bytes_remaining = response->size();
         items_remaining = WIC64_QUEUE_ITEMS_REQUIRED(response->size());
+
+        service->sendQueuedResponseData();
     }
 
     void Service::sendQueuedResponseData(uint8_t *isSubsequentCall, uint16_t ignoreSize) {
@@ -201,7 +200,12 @@ namespace WiC64 {
             : userport->send((uint8_t*) data, size, onResponseSent, onResponseAborted);
     }
 
-    void Service::onResponseAborted(uint8_t *data, uint16_t bytes_sent) {
+    void Service::sendStaticResponse(void) {
+        userport->send(response->data(), response->size(), onResponseSent, onResponseAborted);
+    }
+
+    void Service::onResponseAborted(uint8_t *data, uint16_t bytes_sent)
+    {
         Data *response = service->command->response();
         ESP_LOGW(TAG, "Sent only %d of %d bytes", bytes_sent, response->size());
         service->finalizeRequest("Aborted while sending response", false);
