@@ -1,6 +1,8 @@
 #include "settings.h"
 
 namespace WiC64 {
+    const char* Settings::TAG = "SETTINGS";
+
     Settings::Settings() {
         m_preferences.begin("credentials");
     }
@@ -11,7 +13,7 @@ namespace WiC64 {
             : String();
     }
 
-    void Settings::securityTokenKey(const String value) {
+    void Settings::securityTokenKey(const String& value) {
         string(SECURITY_TOKEN_KEY, value);
     }
 
@@ -23,7 +25,7 @@ namespace WiC64 {
             : String();
     }
 
-    void Settings::securityToken(const String value) {
+    void Settings::securityToken(const String& value) {
         if (m_preferences.isKey(SECURITY_TOKEN_KEY)) {
             if (!securityTokenKey().isEmpty()) {
                 string(securityTokenKey().c_str(), value);
@@ -35,7 +37,8 @@ namespace WiC64 {
         return m_preferences.getString(key);
     }
 
-    void Settings::string(const char *key, const String &value) {
+    void Settings::string(const char *key, const String& value) {
+        ESP_LOGI(TAG, "Setting %s = \"%s\"", key, value.c_str());
         m_preferences.putString(key, value);
     }
 
@@ -44,6 +47,7 @@ namespace WiC64 {
     }
 
     void Settings::boolean(const char *key, const bool value) {
+        ESP_LOGI(TAG, "Setting %s = %s", key, value ? "true" : "false");
         m_preferences.putBool(key, value);
     }
 }

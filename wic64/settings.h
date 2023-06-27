@@ -6,6 +6,8 @@
 
 namespace WiC64 {
     class Settings {
+        public: static const char* TAG;
+
         private:
             Preferences m_preferences;
 
@@ -21,10 +23,10 @@ namespace WiC64 {
             Settings();
 
             String securityTokenKey(void);
-            void securityTokenKey(const String value);
+            void securityTokenKey(const String& value);
 
             String securityToken(void);
-            void securityToken(const String value);
+            void securityToken(const String& value);
     };
 }
 
