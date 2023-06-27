@@ -18,6 +18,7 @@ namespace WiC64 {
         m_isProgramFile = isVersion1() && url.endsWith(".prg");
     }
 
+    // REDESIGN: Don't accept sloppy input
     void HttpGet::sanitize(String &url)
     {
         if (url.indexOf(" ") != -1) {
@@ -26,6 +27,7 @@ namespace WiC64 {
         }
     }
 
+    // REDESIGN: Add file type in response header
     void HttpGet::expand(String& url) {
         if (url.indexOf("%mac") != -1) {
             ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address and security token");
@@ -39,16 +41,14 @@ namespace WiC64 {
     void HttpGet::execute(void) {
         String url = String((char*) request()->argument()->data());
 
-        ESP_LOGI(TAG, "Received URL [%s]", url.c_str());
+        ESP_LOGD(TAG, "Received URL [%s]", url.c_str());
 
         analyze(url);
         sanitize(url);
         expand(url);
 
         ESP_LOGI(TAG, "Fetching URL [%s]", url.c_str());
-        client->get(this, url);
-
-        // client will call responseReady() when appropriate
+        client->get(this, url); // client will call responseReady()
     }
 
     void HttpGet::responseReady(void) {
