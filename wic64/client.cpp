@@ -2,8 +2,8 @@
 #include "client.h"
 #include "connection.h"
 #include "utilities.h"
+#include "settings.h"
 #include "commands/httpGet.h"
-
 
 #include "esp_log.h"
 #include "nvs_flash.h"
@@ -22,6 +22,7 @@ namespace WiC64 {
 
     extern Client* client;
     extern Connection *connection;
+    extern Settings *settings;
 
     Client::Client() {
         m_queue = xQueueCreate(WIC64_QUEUE_SIZE, WIC64_QUEUE_ITEM_SIZE);
@@ -31,13 +32,13 @@ namespace WiC64 {
         }
     }
 
-    esp_err_t Client::eventHandler(esp_http_client_event_t *evt) {
+    esp_err_t Client::eventHandler(esp_http_client_event_t *event) {
         static bool connection_header_sent = false;
 
-        switch(evt->event_id) {
+        switch(event->event_id) {
             case HTTP_EVENT_ERROR:
-                if(evt->data != NULL && evt->data_len > 0) {
-                    ESP_LOG_HEXD(TAG, "Error event data", (uint8_t*) evt->data, evt->data_len);
+                if(event->data != NULL && event->data_len > 0) {
+                    ESP_LOG_HEXD(TAG, "Error event data", (uint8_t*) event->data, event->data_len);
                 }
                 ESP_LOGD(TAG, "HTTP_EVENT_ERROR");
                 break;
@@ -52,16 +53,22 @@ namespace WiC64 {
                 break;
 
             case HTTP_EVENT_ON_HEADER:
-                ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER: %s: %s", evt->header_key, evt->header_value);
+                ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER: %s: %s", event->header_key, event->header_value);
 
-                if(strcmp(evt->header_key, "Connection") == 0) {
+                // Connection: keep-alive
+                if (strcmp(event->header_key, "Connection") == 0) {
                     connection_header_sent = true;
-                    client->keepAlive(strcasecmp(evt->header_value, "keep-alive") == 0);
+                    client->keepAlive(strcasecmp(event->header_value, "keep-alive") == 0);
+                }
+
+                // WiC64-Security-Token-Key: <key>
+                if (strcmp(event->header_key, "WiC64-Security-Token-Key") == 0) {
+                    settings->securityTokenKey(event->header_value);
                 }
                 break;
 
             case HTTP_EVENT_ON_DATA:
-                ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, size=%d", evt->data_len);
+                ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, size=%d", event->data_len);
                 break;
 
             case HTTP_EVENT_ON_FINISH:
@@ -82,10 +89,9 @@ namespace WiC64 {
     void Client::get(Command *command, String url) {
         static uint8_t data[0x10000];
         int32_t size = 0;
-
-        int32_t result;
-        int32_t status;
+        int32_t status_code = -1;
         int32_t content_length;
+        int32_t result;
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
@@ -128,10 +134,11 @@ namespace WiC64 {
             close();
             goto RETRY;
         }
-        content_length = result;
-        status = (HttpStatus_Code) esp_http_client_get_status_code(m_client);
 
-        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", status, content_length);
+        content_length = result;
+        status_code = esp_http_client_get_status_code(m_client);
+
+        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", status_code, content_length);
         ESP_LOGW(TAG, "Keep alive: %s", m_keepAlive ? "true" : "false");
 
         if (content_length > 0) {  // Content-Length specified by peer -> start a queued transfer
@@ -146,7 +153,7 @@ namespace WiC64 {
             command->responseReady();
 
             // Start the queueing task that reads from the connection and inserts it at the end
-            // of the queue in chunks of WIC64_QUEUE_ITEM_SIZE. Well pass a pointer to the
+            // of the queue in chunks of WIC64_QUEUE_ITEM_SIZE. We'll pass a pointer to the
             // content_length variable via the pvParameters argument.
             xTaskCreatePinnedToCore(queueTask, "SENDER", 4096, &content_length, 10, NULL, 1);
         }
