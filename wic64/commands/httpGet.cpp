@@ -22,7 +22,7 @@ namespace WiC64 {
     void HttpGet::sanitize(String &url)
     {
         if (url.indexOf(" ") != -1) {
-            ESP_LOGW(TAG, "Removing spaces");
+            ESP_LOGW(TAG, "Removing spaces from URL");
             url.replace(" ", "");
         }
     }
@@ -30,7 +30,7 @@ namespace WiC64 {
     // REDESIGN: Add file type in response header
     void HttpGet::expand(String& url) {
         if (url.indexOf("%mac") != -1) {
-            ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address and security token");
+            ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address and security token in URL");
 
             String mac(connection->macAddress());
             mac.replace(":", "");
