@@ -266,13 +266,13 @@ namespace WiC64 {
 
         readByte(&api);
 
-        ESP_LOGD(TAG, "Received API id 0x%02x", api);
+        ESP_LOGI(TAG, "Received API id " WIC64_FORMAT_API, api);
 
         if (!service->supports(api)) {
             // delay required to avoid task timeouts when dealing with line noise
             vTaskDelay(pdMS_TO_TICKS(10));
 
-            snprintf(reason, 32, "unsupported API id: 0x%02x", api);
+            snprintf(reason, 32, "unsupported API id " WIC64_FORMAT_API, api);
             abortTransfer(reason);
         }
 

@@ -56,7 +56,7 @@ namespace WiC64 {
         uint8_t id = header[2];
 
         if (!Command::defined(id)) {
-            ESP_LOGD(TAG, "Undefined command id requested: 0x%02x, aborting", id);
+            ESP_LOGE(TAG, "Unsupported command " WIC64_FORMAT_CMD, id);
             return;
         }
 
@@ -65,9 +65,12 @@ namespace WiC64 {
 
         service->request = new Request(api, id, has_argument ? 1 : 0);
 
-        ESP_LOGD(TAG, "request=0x%02X argc=%d size=%d",
+        ESP_LOGI(TAG, "Received request header "
+                      WIC64_CYAN("[0x%02x 0x%02x ") WIC64_FORMAT_CMD WIC64_CYAN("] ")
+                      WIC64_GREEN("(payload %d bytes)"),
+            header[0],
+            header[1],
             service->request->id(),
-            service->request->argc(),
             argument_size);
 
         if (service->request->hasArguments()) {
@@ -171,10 +174,11 @@ namespace WiC64 {
             service->items_remaining--;
         }
 
-        ESP_LOGV(TAG, "%s call of sendQueuedResponseData(), %d bytes and %d items remaining",
+        ESP_LOGV(TAG, "%s call of sendQueuedResponseData(), %d bytes in %d item%s remaining",
             (isSubsequentCall == NULL) ? "First" : "Subsequent",
             service->bytes_remaining,
-            service->items_remaining);
+            service->items_remaining,
+            (service->items_remaining > 1) ? "s" : "");
 
         uint16_t size = (service->items_remaining > 1)
             ? WIC64_QUEUE_ITEM_SIZE
