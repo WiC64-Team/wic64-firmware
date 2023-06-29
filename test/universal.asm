@@ -48,9 +48,41 @@ com_out		jmp u_com_out		; simple ASM send command: lda #<com ; ldy #>com ; jsr c
 pull_data	jmp pullthis		; simple ASM pull data: lda #<data ; ldy #>data ; jsr pull_data
 load_tstr	jmp u_load_tstr		; load & run URL in t$ (sys49152+39)
 
+!macro wait_handshake {
+		lda z_timeout	; handshake always with timeout
+		sta c2			; looplength for timeout
+		sta c3		; z_timeout * z_timeout
+-		lda $dd0d		; check handshake
+		and #$10        ; wait for NMI FLAG2
+		bne .done 		; handshake ok - return
+		dec c1			; inner loop: 256 passes
+		bne -
+		dec c2			; outer loops: z_timeout * z_timeout
+		bne -
+		dec c3
+		bne -
+		lda #$00		; timeout occurred!
+		sta z_error		; $00=timeout, $01-$ff=OK!
+.done
+}
+
+c1 !byte $00			; counter 1
+c2 !byte $00			; counter 2
+c3 !byte $00			; counter 3
+
+!macro write_byte {
+		sta $dd01		    ; bits 0..7 parallel to WiC64 (userport PB 0-7)
+		+wait_handshake
+}
+
+!macro read_byte {
+		+wait_handshake
+		lda $dd01		    ; read byte from WiC64 (userport)
+}
+
 u_wic64_init
 		lda $dd02
-		ora #$01
+		ora #$04
 		sta $dd02		        ; WiC init
 		lda #default_timeout	; set timeout
 		sta z_timeout
@@ -134,7 +166,7 @@ u_wic64_push
 +		dey			; y=0
 loop_send
 		lda (data_pointer),y
-		jsr write_byte		; send bytes to WiC64 in loop
+		+write_byte		; send bytes to WiC64 in loop
         lda z_timeout
         beq push_end
 		iny
@@ -161,7 +193,7 @@ nonull
 		beq loop_read		; special case lobyte=0?
 		inc tmp			; +1 for faster check with dec/bne
 loop_read
-		jsr read_byte		;read byte
+		+read_byte		;read byte
 		sta (data_pointer),y
         lda z_timeout
         beq pull_end
@@ -173,7 +205,7 @@ loop_read
 		dec tmp
 		bne loop_read		; all bytes?
 pull_end
-    	cli
+        cli
 		rts
 
 wic64_pull_strt
@@ -183,44 +215,12 @@ wic64_pull_strt
 		lda $dd00
 		and #$fb		; PA2 LOW: WiC in send-mode
 		sta $dd00
-		jsr read_byte		; dummy byte for triggering ESP IRQ
-		jsr read_byte		; data length high byte
+		+read_byte		; dummy byte for triggering ESP IRQ
+		+read_byte		; data length high byte
 		sta bytes_send+1
 		sta tmp			; counter Hhigh byte
-		jsr read_byte		; data length low byte
+		+read_byte		; data length low byte
 		sta bytes_send+0
-		rts
-
-wait_handshake
-		lda z_timeout	; handshake always with timeout
-		bne +
-		lda #$01		; if z_error/z_timeout = 0 (timeout accured), shorten the following handshakes
-+		sta c3			; looplength for timeout
-		sta c2			; z_timeout * z_timeout
--		lda $dd0d		; check handshake
-		and #$10        	; wait for NMI FLAG2
-		bne hs_rts 		; handshake ok - return
-		dec c1			; inner loop: 256 passes
-		bne -
-		dec c2			; outer loops: z_timeout * z_timeout
-		bne -
-		dec c3
-		bne -
-		lda #$00		; timeout occurred!
-		sta z_error		; $00=timeout, $01-$ff=OK!
-hs_rts
-		rts
-c1		nop			; counter 1
-c2		nop			; counter 2
-c3		nop			; counter 3
-
-write_byte
-		sta $dd01		    ; bits 0..7 parallel to WiC64 (userport PB 0-7)
-		jmp wait_handshake
-
-read_byte
-		jsr wait_handshake
-		lda $dd01		    ; read byte from WiC64 (userport)
 		rts
 
 u_pushpullparameter
@@ -336,12 +336,12 @@ com_load
 		tax			; x: counter low byte
 
 		inc tmp			; +1 for faster check dec/bne
-		jsr read_byte		; loadadress low byte
+		+read_byte		; loadadress low byte
 		cmp #33			; "!" bei http Fehler (z.B. file not found oder server busy)
 		beq lp_load
 		lda #$01		; to force load ,8 (at basic start)
 		sta data_pointer
-		jsr read_byte		; loadadress high byte
+		+read_byte		; loadadress high byte
 		lda #$08		; to force load ,8 (at basic start)
 		sta data_pointer+1
 		jmp safe_area		; load program and run
@@ -357,11 +357,8 @@ copyload
 read_0334_start
 !pseudopc safe_area {
 loop_read_0334
-handshake_0334	lda $dd0d
-		nop
-		nop
-		nop
-		nop 			; short delay
+handshake_0334
+        lda $dd0d
 		and #$10        	; wait for NMI FLAG2
 		beq handshake_0334
 		lda $dd01 		; read byte
