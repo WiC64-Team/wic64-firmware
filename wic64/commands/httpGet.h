@@ -18,6 +18,7 @@ namespace WiC64 {
             void analyze(const String& url);
             void sanitize(String& url);
             void expand(String& url);
+            void encode(String& url);
 
             void execute(void);
             void responseReady(void);

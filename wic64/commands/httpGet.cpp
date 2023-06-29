@@ -38,14 +38,50 @@ namespace WiC64 {
         }
     }
 
+    // REDESIGN: Remove this hack, just POST binary data
+    void HttpGet::encode(String& url) {
+
+        // If this command has command id 0x0f, encode HEX data following the
+        // marker "$<" in the request data using two lowercase hex digits per
+        // byte. This was required in the original firmware for reasons I
+        // still don't quite understand.
+
+        int16_t start;
+
+        if (request()->id() == 0x0f && (start = url.indexOf("<$")) != -1) {
+            // remove the data marker and the rest of the data that made
+            // it into the url String before the first nullbyte occured
+            url = url.substring(0, start);
+
+            // get a pointer to the start of the data in the original request
+            uint8_t* data = request()->argument()->data() + start + 2;
+
+            // the first two bytes contain the size of the data
+            uint16_t size = (*((uint16_t*) data));
+
+            // skip ahead to the actual data following the size
+            data += 2;
+
+            // use snprintf into a temporary char* and append it to the url
+            // String  we'll later pass to client.get()
+            char tmp[3];
+
+            for (uint16_t i=0; i<size; i++) {
+                snprintf(tmp, 3, "%02x", data[i]);
+                url += tmp;
+            }
+        }
+    }
+
     void HttpGet::execute(void) {
         String url = String((char*) request()->argument()->data());
 
         ESP_LOGD(TAG, "Received URL [%s]", url.c_str());
 
-        analyze(url);
+        encode(url);
         sanitize(url);
         expand(url);
+        analyze(url);
 
         ESP_LOGI(TAG, "Fetching URL [%s]", url.c_str());
         client->get(this, url); // client will call responseReady()
