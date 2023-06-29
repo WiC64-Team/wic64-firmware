@@ -112,13 +112,13 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             void setPortToInput(void);
             void setPortToOutput(void);
 
-            inline void readByte(uint8_t *byte);
-            inline void readNextByte(void);
+            inline IRAM_ATTR void readByte(uint8_t *byte);
+            inline IRAM_ATTR void readNextByte(void);
 
-            inline void writeByte(uint8_t *byte);
-            inline void writeNextByte(void);
+            inline void IRAM_ATTR writeByte(uint8_t *byte);
+            inline void IRAM_ATTR writeNextByte(void);
 
-            inline void sendHandshakeSignal();
+            inline void IRAM_ATTR sendHandshakeSignal();
 
             void startTransfer(
                 TRANSFER_TYPE type,
@@ -128,7 +128,7 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
                 callback_t onFailure
             );
             inline void continueTransfer(void);
-            void completeTransfer(void);
+            void IRAM_ATTR completeTransfer(void);
             void abortTransfer(const char* reason);
 
             void createTimeoutTask(void);
@@ -168,10 +168,10 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             static void timeoutTask(void*);
 
             static void IRAM_ATTR dataDirectionChangedISR(void);
-            static void onDataDirectionChanged(void* arg, esp_event_base_t base, int32_t id, void* data);
+            static void IRAM_ATTR onDataDirectionChanged(void* arg, esp_event_base_t base, int32_t id, void* data);
 
             static void IRAM_ATTR handshakeSignalReceivedISR(void);
-            static void onHandshakeSignalReceived(void* arg, esp_event_base_t base, int32_t id, void* data);
+            static void IRAM_ATTR onHandshakeSignalReceived(void* arg, esp_event_base_t base, int32_t id, void* data);
     };
 
 }
