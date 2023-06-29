@@ -88,50 +88,69 @@ namespace WiC64 {
     void Client::get(Command *command, String url) {
         static uint8_t data[0x10000];
         int32_t size = 0;
+
         int32_t status_code = -1;
         int32_t content_length;
+
         int32_t result;
+
+        // REDESIGN: This is the legacy error response. We need to send
+        // qualified error information in the future.
+        static char error[] = "!0";
+
+        uint8_t retries = 3;
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
         esp_http_client_config_t config = {
             .url = url.c_str(),
+            .method = HTTP_METHOD_GET,
             .timeout_ms = 5 * 1000,
             .event_handler = eventHandler,
         };
 
         #pragma GCC diagnostic pop
 
-        closeUnlessKeptAlive();
+        closeConnectionUnlessKeptAlive();
 
     RETRY:
-        if (m_client == NULL) {
+        if (isConnectionClosed()) {
             ESP_LOGW(TAG, "Opening new connection");
             m_client = esp_http_client_init(&config);
 
             if (m_client == NULL) {
-                ESP_LOGE(TAG, "Could not create HTTP client");
-                command->responseReady();
-                return;
+                ESP_LOGE(TAG, "Failed to create esp_http_client");
+                goto ERROR;
             }
         } else {
             if(esp_http_client_set_url(m_client, url.c_str()) == ESP_FAIL) {
-                command->responseReady();
-                return;
+                ESP_LOGE(TAG, "Failed to set URL");
+                goto ERROR;
             };
         }
 
         if ((result = esp_http_client_open(m_client, 0) != ESP_OK)) {
             ESP_LOGE(TAG, "Failed to open connection: %s", esp_err_to_name(result));
-            close();
-            goto RETRY;
+
+            const char* reason = m_keepAlive
+                ? "Assuming keep-alive connection timed out"
+                : "Connection failed for unknown reasons";
+
+            ESP_LOGW(TAG, "%s, retrying %d more time%s...",
+                reason, retries, (retries > 1) ? "s" : "");
+
+            if (retries-- > 0) {
+                closeConnection();
+                goto RETRY;
+            } else {
+                goto ERROR;
+            }
         }
 
         if ((result = esp_http_client_fetch_headers(m_client)) == ESP_FAIL) {
             ESP_LOGE(TAG, "Failed to fetch headers");
-            close();
-            goto RETRY;
+            goto ERROR;
         }
 
         content_length = result;
@@ -162,31 +181,44 @@ namespace WiC64 {
             // Read up to 64kb from the connection into the static receive buffer
             if ((size = esp_http_client_read(m_client, (char*) data, 0x10000)) == -1) {
                 ESP_LOGE(TAG, "Read Error");
+                goto ERROR;
             }
             ESP_LOGI(TAG, "Read %d bytes", size);
+
+            command->response()->data(data, size);
         }
 
-        // If the response was not queued, put data received in buffer into response
+    DONE:
+        // Send response unless already queued
         if(!command->response()->isQueued()) {
-            size = size < 0 ? 0 : size;
-            command->response()->data(data, size);
             command->responseReady();
         }
+        return;
+
+    ERROR:
+        ESP_LOGW(TAG, "Sending error response");
+        command->response()->data(error);
+        closeConnection();
+        goto DONE;
     }
 
-    void Client::close(void) {
+    void Client::closeConnection(void) {
         if (m_client != NULL) {
-            ESP_LOGW(TAG, "Closing previously used connection");
+            ESP_LOGW(TAG, "Closing connection");
             esp_http_client_close(m_client);
             esp_http_client_cleanup(m_client);
             m_client = NULL;
         }
     }
 
-    void Client::closeUnlessKeptAlive() {
+    void Client::closeConnectionUnlessKeptAlive() {
         if (!m_keepAlive) {
-            close();
+            closeConnection();
         }
+    }
+
+    bool Client::isConnectionClosed() {
+        return m_client == NULL;
     }
 
     void Client::queueTask(void *content_length_ptr) {
@@ -205,6 +237,7 @@ namespace WiC64 {
                 ESP_LOGE(TAG, "Read Error");
                 break;
             }
+            ESP_LOGV(TAG, "Queueing %d bytes", WIC64_QUEUE_ITEM_SIZE);
             xQueueSend(client->queue(), data, pdMS_TO_TICKS(1000));
 
             total_bytes_read += bytes_read;

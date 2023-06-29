@@ -26,8 +26,9 @@ namespace WiC64 {
 
             void keepAlive(bool keepAlive) { m_keepAlive = keepAlive; }
 
-            void close(void);
-            void closeUnlessKeptAlive();
+            void closeConnection(void);
+            void closeConnectionUnlessKeptAlive();
+            bool isConnectionClosed();
 
             static esp_err_t eventHandler(esp_http_client_event_t *evt);
             static void queueTask(void* content_length_ptr);
