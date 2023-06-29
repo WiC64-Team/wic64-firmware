@@ -69,14 +69,13 @@ namespace WiC64 {
 
             case HTTP_EVENT_ON_DATA:
                 ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, size=%d", event->data_len);
+                if (!connection_header_sent) {
+                    client->keepAlive(false);
+                }
                 break;
 
             case HTTP_EVENT_ON_FINISH:
                 ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
-                if (!connection_header_sent) {
-                    client->keepAlive(false);
-                }
-
                 break;
 
             case HTTP_EVENT_DISCONNECTED:
