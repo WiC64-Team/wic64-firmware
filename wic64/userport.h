@@ -94,6 +94,7 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             static const uint16_t TIMEOUT_DEFAULT_1000MS = 1000;
             uint16_t timeout = TIMEOUT_DEFAULT_1000MS;
             uint32_t timeOfLastActivity;
+            uint32_t timeTransferStarted;
 
             TaskHandle_t timeoutTaskHandle;
             bool timeoutTaskCreated = false;

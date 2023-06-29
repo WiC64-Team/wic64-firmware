@@ -175,6 +175,7 @@ namespace WiC64 {
             ESP_LOGV(TAG, "Sending initial handshake signal");
             sendHandshakeSignal();
         }
+        timeTransferStarted = millis();
     }
 
     inline void Userport::continueTransfer(void) {
@@ -186,10 +187,13 @@ namespace WiC64 {
     }
 
     void Userport::completeTransfer(void) {
-        ESP_LOGD(TAG, "%d bytes %s, transfer complete",
-            pos, isSending() ? "sent" : "received");
-
         deleteTimeoutTask();
+
+        float sec = (millis() - timeTransferStarted) / 1000.0;
+        float kbs = pos/sec/1024;
+
+        ESP_LOGD(TAG, "%d bytes %s, transfer completed in %.4f sec, approx. %.2fkb/s",
+            pos, isSending() ? "sent" : "received", sec, kbs);
 
         TRANSFER_TYPE currentTransferType = transferType;
         previousTransferType = currentTransferType;
