@@ -1,11 +1,12 @@
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "wic64.h"
+#include "main.h"
+
+using namespace WiC64;
 
 void setup() {
     new WiC64::WiC64();
 }
 
 void loop() {
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    webserver->serve();
+    vTaskDelay(pdMS_TO_TICKS(100));
 }

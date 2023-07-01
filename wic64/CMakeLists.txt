@@ -1,7 +1,6 @@
 idf_component_register(
     INCLUDE_DIRS "."
 
-    SRCS "main.cpp"
     SRCS "wic64.cpp"
     SRCS "settings.cpp"
     SRCS "connection.cpp"
@@ -15,7 +14,9 @@ idf_component_register(
     SRCS "commands/getIP.cpp"
     SRCS "commands/echo.cpp"
     SRCS "display.cpp"
+    SRCS "webserver.cpp"
     SRCS "utilities.cpp"
+    SRCS "main.cpp"
     SRCS "version.h"
 
     REQUIRES "wic64"

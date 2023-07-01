@@ -12,12 +12,15 @@ namespace WiC64 {
             uint8_t m_api;
             uint8_t m_id;
             uint8_t m_argc;
-            Data** m_argv;
+            Data* m_argv[256];
 
             int16_t getNextFreeArgumentIndex();
 
         public:
-            Request(uint8_t api, uint8_t id, uint8_t argc);
+            Request(uint8_t api, uint8_t id, uint8_t argc)
+                : m_api(api), m_id(id), m_argc(argc), m_argv() { }
+                // the m_argv() initializes m_argv with nullpointers
+
             ~Request();
 
             uint8_t api() { return m_api; }

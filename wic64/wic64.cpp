@@ -3,6 +3,7 @@
 #include "display.h"
 #include "connection.h"
 #include "client.h"
+#include "webserver.h"
 #include "userport.h"
 #include "service.h"
 #include "utilities.h"
@@ -14,30 +15,33 @@
 using namespace WiC64;
 
 namespace WiC64 {
-    Settings *settings;
-    Display *display;
+    Settings   *settings;
+    Display    *display;
     Connection *connection;
-    Client *client;
-    Service *service;
-    Userport *userport;
+    Client     *client;
+    Webserver  *webserver;
+    Service    *service;
+    Userport   *userport;
 
     const char* WiC64::TAG = "WIC64";
 
     WiC64::WiC64() {
-        loglevel(ESP_LOG_INFO);
+        loglevel(ESP_LOG_VERBOSE);
         ESP_LOGW(TAG, "Firmware version %s", WIC64_VERSION_STRING);
 
-        settings = new Settings();
-        display = new Display();
+        settings   = new Settings();
+        display    = new Display();
         connection = new Connection();
-        client = new Client();
-        service = new Service();
-        userport = new Userport();
+        client     = new Client();
+        webserver  = new Webserver();
+        service    = new Service();
+        userport   = new Userport();
 
         connection->connect();
         userport->connect();
 
         log_free_mem(TAG, ESP_LOG_WARN);
+        log_task_list(TAG, ESP_LOG_WARN);
     }
 
     void WiC64::loglevel(esp_log_level_t level) {
@@ -47,6 +51,7 @@ namespace WiC64 {
         esp_log_level_set(Connection::TAG, level);
         esp_log_level_set(Display::TAG, level);
         esp_log_level_set(Client::TAG, level);
+        esp_log_level_set(Webserver::TAG, level);
         esp_log_level_set(Request::TAG, level);
         esp_log_level_set(Command::TAG, level);
         esp_log_level_set(HttpGet::TAG, level);

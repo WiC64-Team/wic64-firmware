@@ -15,10 +15,10 @@ namespace WiC64 {
             using Command::Command;
             bool isProgramFile() { return m_isProgramFile; }
 
-            void analyze(const String& url);
-            void sanitize(String& url);
-            void expand(String& url);
             void encode(String& url);
+            void sanitize(String& url);
+            void analyze(const String& url);
+            void expand(String& url);
 
             void execute(void);
             void responseReady(void);

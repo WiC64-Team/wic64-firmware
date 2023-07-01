@@ -2,31 +2,27 @@
 #define WIC64_DATA_H
 
 #include <cstdint>
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+
+#include "wic64.h"
 
 namespace WiC64 {
     class Data {
         private:
-            bool m_allocated = false;
-
             uint8_t *m_data = NULL;
             QueueHandle_t m_queue = NULL;
 
             uint16_t m_size = 0;
             int32_t m_sizeToReport = -1;
-
-            void freeIfAllocated(void);
-
         public:
             Data();
-            Data(uint16_t size);
             Data(uint8_t* data, uint16_t size);
             Data(const char* c_str);
-            ~Data();
 
             uint8_t* data() { return m_data; }
+            char* c_str();
+
             void data(uint8_t* data, uint16_t size);
             void data(const char* c_str);
 

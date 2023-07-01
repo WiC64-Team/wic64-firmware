@@ -56,7 +56,7 @@ namespace WiC64 {
         uint8_t id = header[2];
 
         if (!Command::defined(id)) {
-            ESP_LOGE(TAG, "Unsupported command " WIC64_FORMAT_CMD, id);
+            ESP_LOGE(TAG, "Unsupported command " WIC64_FORMAT_CMD WIC64_RED(" (%d)"), id, id);
             return;
         }
 
@@ -75,7 +75,7 @@ namespace WiC64 {
 
         if (service->request->hasArguments()) {
             ESP_LOGI(TAG, "Receiving request argument");
-            Data* argument = service->request->addArgument(new Data(argument_size));
+            Data* argument = service->request->addArgument(new Data(transferBuffer, argument_size));
             userport->receive(argument->data(), argument->size(), onRequestReceived, onRequestAborted);
         }
         else {

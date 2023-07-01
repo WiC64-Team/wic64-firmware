@@ -44,4 +44,14 @@ namespace WiC64 {
         vTaskList(stats);
         ESP_LOG_LEVEL(level, tag, "\n%s", stats);
     }
+
+    const char* log_level_to_string(esp_log_level_t level) {
+        if (level == ESP_LOG_NONE) return "NONE";
+        if (level == ESP_LOG_ERROR) return "ERROR";
+        if (level == ESP_LOG_WARN) return "WARN";
+        if (level == ESP_LOG_INFO) return "INFO";
+        if (level == ESP_LOG_DEBUG) return "DEBUG";
+        if (level == ESP_LOG_VERBOSE) return "VERBOSE";
+        return "UKNOWN";
+    }
 }

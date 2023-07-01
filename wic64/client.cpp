@@ -86,7 +86,6 @@ namespace WiC64 {
     }
 
     void Client::get(Command *command, String url) {
-        static uint8_t data[0x10000];
         int32_t size = 0;
 
         int32_t status_code = -1;
@@ -157,7 +156,7 @@ namespace WiC64 {
         status_code = esp_http_client_get_status_code(m_client);
 
         ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", status_code, content_length);
-        ESP_LOGW(TAG, "Keep alive: %s", m_keepAlive ? "true" : "false");
+        ESP_LOGI(TAG, "Keep alive: %s", m_keepAlive ? "true" : "false");
 
         if (content_length > 0) {  // Content-Length specified by peer -> start a queued transfer
             ESP_LOGI(TAG, "Starting queued send of %d bytes", content_length);
@@ -179,13 +178,13 @@ namespace WiC64 {
             ESP_LOGI(TAG, "Reading response data of unknown length (limited to 64kb)");
 
             // Read up to 64kb from the connection into the static receive buffer
-            if ((size = esp_http_client_read(m_client, (char*) data, 0x10000)) == -1) {
+            if ((size = esp_http_client_read(m_client, (char*) transferBuffer, 0x10000)) == -1) {
                 ESP_LOGE(TAG, "Read Error");
                 goto ERROR;
             }
             ESP_LOGI(TAG, "Read %d bytes", size);
 
-            command->response()->data(data, size);
+            command->response()->data(transferBuffer, size);
         }
 
     DONE:
@@ -205,8 +204,15 @@ namespace WiC64 {
     void Client::closeConnection(void) {
         if (m_client != NULL) {
             ESP_LOGW(TAG, "Closing connection");
-            esp_http_client_close(m_client);
-            esp_http_client_cleanup(m_client);
+            esp_err_t result;
+
+            if ((result = esp_http_client_close(m_client)) != ESP_OK) {
+                ESP_LOGE(TAG, "Error closing connection: %s", esp_err_to_name(result));
+            }
+
+            if ((result = esp_http_client_cleanup(m_client)) != ESP_OK) {
+                ESP_LOGE(TAG, "Error cleaning up: %s", esp_err_to_name(result));
+            }
             m_client = NULL;
         }
     }

@@ -15,7 +15,7 @@ namespace WiC64 {
     extern Settings *settings;
 
     void HttpGet::analyze(const String &url) {
-        m_isProgramFile = isVersion1() && url.endsWith(".prg");
+        m_isProgramFile = url.endsWith(".prg");
     }
 
     // REDESIGN: Don't accept sloppy input
@@ -40,11 +40,10 @@ namespace WiC64 {
 
     // REDESIGN: Remove this hack, just POST binary data
     void HttpGet::encode(String& url) {
-
-        // If this command has command id 0x0f, encode HEX data following the
-        // marker "$<" in the request data using two lowercase hex digits per
-        // byte. This was required in the original firmware for reasons I
-        // still don't quite understand.
+        // If this command has id 0x0f, encode HEX data after the
+        // marker "$<" in the request data using two lowercase hex
+        // digits per byte. This was required in the original firmware
+        // for reasons I still don't quite understand.
 
         int16_t start;
 
@@ -59,7 +58,7 @@ namespace WiC64 {
             // the first two bytes contain the size of the data
             uint16_t size = (*((uint16_t*) data));
 
-            // skip ahead to the actual data following the size
+            // skip ahead to the actual data
             data += 2;
 
             // use snprintf into a temporary char* and append it to the url
@@ -74,7 +73,7 @@ namespace WiC64 {
     }
 
     void HttpGet::execute(void) {
-        String url = String((char*) request()->argument()->data());
+        String url = String(request()->argument()->c_str());
 
         ESP_LOGD(TAG, "Received URL [%s]", url.c_str());
 
@@ -88,7 +87,7 @@ namespace WiC64 {
     }
 
     void HttpGet::responseReady(void) {
-        if (isProgramFile() && response()->size() > 2) {
+        if (isVersion1() && isProgramFile() && response()->size() > 2) {
             response()->sizeToReport(response()->size() - 2);
         }
         Command::responseReady();
