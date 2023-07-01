@@ -171,7 +171,8 @@ namespace WiC64 {
         createTimeoutTask();
 
         if (type == TRANSFER_TYPE_RECEIVE_PARTIAL ||
-            previousTransferType == TRANSFER_TYPE_RECEIVE_PARTIAL) {
+            previousTransferType == TRANSFER_TYPE_RECEIVE_PARTIAL ||
+            previousTransferType == TRANSFER_TYPE_SEND_PARTIAL) {
             ESP_LOGV(TAG, "Sending initial handshake signal");
             sendHandshakeSignal();
         }
@@ -192,7 +193,7 @@ namespace WiC64 {
         float sec = (millis() - timeTransferStarted) / 1000.0;
         float kbs = pos/sec/1024;
 
-        ESP_LOGD(TAG, "%d bytes %s, transfer completed in %.4f sec, approx. %.2fkb/s",
+        ESP_LOGW(TAG, "%d bytes %s, transfer completed in %.4f sec, approx. %.2fkb/s",
             pos, isSending() ? "sent" : "received", sec, kbs);
 
         TRANSFER_TYPE currentTransferType = transferType;
@@ -202,7 +203,8 @@ namespace WiC64 {
         transferType = TRANSFER_TYPE_NONE;
         onFailureCallback = NULL;
 
-        if (currentTransferType != TRANSFER_TYPE_RECEIVE_PARTIAL) {
+        if (currentTransferType == TRANSFER_TYPE_RECEIVE_FULL ||
+            currentTransferType == TRANSFER_TYPE_SEND_FULL) {
             ESP_LOGD(TAG, "Sending final handshake signal");
             sendHandshakeSignal();
         }
