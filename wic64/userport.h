@@ -7,11 +7,9 @@
 #include "freertos/task.h"
 #include "esp_event.h"
 
-#define IS_HIGH(PIN) (((GPIO.in >> PIN) & 1) == 1)
-#define IS_LOW(PIN) (((GPIO.in >> PIN) & 1) == 1)
-
-#define SET_HIGH(PIN) (GPIO.out_w1ts = (1ULL<<PIN))
-#define SET_LOW(PIN) (GPIO.out_w1tc = (1ULL<<PIN))
+#define IS_HIGH(PIN) ((GPIO.in >> PIN) & 1)
+#define SET_HIGH(PIN) (GPIO.out_w1ts = (1UL<<PIN))
+#define SET_LOW(PIN) (GPIO.out_w1tc = (1UL<<PIN))
 
 #ifdef ___cplusplus
 extern "C" {
