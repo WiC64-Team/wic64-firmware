@@ -49,11 +49,15 @@ pull_data	jmp pullthis		; simple ASM pull data: lda #<data ; ldy #>data ; jsr pu
 load_tstr	jmp u_load_tstr		; load & run URL in t$ (sys49152+39)
 
 !macro wait_handshake {
-		lda z_timeout	; handshake always with timeout
+        lda #$10        ; early try before resetting timeout
+-		bit $dd0d
+		bne .done
+
+        lda z_timeout	; handshake always with timeout
 		sta c2			; looplength for timeout
-		sta c3		; z_timeout * z_timeout
--		lda $dd0d		; check handshake
-		and #$10        ; wait for NMI FLAG2
+		sta c3		    ; z_timeout * z_timeout
+        lda #$10
+-		bit $dd0d
 		bne .done 		; handshake ok - return
 		dec c1			; inner loop: 256 passes
 		bne -
@@ -156,10 +160,10 @@ u_wic64_push
 		sei			; disable IRQ
 		jsr wic64_ESP_read
 		ldy #$02
-		lda (data_pointer),y	; number of bytes to send (lowbyte)
+		lda (data_pointer),y	; number of bytes to send (highbyte)
 		sta bytes_send+1
 		dey
-		lda (data_pointer),y	; number of bytes to send (highbyte)
+		lda (data_pointer),y	; number of bytes to send (lowbyte)
 		tax
 		beq +			; special case:		lowbyte=0
 		inc bytes_send+1
