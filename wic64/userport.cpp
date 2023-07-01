@@ -262,7 +262,7 @@ namespace WiC64 {
 
     void Userport::acceptRequest(void) {
         uint8_t api;
-        static char reason[32];
+        static char reason[64];
 
         readByte(&api);
 
@@ -272,7 +272,7 @@ namespace WiC64 {
             // delay required to avoid task timeouts when dealing with line noise
             vTaskDelay(pdMS_TO_TICKS(10));
 
-            snprintf(reason, 32, "unsupported API id " WIC64_FORMAT_API, api);
+            snprintf(reason, 64, "unsupported API id " WIC64_FORMAT_API, api);
             abortTransfer(reason);
         }
 
