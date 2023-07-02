@@ -91,9 +91,14 @@ namespace WiC64 {
         transferState = TRANSFER_STATE_RUNNING;
     }
 
-    bool Userport::isSending(void) {
-        return transferType == TRANSFER_TYPE_SEND_PARTIAL ||
-            transferType == TRANSFER_TYPE_SEND_FULL;
+    bool Userport::isInitiallyPending(void) {
+        return (transferType == TRANSFER_TYPE_SEND_FULL ||
+                transferType == TRANSFER_TYPE_SEND_PARTIAL) &&
+                    previousTransferType != TRANSFER_TYPE_SEND_PARTIAL;
+    }
+
+    bool Userport::isSending() {
+        return isSending(transferType);
     }
 
     bool Userport::isSending(TRANSFER_TYPE type) {
@@ -164,11 +169,12 @@ namespace WiC64 {
         this->size = size;
         this->pos = 0;
 
-        transferState = isSending()
+        transferState = isInitiallyPending()
             ? TRANSFER_STATE_PENDING
             : TRANSFER_STATE_RUNNING;
 
         createTimeoutTask();
+        timeTransferStarted = millis();
 
         if (type == TRANSFER_TYPE_RECEIVE_PARTIAL ||
             previousTransferType == TRANSFER_TYPE_RECEIVE_PARTIAL ||
@@ -176,7 +182,6 @@ namespace WiC64 {
             ESP_LOGV(TAG, "Sending initial handshake signal");
             sendHandshakeSignal();
         }
-        timeTransferStarted = millis();
     }
 
     inline void Userport::continueTransfer(void) {
@@ -314,11 +319,11 @@ namespace WiC64 {
     }
 
     void IRAM_ATTR Userport::dataDirectionChangedISR(void) {
-        esp_event_post_to(
+        esp_event_isr_post_to(
             userport->event_loop_handle,
             USERPORT_EVENTS,
             USERPORT_DATA_DIRECTION_CHANGED,
-            NULL, 0, 0);
+            NULL, 0, NULL);
     }
 
     void Userport::onDataDirectionChanged(void *arg, esp_event_base_t base, int32_t id, void *data) {
@@ -338,11 +343,11 @@ namespace WiC64 {
     }
 
     void IRAM_ATTR Userport::handshakeSignalReceivedISR(void) {
-        esp_event_post_to(
+        esp_event_isr_post_to(
             userport->event_loop_handle,
             USERPORT_EVENTS,
             USERPORT_HANDSHAKE_SIGNAL_RECEIVED,
-            NULL, 0, 0);
+            NULL, 0, NULL);
     }
 
     void Userport::onHandshakeSignalReceived(void *arg, esp_event_base_t base, int32_t id, void *data) {

@@ -146,6 +146,7 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
 
             bool isTransferPending(void);
             void setTransferRunning(void);
+            bool isInitiallyPending(void);
             bool isSending(void);
             bool isSending(TRANSFER_TYPE type);
 
