@@ -15,13 +15,13 @@
 using namespace WiC64;
 
 namespace WiC64 {
+    Userport   *userport;
+    Service    *service;
+    Client     *client;
     Settings   *settings;
     Display    *display;
     Connection *connection;
-    Client     *client;
     Webserver  *webserver;
-    Service    *service;
-    Userport   *userport;
 
     const char* WiC64::TAG = "WIC64";
 
@@ -29,13 +29,13 @@ namespace WiC64 {
         loglevel(ESP_LOG_VERBOSE);
         ESP_LOGW(TAG, "Firmware version %s", WIC64_VERSION_STRING);
 
+        userport   = new Userport();
+        service    = new Service();
+        client     = new Client();
         settings   = new Settings();
         display    = new Display();
         connection = new Connection();
-        client     = new Client();
         webserver  = new Webserver();
-        service    = new Service();
-        userport   = new Userport();
 
         connection->connect();
         userport->connect();
@@ -44,16 +44,16 @@ namespace WiC64 {
         log_task_list(TAG, ESP_LOG_WARN);
     }
 
-    void WiC64::loglevel(esp_log_level_t level) {
-        esp_log_level_set(WiC64::TAG, level);
-        esp_log_level_set(Userport::TAG, level);
-        esp_log_level_set(Service::TAG, level);
-        esp_log_level_set(Connection::TAG, level);
-        esp_log_level_set(Display::TAG, level);
-        esp_log_level_set(Client::TAG, level);
-        esp_log_level_set(Webserver::TAG, level);
-        esp_log_level_set(Request::TAG, level);
-        esp_log_level_set(Command::TAG, level);
-        esp_log_level_set(HttpGet::TAG, level);
+    void WiC64::loglevel(esp_log_level_t loglevel) {
+        esp_log_level_set(WiC64::TAG, loglevel);
+        esp_log_level_set(Userport::TAG, loglevel);
+        esp_log_level_set(Service::TAG, loglevel);
+        esp_log_level_set(Connection::TAG, loglevel);
+        esp_log_level_set(Display::TAG, loglevel);
+        esp_log_level_set(Client::TAG, loglevel);
+        esp_log_level_set(Webserver::TAG, loglevel);
+        esp_log_level_set(Request::TAG, loglevel);
+        esp_log_level_set(Command::TAG, loglevel);
+        esp_log_level_set(HttpGet::TAG, loglevel);
     }
 }

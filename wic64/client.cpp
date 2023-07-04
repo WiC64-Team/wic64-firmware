@@ -89,7 +89,7 @@ namespace WiC64 {
         int32_t size = 0;
 
         int32_t status_code = -1;
-        int32_t content_length;
+        static int32_t content_length;
 
         int32_t result;
 
@@ -172,12 +172,12 @@ namespace WiC64 {
             // Start the queueing task that reads from the connection and inserts it at the end
             // of the queue in chunks of WIC64_QUEUE_ITEM_SIZE. We'll pass a pointer to the
             // content_length variable via the pvParameters argument.
-            xTaskCreatePinnedToCore(queueTask, "SENDER", 4096, &content_length, 10, NULL, 1);
+            xTaskCreatePinnedToCore(queueTask, "SENDER", 4096, &content_length, 30, NULL, 1);
         }
         else { // Content-Length not send by server or Transfer-Encoding: chunked
             ESP_LOGI(TAG, "Reading response data of unknown length (limited to 64kb)");
 
-            // Read up to 64kb from the connection into the static receive buffer
+            // Read up to 64kb from the connection into the static transfer buffer
             if ((size = esp_http_client_read(m_client, (char*) transferBuffer, 0x10000)) == -1) {
                 ESP_LOGE(TAG, "Read Error");
                 goto ERROR;
@@ -233,7 +233,7 @@ namespace WiC64 {
 
         int32_t bytes_read = 0;
         int32_t total_bytes_read = 0;
-
+        int16_t timeout_ms = 5000;
         ESP_LOGD(TAG, "Client queue task queueing %d bytes...", content_length);
 
         do {
@@ -244,12 +244,15 @@ namespace WiC64 {
                 break;
             }
             ESP_LOGV(TAG, "Queueing %d bytes", WIC64_QUEUE_ITEM_SIZE);
-            xQueueSend(client->queue(), data, pdMS_TO_TICKS(1000));
-
+            if (xQueueSend(client->queue(), data, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
+                ESP_LOGW(TAG, "Could not send to queue for more than %dms", timeout_ms);
+                break;
+            }
             total_bytes_read += bytes_read;
 
         } while (total_bytes_read < content_length);
 
+        ESP_LOGV(TAG, "Queueing task deleting itself");
         vTaskDelete(NULL);
     }
 }

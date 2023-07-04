@@ -7,9 +7,11 @@
 #include "freertos/task.h"
 #include "esp_event.h"
 
-#define IS_HIGH(PIN) ((GPIO.in >> PIN) & 1)
+#define IS_HIGH(PIN) (((GPIO.in >> PIN) & 1) == 1)
+#define IS_LOW(PIN)  (((GPIO.in >> PIN) & 1) == 0)
+
 #define SET_HIGH(PIN) (GPIO.out_w1ts = (1UL<<PIN))
-#define SET_LOW(PIN) (GPIO.out_w1tc = (1UL<<PIN))
+#define SET_LOW(PIN)  (GPIO.out_w1tc = (1UL<<PIN))
 
 #ifdef ___cplusplus
 extern "C" {
@@ -17,9 +19,10 @@ extern "C" {
 
 ESP_EVENT_DECLARE_BASE(USERPORT_EVENTS);
 
-enum {
-    USERPORT_DATA_DIRECTION_CHANGED,
-    USERPORT_HANDSHAKE_SIGNAL_RECEIVED,
+enum userport_event_t {
+    USERPORT_REQUEST_ACCEPTED,
+    USERPORT_READY_TO_SEND,
+    USERPORT_TRANSFER_COMPLETED,
 };
 
 #ifdef ___cplusplus
@@ -115,6 +118,7 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             inline IRAM_ATTR void readNextByte(void);
 
             inline void IRAM_ATTR writeByte(uint8_t *byte);
+            inline void IRAM_ATTR writeFirstByte(void);
             inline void IRAM_ATTR writeNextByte(void);
 
             inline void IRAM_ATTR sendHandshakeSignal();
@@ -126,13 +130,15 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
                 callback_t onSuccess,
                 callback_t onFailure
             );
+
             inline void continueTransfer(void);
-            void IRAM_ATTR completeTransfer(void);
-            void abortTransfer(const char* reason);
+            static void IRAM_ATTR onTransferCompleted(void* arg, esp_event_base_t base, int32_t id, void* data);
 
             void createTimeoutTask(void);
             void deleteTimeoutTask(void);
             bool isTimeoutTaskRunning(void);
+
+            static void IRAM_ATTR post(userport_event_t event);
 
         public:
             esp_event_loop_handle_t event_loop_handle;
@@ -142,36 +148,36 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             void connect(void);
             void disconnect(void);
             bool isConnected(void);
-            bool isReadyToReceiveRequest(void);
+            bool isReadyToReceive(void);
+            bool isReadyToSend(void);
 
             bool isTransferPending(void);
             void setTransferRunning(void);
-            bool isInitiallyPending(void);
+            bool isInitiallySending(void);
             bool isSending(void);
             bool isSending(TRANSFER_TYPE type);
 
-            void acceptRequest(void);
+            static void onRequestAccepted(void* arg, esp_event_base_t base, int32_t id, void* data);
 
             void receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess);
             void receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
             void receive(uint8_t *data, uint16_t size, callback_t onSuccess);
             void receive(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
 
+            static void IRAM_ATTR onReadyToSend(void* arg, esp_event_base_t base, int32_t id, void* data);
+
             void sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess);
             void sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
             void send(uint8_t *data, uint16_t size, callback_t onSuccess);
             void send(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
 
+            void abortTransfer(const char* reason);
+
             void resetTimeout(void);
             bool hasTimedOut(void);
-
             static void timeoutTask(void*);
 
-            static void IRAM_ATTR dataDirectionChangedISR(void);
-            static void IRAM_ATTR onDataDirectionChanged(void* arg, esp_event_base_t base, int32_t id, void* data);
-
-            static void IRAM_ATTR handshakeSignalReceivedISR(void);
-            static void IRAM_ATTR onHandshakeSignalReceived(void* arg, esp_event_base_t base, int32_t id, void* data);
+            static void IRAM_ATTR onHandshakeSignalReceived(void);
     };
 
 }

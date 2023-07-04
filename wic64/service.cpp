@@ -21,9 +21,9 @@ namespace WiC64 {
         esp_event_loop_args_t event_loop_args = {
             .queue_size = 16,
             .task_name = TAG,
-            .task_priority = 20,
+            .task_priority = 15,
             .task_stack_size = 8192,
-            .task_core_id = 0
+            .task_core_id = 1
         };
 
         esp_event_loop_create(&event_loop_args, &event_loop_handle);
@@ -98,7 +98,7 @@ namespace WiC64 {
         Request *request = service->request;
 
         ESP_LOGI(TAG, "Request received successfully");
-        ESP_LOGI(TAG, "Handling request 0x%02X:", request->id());
+        ESP_LOGI(TAG, "Handling request [" WIC64_FORMAT_CMD WIC64_GREEN("]"), request->id());
         ESP_LOGV(TAG, "Request arguments...");
 
         for (uint8_t i=0; i<request->argc(); i++) {
@@ -170,6 +170,8 @@ namespace WiC64 {
         static uint8_t data[WIC64_QUEUE_ITEM_SIZE];
         Data *response = service->command->response();
 
+        vTaskDelay(10);
+
         if (isSubsequentCall != NULL) {
             service->items_remaining--;
         }
@@ -184,7 +186,7 @@ namespace WiC64 {
             ? WIC64_QUEUE_ITEM_SIZE
             : service->bytes_remaining;
 
-        const uint8_t timeout_ms = 250;
+        const uint16_t timeout_ms = 1000;
         uint8_t attempts = 8;
 
         while (xQueueReceive(response->queue(), data, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
@@ -196,7 +198,6 @@ namespace WiC64 {
                 return;
             }
         }
-
         service->bytes_remaining -= size;
 
         (service->items_remaining > 1)
@@ -212,6 +213,7 @@ namespace WiC64 {
     {
         Data *response = service->command->response();
         ESP_LOGW(TAG, "Sent only %d of %d bytes", bytes_sent, response->size());
+
         service->finalizeRequest("Aborted while sending response", false);
     }
 
@@ -224,7 +226,7 @@ namespace WiC64 {
         esp_log_level_t level;
 
         level = success ? ESP_LOG_INFO : ESP_LOG_WARN;
-        ESP_LOG_LEVEL(level, TAG, "%s", message);
+        ESP_LOG_LEVEL(level, TAG, "Finalizing request: %s", message);
 
         if(command->response()->isQueued()) {
             ESP_LOG_LEVEL(ESP_LOG_DEBUG, TAG, "Resetting response queue");
@@ -238,7 +240,7 @@ namespace WiC64 {
             delete command;
             command = NULL;
         }
-
+        vTaskDelay(pdMS_TO_TICKS(10));
         log_free_mem(TAG, ESP_LOG_INFO);
     }
 }

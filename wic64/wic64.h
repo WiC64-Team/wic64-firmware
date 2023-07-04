@@ -4,8 +4,8 @@
 #include <cstdint>
 #include "esp_log.h"
 
-#define WIC64_QUEUE_ITEM_SIZE 512
-#define WIC64_QUEUE_SIZE (0x4000 / WIC64_QUEUE_ITEM_SIZE)
+#define WIC64_QUEUE_ITEM_SIZE 1024
+#define WIC64_QUEUE_SIZE (0x8000 / WIC64_QUEUE_ITEM_SIZE)
 
 #define WIC64_QUEUE_ITEMS_REQUIRED(size) \
     (size / WIC64_QUEUE_ITEM_SIZE) + \
@@ -13,11 +13,11 @@
 
 namespace WiC64 {
 
-    /* globalTransferBuffer - a statically allocated
+    /* transferBuffer - a statically allocated,
      * global transfer buffer of 65536+1 bytes. This
      * is the maximum transfer length defined by the
      * protocol, plus another byte reserved in order
-     * to interpret the dataas a null-terminated
+     * to interpret the data as a null-terminated
      * c-string. (see Data::c_str()).
      *
      * This buffer is used for incoming requests
@@ -26,7 +26,13 @@ namespace WiC64 {
      * data is transferred via an RTOS queue of
      * 16kb.
      */
+
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wunused-variable"
+
     static uint8_t transferBuffer[0x10000+1];
+
+    #pragma GCC diagnostic pop
 
     class WiC64 {
         public:
