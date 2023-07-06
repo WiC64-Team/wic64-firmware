@@ -31,6 +31,18 @@ test_get_ip !zone test_get_ip {
 !text $0d, $0d, $00
 
 get_ip !zone get_ip {
+    ; need to null the response buffer
+    ; because strings are always send WITHOUT
+    ; a terminating nullbyte by the original
+    ; firmware...
+
+    ldy #$11  ; IPs have a max length of 16 + nullbyte
+    lda #$00
+    +pointer $a7, response
+-   sta ($a7),y
+    dey
+    bne -
+
     lda #$06
     sta request_id
 

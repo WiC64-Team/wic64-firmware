@@ -23,8 +23,9 @@ namespace WiC64 {
             uint8_t* data() { return m_data; }
             char* c_str();
 
-            void data(uint8_t* data, uint16_t size);
-            void data(const char* c_str);
+            void wrap(uint8_t* data, uint16_t size);
+            void wrap(const char* c_str);
+            void copyFrom(const char* c_str);
 
             uint16_t size() { return m_size; }
 

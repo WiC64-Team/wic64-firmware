@@ -184,7 +184,7 @@ namespace WiC64 {
             }
             ESP_LOGI(TAG, "Read %d bytes", size);
 
-            command->response()->data(transferBuffer, size);
+            command->response()->wrap(transferBuffer, size);
         }
 
     DONE:
@@ -196,7 +196,7 @@ namespace WiC64 {
 
     ERROR:
         ESP_LOGW(TAG, "Sending error response");
-        command->response()->data(error);
+        command->response()->wrap(error);
         closeConnection();
         goto DONE;
     }

@@ -6,7 +6,7 @@ namespace WiC64 {
     extern Connection* connection;
 
     void GetIP::execute(void) {
-        response()->data(connection->ipAddress());
+        response()->wrap(connection->ipAddress());
         responseReady();
     }
 }
