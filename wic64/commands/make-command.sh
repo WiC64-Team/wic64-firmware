@@ -16,6 +16,7 @@ id=$2
 
 guard="WIC64_${name^^}_H"
 classname="${name^}"
+tagname="${name^^}"
 basename="${name,}"
 header="${basename}.h"
 impl="${basename}.cpp"
@@ -30,8 +31,9 @@ echo -n "#ifndef ${guard}
 
 namespace WiC64 {
     class ${classname} : public Command {
-
         public:
+            static const char* TAG;
+
             using Command::Command;
             void execute(void);
     };
@@ -45,6 +47,8 @@ echo -n "
 ${include}
 
 namespace WiC64 {
+    const char* ${classname}::TAG = \"${tagname}\";
+
     void ${classname}::execute(void) {
         responseReady();
     }
