@@ -25,7 +25,11 @@ namespace WiC64 {
 
     const char* WiC64::TAG = "WIC64";
 
+    uint8_t *transferBuffer;
+
     WiC64::WiC64() {
+        transferBuffer = (uint8_t*) calloc(0x10000+1, sizeof(uint8_t));
+
         loglevel(ESP_LOG_VERBOSE);
         ESP_LOGW(TAG, "Firmware version %s", WIC64_VERSION_STRING);
 

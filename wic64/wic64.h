@@ -13,8 +13,7 @@
 
 namespace WiC64 {
 
-    /* transferBuffer - a statically allocated,
-     * global transfer buffer of 65536+1 bytes. This
+    /* Global transfer buffer of 65536+1 bytes. This
      * is the maximum transfer length defined by the
      * protocol, plus another byte reserved in order
      * to interpret the data as a null-terminated
@@ -25,14 +24,21 @@ namespace WiC64 {
      * response is queued. In the latter case the
      * data is transferred via an RTOS queue of
      * 16kb.
+     *
+     * The reason this buffer is not statically
+     * allocated is that on the esp32, the amount
+     * of statically allocatable memory is limited
+     * due to hard coded memory locations in the
+     * esps roms, so the general advice is to
+     * dynamically allocate large buffers even
+     * though a static allocation would seem the more
+     * appropriate thing to do.
+     *
+     * Since this buffer is allocated early in the
+     * WiC64 constructor and never freed, this will
+     * not contribute to any heap fragmentation.
      */
-
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wunused-variable"
-
-    static uint8_t transferBuffer[0x10000+1];
-
-    #pragma GCC diagnostic pop
+    extern uint8_t *transferBuffer;
 
     class WiC64 {
         public:
