@@ -12,6 +12,7 @@ idf_component_register(
     SRCS "command.cpp"
     SRCS "commands/httpGet.cpp"
     SRCS "commands/getIP.cpp"
+    SRCS "commands/scan.cpp"
     SRCS "commands/echo.cpp"
     SRCS "display.cpp"
     SRCS "webserver.cpp"
