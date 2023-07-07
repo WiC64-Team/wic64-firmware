@@ -115,7 +115,7 @@ namespace WiC64 {
 
     RETRY:
         if (isConnectionClosed()) {
-            ESP_LOGW(TAG, "Opening new connection");
+            ESP_LOGV(TAG, "Opening new connection");
             m_client = esp_http_client_init(&config);
 
             if (m_client == NULL) {

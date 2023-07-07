@@ -215,7 +215,7 @@ namespace WiC64 {
         float sec = (millis() - userport->timeTransferStarted) / 1000.0;
         float kbs = userport->pos/sec/1024;
 
-        ESP_LOGE(TAG, "%d bytes %s, transfer completed in %.4f sec, approx. %.2fkb/s",
+        ESP_LOGI(TAG, "%d bytes %s, transfer completed in %.4f sec, approx. %.2fkb/s",
             userport->pos, userport->isSending() ? "sent" : "received", sec, kbs);
 
         userport->deleteTimeoutTask();
