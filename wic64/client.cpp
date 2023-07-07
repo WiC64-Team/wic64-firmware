@@ -158,7 +158,8 @@ namespace WiC64 {
         ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", status_code, content_length);
         ESP_LOGI(TAG, "Keep alive: %s", m_keepAlive ? "true" : "false");
 
-        if (content_length > 0) {  // Content-Length specified by peer -> start a queued transfer
+        if (content_length > 0x10000) {
+            // Start queued transfer if content length is known and exceeds transferBuffer
             ESP_LOGI(TAG, "Starting queued send of %d bytes", content_length);
 
             // Set the queue and the size of the reponse in the response object
