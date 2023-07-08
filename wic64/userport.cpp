@@ -27,8 +27,8 @@ namespace WiC64 {
         esp_event_handler_register_with(
             event_loop_handle,
             USERPORT_EVENTS,
-            USERPORT_REQUEST_ACCEPTED,
-            onRequestAccepted,
+            USERPORT_REQUEST_INITIATED,
+            onRequestInitiated,
             NULL);
 
         esp_event_handler_register_with(
@@ -189,7 +189,7 @@ namespace WiC64 {
 
         ESP_LOGD(TAG, "%s %d bytes...", isSending(type) ? "Sending" : "Receiving", size);
 
-        if(isInitiallySending()) {
+        if (isInitiallySending()) {
             ESP_LOGV(TAG, "Sending initial handshake to start pending transfer");
             sendHandshakeSignal(); // first handshake the c64 is waiting for after changing direction
         }
@@ -293,9 +293,8 @@ namespace WiC64 {
         return millis() - timeOfLastActivity > timeout;
     }
 
-    void Userport::onRequestAccepted(void* arg, esp_event_base_t base, int32_t id, void* data) {
+    void Userport::onRequestInitiated(void* arg, esp_event_base_t base, int32_t id, void* data) {
         uint8_t api;
-        static char reason[64];
 
         ESP_LOGV(TAG, "Received initial handshake");
 
@@ -308,15 +307,11 @@ namespace WiC64 {
 
         ESP_LOGI(TAG, "Received API id " WIC64_FORMAT_API, api);
 
-        if (!service->supports(api)) {
-            // delay required to avoid task timeouts when dealing with line noise
-            vTaskDelay(pdMS_TO_TICKS(10));
-
-            snprintf(reason, 64, "unsupported API id " WIC64_FORMAT_API, api);
-            userport->abortTransfer(reason);
+        if (service->supports(api)) {
+            service->acceptRequest(api);
+        } else {
+            ESP_LOGE(TAG, "unsupported API id " WIC64_FORMAT_API, api);
         }
-
-        service->receiveRequest(api);
     }
 
     void Userport::receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess) {
@@ -345,6 +340,8 @@ namespace WiC64 {
 
         userport->setPortToOutput();
         userport->setTransferRunning();
+
+        ESP_LOGV(TAG, "Initiating send by writing first byte");
         userport->writeFirstByte();
     }
 
@@ -370,33 +367,33 @@ namespace WiC64 {
         if (userport->transferState == TRANSFER_STATE_TERMINATING) {
             // received final handshake caused by last read of $dd01
             userport->transferState = TRANSFER_STATE_NONE;
-            return;
         }
-
-        if (userport->transferState == TRANSFER_STATE_PENDING) {
+        else if (userport->transferState == TRANSFER_STATE_PENDING) {
             userport->post(USERPORT_READY_TO_SEND);
-            return;
         }
+        else {
+            switch(userport->transferType) {
+                case TRANSFER_TYPE_NONE:
+                    userport->post(USERPORT_REQUEST_INITIATED);
+                    break;
 
-        switch(userport->transferType) {
-            case TRANSFER_TYPE_NONE:
-                userport->post(USERPORT_REQUEST_ACCEPTED);
-                break;
+                case TRANSFER_TYPE_RECEIVE_FULL:
+                case TRANSFER_TYPE_RECEIVE_PARTIAL:
+                    userport->readNextByte();
+                    break;
 
-            case TRANSFER_TYPE_RECEIVE_FULL:
-            case TRANSFER_TYPE_RECEIVE_PARTIAL:
-                userport->readNextByte();
-                break;
-
-            case TRANSFER_TYPE_SEND_FULL:
-            case TRANSFER_TYPE_SEND_PARTIAL:
-                userport->writeNextByte();
-                break;
+                case TRANSFER_TYPE_SEND_FULL:
+                case TRANSFER_TYPE_SEND_PARTIAL:
+                    userport->writeNextByte();
+                    break;
+            }
         }
     }
 
     void IRAM_ATTR Userport::post(userport_event_t event) {
         BaseType_t task_unblocked;
+
+        // esp_rom_printf("HANDSHAKE => %s\n", userport->eventName(event));
 
         esp_event_isr_post_to(
             userport->event_loop_handle,
@@ -419,5 +416,14 @@ namespace WiC64 {
                 userport->abortTransfer("Timed out");
             }
         }
+    }
+
+    const char *Userport::eventName(userport_event_t event) {
+        switch (event) {
+            case USERPORT_REQUEST_INITIATED: return "REQUEST INITIATED"; break;
+            case USERPORT_READY_TO_SEND: return "READY TO SEND"; break;
+            case USERPORT_TRANSFER_COMPLETED: return "TRANSFER COMPLETED"; break;
+        }
+        return "UNNAMED EVENT";
     }
 }

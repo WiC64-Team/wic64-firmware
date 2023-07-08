@@ -40,7 +40,7 @@ namespace WiC64 {
         return api == WiC64::API_V1;
     }
 
-    void Service::receiveRequest(uint8_t api) {
+    void Service::acceptRequest(uint8_t api) {
         static uint8_t header[REQUEST_HEADER_SIZE];
 
         if (api == WiC64::API_V1) {
