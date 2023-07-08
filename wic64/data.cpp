@@ -38,6 +38,20 @@ namespace WiC64 {
         strncpy((char*) transferBuffer, c_str, m_size+1);
     }
 
+    void Data::appendSeparated(const String& string, const char separator) {
+        size_t len = string.length();
+        memcpy(m_data + m_index, string.c_str(), len);
+
+        m_index += len;
+        m_data[m_index] = separator;
+        m_index++;
+        m_size += len + 1;
+    }
+
+    void Data::appendSeparated(const String &string) {
+        appendSeparated(string, '\1');
+    }
+
     void Data::queue(QueueHandle_t queue, uint16_t size) {
         m_queue = queue;
         m_size = size;

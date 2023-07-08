@@ -8,8 +8,6 @@ namespace WiC64 {
     const char* Scan::TAG = "SCAN";
 
     void Scan::execute(void) {
-        const String separator("\1");
-        String networks;
         int num_networks;
 
         ESP_LOGD(TAG, "Scanning for WiFi networks...");
@@ -22,12 +20,10 @@ namespace WiC64 {
             ESP_LOGD(TAG, "Network %d: [%s] %ddbm",
                 i, WiFi.SSID(i).c_str(), WiFi.RSSI(i));
 
-            networks += i + separator +
-                WiFi.SSID(i) + separator +
-                WiFi.RSSI(i) + separator;
+            response()->appendSeparated(String(i));
+            response()->appendSeparated(WiFi.SSID(i));
+            response()->appendSeparated(String(WiFi.RSSI(i)));
         }
-
-        response()->copyFrom(networks.c_str());
         responseReady();
     }
 }

@@ -11,10 +11,12 @@ namespace WiC64 {
     class Data {
         private:
             uint8_t *m_data = NULL;
-            QueueHandle_t m_queue = NULL;
+            uint16_t m_index = 0;
 
             uint16_t m_size = 0;
             int32_t m_sizeToReport = -1;
+
+            QueueHandle_t m_queue = NULL;
         public:
             Data();
             Data(uint8_t* data, uint16_t size);
@@ -26,6 +28,9 @@ namespace WiC64 {
             void wrap(uint8_t* data, uint16_t size);
             void wrap(const char* c_str);
             void copyFrom(const char* c_str);
+
+            void appendSeparated(const String& string, const char separator);
+            void appendSeparated(const String& string);
 
             uint16_t size() { return m_size; }
 
