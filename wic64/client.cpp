@@ -4,6 +4,7 @@
 #include "utilities.h"
 #include "settings.h"
 #include "commands/httpGet.h"
+#include "version.h"
 
 #include "esp_log.h"
 #include "nvs_flash.h"
@@ -104,6 +105,7 @@ namespace WiC64 {
 
         esp_http_client_config_t config = {
             .url = url.c_str(),
+            .user_agent = "WiC64/" WIC64_VERSION_STRING,
             .method = HTTP_METHOD_GET,
             .timeout_ms = 5 * 1000,
             .event_handler = eventHandler,
