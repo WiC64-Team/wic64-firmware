@@ -20,12 +20,27 @@ namespace WiC64 {
     }
 
     bool Command::defined(uint8_t id) {
-        return commands.find(id) != commands.end();
+        uint8_t num_commands = sizeof(commands) / sizeof(command_map_entry_t);
+        command_map_entry_t command;
+
+        for (uint8_t i=0; i<num_commands; i++) {
+            command = commands[i];
+            if (command.id == id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     Command* Command::create(Request* request) {
-        if (defined(request->id())) {
-            return commands.at(request->id())(request);
+        uint8_t num_commands = sizeof(commands) / sizeof(command_map_entry_t);
+        command_map_entry_t command;
+
+        for (uint8_t i=0; i<num_commands; i++) {
+            command = commands[i];
+            if (command.id == request->id()) {
+                return command.create(request);
+            }
         }
         return nullptr;
     }

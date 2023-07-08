@@ -1,14 +1,13 @@
 #ifndef WIC64_COMMAND_H
 #define WIC64_COMMAND_H
 
-#include <map>
 #include <functional>
 
 #include "wic64.h"
 #include "service.h"
 
-#define WIC64_COMMANDS const std::map<uint8_t, std::function<Command* (Request *request)>> commands
-#define WIC64_COMMAND(ID, CLASS) { ID, [](Request* request) { return new CLASS(request); } }
+#define WIC64_COMMANDS command_map_entry_t commands[]
+#define WIC64_COMMAND(ID, CLASS) { .id = ID, .create = [](Request* request) { return new CLASS(request); } }
 
 namespace WiC64 {
     class Command {
@@ -36,6 +35,11 @@ namespace WiC64 {
 
             virtual void execute(void);
             virtual void responseReady();
+    };
+
+    struct command_map_entry_t {
+        uint8_t id;
+        std::function<Command* (Request *request)> create;
     };
 
     extern WIC64_COMMANDS;
