@@ -1,6 +1,8 @@
 #include "driver/gpio.h"
 #include "esp32-hal.h"
 
+#include <cmath>
+
 #include "userport.h"
 #include "service.h"
 #include "utilities.h"
@@ -212,11 +214,17 @@ namespace WiC64 {
     }
 
     void Userport::onTransferCompleted(void* arg, esp_event_base_t base, int32_t id, void* data) {
-        float sec = (millis() - userport->timeTransferStarted) / 1000.0;
-        float kbs = userport->pos/sec/1024;
 
-        ESP_LOGI(TAG, "%d bytes %s, transfer completed in %.4f sec, approx. %.2fkb/s",
-            userport->pos, userport->isSending() ? "sent" : "received", sec, kbs);
+        float sec = (millis() - userport->timeTransferStarted) / 1000.0;
+        float kbs = userport->size/sec/1024;
+
+        if (kbs != INFINITY) {
+            ESP_LOGW(TAG, "%d bytes %s, transfer completed in %.4f sec, approx. %.2fkb/s",
+            userport->size, userport->isSending() ? "sent" : "received", sec, kbs);
+        } else {
+            ESP_LOGW(TAG, "%d bytes %s, transfer completed",
+                userport->size, userport->isSending() ? "sent" : "received");
+        }
 
         userport->deleteTimeoutTask();
 
