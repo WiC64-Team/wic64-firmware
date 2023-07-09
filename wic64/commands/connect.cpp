@@ -22,6 +22,18 @@ namespace WiC64 {
         connection->connect(ssid.c_str(), password);
 
         response()->copy("Wlan config changed");
+
+        // After receiving the response, the portal's wifi.prg
+        // (and probably launcher.prg) immediately try to determine
+        // whether a connection has been established by requesting
+        // the ip nine times in quick succession before giving up
+        // and printing "Not connected. Wrong password?"
+        // The previous firmware added a delay of 3 seconds so that
+        // the client would not start checking the IP right away.
+
+        // REDESIGN: This is not the firmware's job
+        vTaskDelay(pdMS_TO_TICKS(3000));
+
         responseReady();
     }
 }
