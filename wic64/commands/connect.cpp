@@ -25,6 +25,8 @@ namespace WiC64 {
 
     void Connect::execute(void) {
         const String& ssid = this->ssid();
+
+        // TODO: Implement handling of "Arrow-Up" escape sequences ("convertspecial()")
         const char* passphrase = request()->argument()->field(1);
 
         if (ssid.isEmpty()) {
