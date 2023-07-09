@@ -102,9 +102,15 @@ namespace WiC64 {
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
+        // The Arduino HTTPClient sends "ESP32HTTPClient" as the user-agent
+        // Some programs test for this value, so we will mimic this behaviour
+        // for compatibility.
+        //
+        // REDESIGN: Send "WiC64/<version>" as user-agent
+
         esp_http_client_config_t config = {
             .url = url.c_str(),
-            .user_agent = "WiC64/" WIC64_VERSION_STRING,
+            .user_agent = "ESP32HTTPClient",
             .method = HTTP_METHOD_GET,
             .timeout_ms = 5 * 1000,
             .event_handler = eventHandler,
