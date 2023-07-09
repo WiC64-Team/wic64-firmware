@@ -219,10 +219,10 @@ namespace WiC64 {
         float kbs = userport->size/sec/1024;
 
         if (kbs != INFINITY) {
-            ESP_LOGW(TAG, "%d bytes %s, transfer completed in %.4f sec, approx. %.2fkb/s",
+            ESP_LOGI(TAG, "%d bytes %s, transfer completed in %.4f sec, approx. %.2fkb/s",
             userport->size, userport->isSending() ? "sent" : "received", sec, kbs);
         } else {
-            ESP_LOGW(TAG, "%d bytes %s, transfer completed",
+            ESP_LOGI(TAG, "%d bytes %s, transfer completed",
                 userport->size, userport->isSending() ? "sent" : "received");
         }
 
