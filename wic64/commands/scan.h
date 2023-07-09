@@ -9,6 +9,7 @@ namespace WiC64 {
             static const char* TAG;
 
             using Command::Command;
+            const char* describe(void);
             void execute(void);
     };
 }

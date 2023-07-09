@@ -109,6 +109,8 @@ namespace WiC64 {
         }
 
         service->command = Command::create(request);
+
+        ESP_LOGI(TAG, "Executing command " WIC64_WHITE("") "%s", service->command->describe());
         service->command->execute();
     }
 

@@ -33,6 +33,7 @@ namespace WiC64 {
             Data* response(void) { return m_response; }
             bool isResponseReady() { return m_response_ready; }
 
+            virtual const char* describe();
             virtual void execute(void);
             virtual void responseReady();
     };

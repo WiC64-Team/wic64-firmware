@@ -9,7 +9,12 @@ namespace WiC64 {
 
     extern Connection *connection;
 
-    void Scan::execute(void) {
+    const char *Scan::describe(void) {
+        return "Scan (scan for WiFi networks)";
+    }
+
+    void Scan::execute(void)
+    {
         int num_networks;
 
         ESP_LOGI(TAG, "Scanning for WiFi networks...");

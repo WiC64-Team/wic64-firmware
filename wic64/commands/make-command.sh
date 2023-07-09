@@ -36,6 +36,7 @@ namespace WiC64 {
             static const char* TAG;
 
             using Command::Command;
+            const char* describe(void);
             void execute(void);
     };
 }
@@ -49,6 +50,10 @@ ${include}
 
 namespace WiC64 {
     const char* ${classname}::TAG = \"${tagname}\";
+
+    const char* describe() {
+        return \"${classname} (short description)\";
+    }
 
     void ${classname}::execute(void) {
         responseReady();

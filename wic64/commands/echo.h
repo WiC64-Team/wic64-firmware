@@ -8,6 +8,7 @@ namespace WiC64 {
     class Echo : public Command {
         public:
             using Command::Command;
+            const char* describe();
             void execute(void);
     };
 }

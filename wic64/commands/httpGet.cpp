@@ -38,6 +38,10 @@ namespace WiC64 {
         }
     }
 
+    const char *HttpGet::describe(void) {
+        return "HTTP GET (fetch URL)";
+    }
+
     // REDESIGN: Remove this hack, just POST binary data
     void HttpGet::encode(String& url) {
         // If this command has id 0x0f, encode HEX data after the

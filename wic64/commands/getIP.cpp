@@ -5,7 +5,12 @@ namespace WiC64 {
 
     extern Connection* connection;
 
-    void GetIP::execute(void) {
+    const char *GetIP::describe(void) {
+        return "IP (get local IP address)";
+    }
+
+    void GetIP::execute(void)
+    {
         response()->wrap(connection->ipAddress());
         responseReady();
     }

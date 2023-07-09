@@ -45,7 +45,12 @@ namespace WiC64 {
         return nullptr;
     }
 
-    void Command::execute(void) {
+    const char *Command::describe() {
+        return "Generic command (no description available)";
+    }
+
+    void Command::execute(void)
+    {
         responseReady();
     }
 

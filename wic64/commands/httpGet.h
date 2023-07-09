@@ -13,7 +13,8 @@ namespace WiC64 {
 
         public:
             using Command::Command;
-            bool isProgramFile() { return m_isProgramFile; }
+            const char* describe(void);
+            bool isProgramFile(void) { return m_isProgramFile; }
 
             void encode(String& url);
             void sanitize(String& url);

@@ -8,7 +8,12 @@ namespace WiC64 {
 
     extern Connection *connection;
 
-    void Connect::execute(void) {
+    const char *Connect::describe() {
+        return "Connect (connect to WiFi with specified credentials)";
+    }
+
+    void Connect::execute(void)
+    {
         uint8_t indexInLastScanResult = atoi(request()->argument()->field(0));
         const char* password = request()->argument()->field(1);
 
