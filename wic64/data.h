@@ -27,10 +27,10 @@ namespace WiC64 {
 
             void wrap(uint8_t* data, uint16_t size);
             void wrap(const char* c_str);
-            void copyFrom(const char* c_str);
+            void copy(const char* c_str);
 
-            void appendSeparated(const String& string, const char separator);
-            void appendSeparated(const String& string);
+            void appendField(const String& string);
+            const char* field(uint8_t index);
 
             uint16_t size() { return m_size; }
 

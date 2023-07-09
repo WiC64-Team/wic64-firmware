@@ -41,6 +41,8 @@ namespace WiC64 {
         display->RSSI(WiFi.RSSI());
         display->ip("0.0.0.0");
         display->status("Connected");
+
+        connection->reconnecting(true);
     }
 
     void Connection::onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -49,9 +51,13 @@ namespace WiC64 {
         display->SSID(getStoredSSID());
         display->RSSI(WiFi.RSSI());
         display->ip("0.0.0.0");
-        display->status("Connecting...");
 
-        connection->connect();
+        if (connection->reconnecting()) {
+            display->status("Reconnecting...");
+            connection->connect();
+        } else {
+            display->status("Disconnected");
+        }
     }
 
     void Connection::onGotIpAddress(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -62,13 +68,22 @@ namespace WiC64 {
         display->ip(connection->ipAddress());
     }
 
-    bool Connection::isConnected() {
-        return WiFi.isConnected();
-    }
-
     void Connection::connect() {
         ESP_LOGI(TAG, "Connecting to WiFi network...");
         WiFi.begin();
+    }
+
+    void Connection::disconnect(void) {
+        reconnecting(false);
+        WiFi.disconnect();
+    }
+
+    void Connection::connect(const char* ssid, const char* password) {
+        ESP_LOGI(TAG, "Connecting with WiFi credentials SSID [%s] Passphrase [%s]",
+            ssid, password);
+
+        disconnect();
+        WiFi.begin(ssid, password);
     }
 
     const char* Connection::ipAddress() {
@@ -81,5 +96,15 @@ namespace WiC64 {
         static char mac[18+1];
         strncpy(mac, WiFi.macAddress().c_str(), 18);
         return mac;
+    }
+
+    uint16_t Connection::scanNetworks(void) {
+        uint16_t num_networks;
+
+        disconnect();
+        num_networks = WiFi.scanNetworks();
+        connect();
+
+        return num_networks;
     }
 }

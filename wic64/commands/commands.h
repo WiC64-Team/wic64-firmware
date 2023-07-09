@@ -5,6 +5,7 @@
 #include "httpGet.h"
 #include "getIP.h"
 #include "scan.h"
+#include "connect.h"
 #include "echo.h"
 
 namespace WiC64 {
@@ -13,6 +14,7 @@ namespace WiC64 {
         WIC64_COMMAND(0x0f, HttpGet),
         WIC64_COMMAND(0x06, GetIP),
         WIC64_COMMAND(0x0c, Scan),
+        WIC64_COMMAND(0x0d, Connect),
         WIC64_COMMAND(0xff, Echo),
     };
 }

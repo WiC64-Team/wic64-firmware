@@ -32,24 +32,50 @@ namespace WiC64 {
         m_data[m_size] = '\0';
     }
 
-    void Data::copyFrom(const char *c_str) {
+    void Data::copy(const char *c_str) {
         m_data = transferBuffer;
         m_size = strlen(c_str);
         strncpy((char*) transferBuffer, c_str, m_size+1);
     }
 
-    void Data::appendSeparated(const String& string, const char separator) {
+    void Data::appendField(const String& string) {
         size_t len = string.length();
         memcpy(m_data + m_index, string.c_str(), len);
 
         m_index += len;
-        m_data[m_index] = separator;
+        m_data[m_index] = '\1';
         m_index++;
         m_size += len + 1;
     }
 
-    void Data::appendSeparated(const String &string) {
-        appendSeparated(string, '\1');
+    const char* Data::field(uint8_t index) {
+        static char value[256];
+
+        char* begin = (char*) m_data;
+        char* end = begin;
+        char* previous_end;
+
+        for (uint16_t i=0; i<=index; i++) {
+            previous_end = end;
+
+            if ((end = strstr(end, "\01")) != NULL) {
+                if (index == i) {
+                    begin = previous_end;
+
+                    uint8_t size =
+                        (end - (char*) m_data) -
+                        (begin - (char*) m_data);
+
+                    memcpy(value, begin, size);
+                    value[size] = '\0';
+
+                    return value;
+                }
+                end++;
+            }
+        }
+        value[0] = '\0';
+        return value;
     }
 
     void Data::queue(QueueHandle_t queue, uint16_t size) {

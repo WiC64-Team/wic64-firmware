@@ -8,19 +8,26 @@ namespace WiC64 {
         public: static const char* TAG;
 
         private:
+            bool m_reconnecting = false;
+
             static String getStoredSSID(void);
             static void onConnected(WiFiEvent_t event, WiFiEventInfo_t info);
             static void onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
             static void onGotIpAddress(WiFiEvent_t event, WiFiEventInfo_t info);
 
         public:
-            Connection();
+            Connection(void);
+            bool reconnecting(void) { return m_reconnecting; }
+            void reconnecting(bool reconnecting) { m_reconnecting = reconnecting; }
 
-            bool isConnected(void);
+            const char* ipAddress(void);
+            const char* macAddress(void);
+
+            uint16_t scanNetworks(void);
+
             void connect(void);
-
-            const char* ipAddress();
-            const char* macAddress();
+            void connect(const char* ssid, const char* passphrase);
+            void disconnect(void);
     };
 
 }
