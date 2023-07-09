@@ -1,5 +1,4 @@
-#include "wic64.h"
-#include "httpGet.h"
+#include "get.h"
 #include "client.h"
 #include "connection.h"
 #include "settings.h"
@@ -8,18 +7,18 @@
 #include "WString.h"
 
 namespace WiC64 {
-    const char* HttpGet::TAG = "HTTPGET";
+    const char* Get::TAG = "HTTPGET";
 
     extern Client *client;
     extern Connection *connection;
     extern Settings *settings;
 
-    void HttpGet::analyze(const String &url) {
+    void Get::analyze(const String &url) {
         m_isProgramFile = url.endsWith(".prg");
     }
 
     // REDESIGN: Don't accept sloppy input
-    void HttpGet::sanitize(String &url)
+    void Get::sanitize(String &url)
     {
         if (url.indexOf(" ") != -1) {
             ESP_LOGW(TAG, "Removing spaces from URL");
@@ -28,7 +27,7 @@ namespace WiC64 {
     }
 
     // REDESIGN: Add file type in response header
-    void HttpGet::expand(String& url) {
+    void Get::expand(String& url) {
         if (url.indexOf("%mac") != -1) {
             ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address and security token in URL");
 
@@ -38,12 +37,12 @@ namespace WiC64 {
         }
     }
 
-    const char *HttpGet::describe(void) {
+    const char *Get::describe(void) {
         return "HTTP GET (fetch URL)";
     }
 
     // REDESIGN: Remove this hack, just POST binary data
-    void HttpGet::encode(String& url) {
+    void Get::encode(String& url) {
         // If this command has id 0x0f, encode HEX data after the
         // marker "$<" in the request data using two lowercase hex
         // digits per byte. This was required in the original firmware
@@ -76,7 +75,7 @@ namespace WiC64 {
         }
     }
 
-    void HttpGet::execute(void) {
+    void Get::execute(void) {
         String url = String(request()->argument()->c_str());
 
         ESP_LOGD(TAG, "Received URL [%s]", url.c_str());
@@ -90,7 +89,7 @@ namespace WiC64 {
         client->get(this, url); // client will call responseReady()
     }
 
-    void HttpGet::responseReady(void) {
+    void Get::responseReady(void) {
         if (isVersion1() && isProgramFile() && response()->size() > 2) {
             response()->sizeToReport(response()->size() - 2);
         }

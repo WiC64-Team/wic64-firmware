@@ -8,7 +8,7 @@
 #include "service.h"
 #include "utilities.h"
 #include "version.h"
-#include "commands/httpGet.h"
+#include "commands/get.h"
 #include "commands/scan.h"
 #include "commands/connect.h"
 
@@ -60,7 +60,7 @@ namespace WiC64 {
         esp_log_level_set(Webserver::TAG, loglevel);
         esp_log_level_set(Request::TAG, loglevel);
         esp_log_level_set(Command::TAG, loglevel);
-        esp_log_level_set(HttpGet::TAG, loglevel);
+        esp_log_level_set(Get::TAG, loglevel);
         esp_log_level_set(Scan::TAG, loglevel);
         esp_log_level_set(Connect::TAG, loglevel);
     }

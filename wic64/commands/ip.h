@@ -5,7 +5,7 @@
 #include "data.h"
 
 namespace WiC64 {
-    class GetIP : public Command {
+    class IP : public Command {
         public:
             using Command::Command;
             const char* describe(void);

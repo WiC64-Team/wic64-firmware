@@ -6,7 +6,7 @@
 #include "WString.h"
 
 namespace WiC64 {
-    class HttpGet : public Command {
+    class Get : public Command {
         public: static const char* TAG;
         private:
             bool m_isProgramFile = false;
