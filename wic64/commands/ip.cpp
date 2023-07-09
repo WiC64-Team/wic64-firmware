@@ -9,8 +9,7 @@ namespace WiC64 {
         return "IP (get local IP address)";
     }
 
-    void IP::execute(void)
-    {
+    void IP::execute(void) {
         response()->wrap(connection->ipAddress());
         responseReady();
     }

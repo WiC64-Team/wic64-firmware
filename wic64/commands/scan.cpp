@@ -13,8 +13,7 @@ namespace WiC64 {
         return "Scan (scan for WiFi networks)";
     }
 
-    void Scan::execute(void)
-    {
+    void Scan::execute(void) {
         int num_networks;
 
         ESP_LOGI(TAG, "Scanning for WiFi networks...");
