@@ -12,28 +12,42 @@ namespace WiC64 {
         return "Connect (connect to WiFi with specified credentials)";
     }
 
-    void Connect::execute(void)
-    {
-        uint8_t indexInLastScanResult = atoi(request()->argument()->field(0));
-        const char* password = request()->argument()->field(1);
+    const String Connect::ssid() {
+        if (request()->id() == SSID_PASSED_AS_STRING) {
+            return String(request()->argument()->field(0));
+        }
+        else if (request()->id() == SSID_PASSED_VIA_INDEX) {
+            uint8_t indexInLastScan = atoi(request()->argument()->field(0));
+            return String(WiFi.SSID(indexInLastScan));
+        }
+        return String();
+    }
 
-        const String& ssid = WiFi.SSID(indexInLastScanResult).c_str();
+    void Connect::execute(void) {
+        const String& ssid = this->ssid();
+        const char* passphrase = request()->argument()->field(1);
 
-        connection->connect(ssid.c_str(), password);
+        if (ssid.isEmpty()) {
+            ESP_LOGE(TAG, "SSID is empty");
+            response()->copy("wifi config not changed");
+        }
+        else {
+            connection->connect(ssid.c_str(), passphrase);
+            response()->copy("wifi config changed");
 
-        response()->copy("Wlan config changed");
-
-        // After receiving the response, the portal's wifi.prg
-        // (and probably launcher.prg) immediately try to determine
-        // whether a connection has been established by requesting
-        // the ip nine times in quick succession before giving up
-        // and printing "Not connected. Wrong password?"
-        // The previous firmware added a delay of 3 seconds so that
-        // the client would not start checking the IP right away.
-
-        // REDESIGN: This is not the firmware's job
-        vTaskDelay(pdMS_TO_TICKS(3000));
-
+            // After receiving the response, the portal's wifi.prg
+            // (and probably launcher.prg) immediately try to determine
+            // whether a connection has been established by requesting
+            // the ip nine times in quick succession before returning to
+            // password entry, printing "Not connected. Wrong password?".
+            //
+            // The previous firmware added a delay of 3 seconds so that
+            // the client would not start checking the IP right away.
+            //
+            // REDESIGN: This is not the firmware's job, add a command
+            // to explicitly check connection state with optional timeout.
+            vTaskDelay(pdMS_TO_TICKS(3000));
+        }
         responseReady();
     }
 }

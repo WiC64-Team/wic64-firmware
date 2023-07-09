@@ -11,8 +11,9 @@
 namespace WiC64 {
     WIC64_COMMANDS = {
         WIC64_COMMAND(0x01, Get),
-        WIC64_COMMAND(0x0f, Get),
+        WIC64_COMMAND(0x02, Connect),
         WIC64_COMMAND(0x06, IP),
+        WIC64_COMMAND(0x0f, Get),
         WIC64_COMMAND(0x0c, Scan),
         WIC64_COMMAND(0x0d, Connect),
         WIC64_COMMAND(0xff, Echo),
