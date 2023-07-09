@@ -9,7 +9,6 @@
 
 #include "data.h"
 #include "command.h"
-#include "commands/httpGet.h"
 
 namespace WiC64 {
     class Client {

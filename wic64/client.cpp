@@ -3,7 +3,6 @@
 #include "connection.h"
 #include "utilities.h"
 #include "settings.h"
-#include "commands/httpGet.h"
 #include "version.h"
 
 #include "esp_log.h"
