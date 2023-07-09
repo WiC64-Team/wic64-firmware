@@ -1,5 +1,5 @@
-#ifndef WIC64_HTTPGET_H
-#define WIC64_HTTPGET_H
+#ifndef WIC64_GET_H
+#define WIC64_GET_H
 
 #include "command.h"
 #include "data.h"
@@ -25,4 +25,4 @@ namespace WiC64 {
             void responseReady(void);
     };
 }
-#endif // WIC64_HTTPGET_H
+#endif // WIC64_GET_H

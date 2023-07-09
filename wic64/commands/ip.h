@@ -1,5 +1,5 @@
-#ifndef WIC64_COMMAND_GET_IP
-#define WIC64_COMMAND_GET_IP
+#ifndef WIC64_IP_H
+#define WIC64_IP_H
 
 #include "command.h"
 #include "data.h"
@@ -13,4 +13,4 @@ namespace WiC64 {
     };
 }
 
- #endif // WIC64_COMMAND_GET_IP
+ #endif // WIC64_IP_H
