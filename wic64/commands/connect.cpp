@@ -68,10 +68,7 @@ namespace WiC64 {
         const String& ssid = this->ssid();
         const char* passphrase = this->passphrase();
 
-        if (passphrase != NULL) {
-            ESP_LOGW(TAG, "Decoded passphrase [%s]", passphrase);
-        }
-        else if (passphrase == NULL) {
+        if (passphrase == NULL) {
             ESP_LOGE(TAG, "Failed to decode passphrase");
             response()->copy("wifi config not changed: passphrase decode failed");
         }

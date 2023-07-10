@@ -78,12 +78,12 @@ namespace WiC64 {
         WiFi.disconnect();
     }
 
-    void Connection::connect(const char* ssid, const char* password) {
-        ESP_LOGI(TAG, "Connecting with WiFi credentials SSID [%s] Passphrase [%s]",
-            ssid, password);
+    void Connection::connect(const char* ssid, const char* passphrase) {
+        ESP_LOGI(TAG, "Connecting to SSID: [%s], Passphrase length: %d chars",
+            ssid, strlen(passphrase));
 
         disconnect();
-        WiFi.begin(ssid, password);
+        WiFi.begin(ssid, passphrase);
     }
 
     const char* Connection::ipAddress() {
