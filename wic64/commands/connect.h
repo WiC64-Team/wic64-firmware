@@ -11,6 +11,7 @@ namespace WiC64 {
 
         private:
             const String ssid();
+            const char* passphrase();
 
         public:
             static const uint8_t SSID_PASSED_AS_STRING = 0x02;

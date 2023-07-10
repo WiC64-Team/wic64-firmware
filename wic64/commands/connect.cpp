@@ -23,15 +23,61 @@ namespace WiC64 {
         return String();
     }
 
+    const char *Connect::passphrase() {
+        static const char UPARROW = '~';
+        char hexcode[5] = { '0', 'x', 0, 0, 0 };
+
+        const char* escaped = request()->argument()->field(1);
+
+        static char unescaped[MAX_PASSPHRASE_LEN];
+        memset(unescaped, 0, MAX_PASSPHRASE_LEN);
+
+        uint8_t len = strlen(escaped);
+        char* pos = unescaped;
+
+        char *error[] = { NULL };
+        char decoded;
+
+        for (uint8_t i=0; i<len; i++) {
+            if (escaped[i] == UPARROW) {
+                hexcode[2] = escaped[++i];
+                hexcode[3] = escaped[++i];
+
+                decoded = (char) strtol(hexcode, error, 16);
+
+                if (**error != '\0') {
+                    ESP_LOGE(TAG, "Failed to decode hex value [%s]", hexcode+2);
+                    return NULL;
+                }
+
+                *pos = decoded;
+            }
+            else {
+                *pos = escaped[i];
+            }
+
+            if (((++pos) - unescaped) > (MAX_PASSPHRASE_LEN - 1)) {
+                ESP_LOGE(TAG, "Passphrase too long: max 63 chars");
+                return NULL;
+            }
+        }
+        return unescaped;
+    }
+
     void Connect::execute(void) {
         const String& ssid = this->ssid();
+        const char* passphrase = this->passphrase();
 
-        // TODO: Implement handling of "Arrow-Up" escape sequences ("convertspecial()")
-        const char* passphrase = request()->argument()->field(1);
-
-        if (ssid.isEmpty()) {
+        if (passphrase != NULL) {
+            ESP_LOGW(TAG, "Decoded passphrase [%s]", passphrase);
+        }
+        else if (passphrase == NULL) {
+            ESP_LOGE(TAG, "Failed to decode passphrase");
+            response()->copy("wifi config not changed: passphrase decode failed");
+        }
+        else if (ssid.isEmpty()) {
             ESP_LOGE(TAG, "SSID is empty");
-            response()->copy("wifi config not changed");
+            response()->copy("wifi config not changed: ssid empty");
         }
         else {
             connection->connect(ssid.c_str(), passphrase);
