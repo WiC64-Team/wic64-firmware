@@ -17,7 +17,11 @@ namespace WiC64 {
             bool boolean(const char* key);
             void boolean(const char* key, const bool value);
 
+            int32_t int32(const char* key);
+            void int32(const char* key, const int32_t value);
+
             const char* SECURITY_TOKEN_KEY = "sectokenname";
+            const char* GMT_OFFSET_SECONDS_KEY = "gmtoffset";
 
         public:
             Settings();
@@ -27,6 +31,9 @@ namespace WiC64 {
 
             String securityToken(void);
             void securityToken(const String& value);
+
+            int32_t gmtOffsetSeconds(void);
+            void gmtOffsetSeconds(int32_t value);
     };
 }
 

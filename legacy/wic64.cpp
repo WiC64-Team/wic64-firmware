@@ -478,7 +478,7 @@ void loop() {
           displaystuff("get mac");
           sendmessage(WiFi.macAddress());
         }
-        if (lastinput.charAt(3) == 21) { // TODO: Comannd 0x15 (21) Get time and date
+        if (lastinput.charAt(3) == 21) {
           ex = true;
           displaystuff("get time and date");
           getLocalTime();

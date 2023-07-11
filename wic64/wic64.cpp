@@ -6,11 +6,13 @@
 #include "webserver.h"
 #include "userport.h"
 #include "service.h"
+#include "clock.h"
 #include "utilities.h"
 #include "version.h"
 #include "commands/get.h"
 #include "commands/scan.h"
 #include "commands/connect.h"
+#include "commands/time.h"
 
 #include "esp_log.h"
 
@@ -24,6 +26,7 @@ namespace WiC64 {
     Display    *display;
     Connection *connection;
     Webserver  *webserver;
+    Clock      *clock;
 
     const char* WiC64::TAG = "WIC64";
 
@@ -42,6 +45,7 @@ namespace WiC64 {
         display    = new Display();
         connection = new Connection();
         webserver  = new Webserver();
+        clock      = new Clock();
 
         connection->connect();
         userport->connect();
@@ -59,9 +63,11 @@ namespace WiC64 {
         esp_log_level_set(Client::TAG, loglevel);
         esp_log_level_set(Webserver::TAG, loglevel);
         esp_log_level_set(Request::TAG, loglevel);
+        esp_log_level_set(Clock::TAG, loglevel);
         esp_log_level_set(Command::TAG, loglevel);
         esp_log_level_set(Get::TAG, loglevel);
         esp_log_level_set(Scan::TAG, loglevel);
         esp_log_level_set(Connect::TAG, loglevel);
+        esp_log_level_set(Time::TAG, loglevel);
     }
 }
