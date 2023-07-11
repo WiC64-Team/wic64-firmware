@@ -230,18 +230,23 @@ namespace WiC64 {
         level = success ? ESP_LOG_INFO : ESP_LOG_WARN;
         ESP_LOG_LEVEL(level, TAG, "Finalizing request: %s", message);
 
-        if(command->response()->isQueued()) {
-            ESP_LOG_LEVEL(ESP_LOG_DEBUG, TAG, "Resetting response queue");
-            xQueueReset(command->response()->queue());
-        }
-
-        level = success ? ESP_LOG_DEBUG : ESP_LOG_WARN;
-        ESP_LOG_LEVEL(level, TAG, "Freeing allocated memory");
-
         if (command != NULL) {
+            if(command->response()->isQueued()) {
+                ESP_LOG_LEVEL(ESP_LOG_DEBUG, TAG, "Resetting response queue");
+                xQueueReset(command->response()->queue());
+            }
+
+            level = success ? ESP_LOG_DEBUG : ESP_LOG_WARN;
+            ESP_LOG_LEVEL(level, TAG, "Freeing allocated memory");
+
             delete command;
             command = NULL;
         }
+        else {
+            ESP_LOGE(TAG, "Request has already been finalized: "
+                "Protocol violation or firmware bug");
+        }
+
         vTaskDelay(pdMS_TO_TICKS(10));
         log_free_mem(TAG, ESP_LOG_INFO);
     }
