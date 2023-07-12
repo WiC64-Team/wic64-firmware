@@ -6,6 +6,7 @@
 #include "webserver.h"
 #include "userport.h"
 #include "service.h"
+#include "settings.h"
 #include "clock.h"
 #include "utilities.h"
 #include "version.h"
@@ -13,6 +14,7 @@
 #include "commands/scan.h"
 #include "commands/connect.h"
 #include "commands/time.h"
+#include "commands/timezone.h"
 
 #include "esp_log.h"
 
@@ -58,6 +60,7 @@ namespace WiC64 {
         esp_log_level_set(WiC64::TAG, loglevel);
         esp_log_level_set(Userport::TAG, loglevel);
         esp_log_level_set(Service::TAG, loglevel);
+        esp_log_level_set(Settings::TAG, loglevel);
         esp_log_level_set(Connection::TAG, loglevel);
         esp_log_level_set(Display::TAG, loglevel);
         esp_log_level_set(Client::TAG, loglevel);
@@ -69,5 +72,6 @@ namespace WiC64 {
         esp_log_level_set(Scan::TAG, loglevel);
         esp_log_level_set(Connect::TAG, loglevel);
         esp_log_level_set(Time::TAG, loglevel);
+        esp_log_level_set(Timezone::TAG, loglevel);
     }
 }

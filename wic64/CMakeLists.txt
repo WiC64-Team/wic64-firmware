@@ -16,6 +16,7 @@ idf_component_register(
     SRCS "commands/connect.cpp"
     SRCS "commands/echo.cpp"
     SRCS "commands/time.cpp"
+    SRCS "commands/timezone.cpp"
     SRCS "display.cpp"
     SRCS "webserver.cpp"
     SRCS "clock.cpp"

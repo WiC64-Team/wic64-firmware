@@ -484,13 +484,13 @@ void loop() {
           getLocalTime();
           sendmessage(acttime);
         }
-        if (lastinput.charAt(3) == 22) { // TODO: Command 0x16 (22) Set timezone
+        if (lastinput.charAt(3) == 22) {
           ex = true;
           displaystuff("set timezone");
           httpstring = lastinput;
           settimezone();
         }
-        if (lastinput.charAt(3) == 23) { // TODO: Command 0x17 (23) Set timezone
+        if (lastinput.charAt(3) == 23) {
           ex = true;
           displaystuff("get timezone");
           sendmessage(String(gmtOffset_sec, DEC));

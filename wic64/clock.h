@@ -8,13 +8,14 @@ namespace WiC64 {
         public: static const char* TAG;
 
         private:
-            static const int32_t timezones[];
             void configure(void);
             void reconfigure(void);
 
         public:
             Clock();
             const char* localTime(void);
+            int32_t timezone(void);
+            void timezone(int32_t timezone);
     };
 }
 
