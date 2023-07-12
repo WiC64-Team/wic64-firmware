@@ -51,7 +51,7 @@ ${include}
 namespace WiC64 {
     const char* ${classname}::TAG = \"${tagname}\";
 
-    const char* describe() {
+    const char* ${classname}::describe() {
         return \"${classname} (short description)\";
     }
 
