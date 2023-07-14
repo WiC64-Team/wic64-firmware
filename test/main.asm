@@ -134,7 +134,7 @@ menu !zone menu {
 
 !src "tests/echo.asm"
 !src "tests/noise.asm"
-!src "tests/get_ip.asm"
+!src "tests/wifi_info.asm"
 
 verify_error_text
 !text red, "          => VERIFY ERROR <=", green, $0d, $0d, $00
