@@ -448,7 +448,7 @@ void loop() {
           loader(lastinput);
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
         }  // Chatserver string decoding
-        if (lastinput.charAt(3) == 16) { // TODO: Command 0x10 (16) Get SSID
+        if (lastinput.charAt(3) == 16) {
           ex = true;
           displaystuff("get ssid");
           sendmessage(WiFi.SSID());
@@ -473,7 +473,7 @@ void loop() {
           loader("XXXXhttp://wic64.com/firmware/stable/ip.php");
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
         }
-        if (lastinput.charAt(3) == 20) { // TODO: Command 0x14 (20) Get MAC address
+        if (lastinput.charAt(3) == 20) {
           ex = true;
           displaystuff("get mac");
           sendmessage(WiFi.macAddress());
@@ -523,50 +523,50 @@ void loop() {
         }
 #endif
 
-        if (lastinput.charAt(3) == 25) { // TODO: Command 0x19 (25) "read prefs"
+        if (lastinput.charAt(3) == 25) {
           ex = true;
           displaystuff("read prefs");
           httpstring = lastinput;
           sendmessage(getprefs());
         }
-        if (lastinput.charAt(3) == 26) { // TODO: Command 0x1a (26) "save prefs"
+        if (lastinput.charAt(3) == 26) {
           ex = true;
           displaystuff("save prefs");
           httpstring = lastinput;
           sendmessage(setprefs());
         }
 
-        if (lastinput.charAt(3) == 30) { // TODO: TCP commands required? incomplete? Telnet?
+        if (lastinput.charAt(3) == 30) {
           ex = true;
-          displaystuff("get tcp");
+          displaystuff("get udp");
           getudpmsg();
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
-        }  // Get TCP data and return them to c64 INCOMPLETE
+        }
         if (lastinput.charAt(3) == 31) {
           ex = true;
-          displaystuff("send tcp");
+          displaystuff("send udp");
           sendudpmsg(lastinput);
           sendmessage("");
           log_i("tcp send %s", lastinput);
-        }  // Get TCP data and return them to c64 INCOMPLETE
-        if (lastinput.charAt(3) == 32) {
+        }
+        if (lastinput.charAt(3) == 32) { // TODO: Command 0x20 (32) tcp set port (?)
           ex = true;
           displaystuff("set tcp port");
           httpstring = lastinput;
           settcpport();
         }
 
-        if (lastinput.charAt(3) == 33) {
+        if (lastinput.charAt(3) == 33) { // TODO: Command 0x21 (33) tcp connect
           ex = true;
           displaystuff("connect tcp1");
           sendmessage(connecttcp1());
         }
-        if (lastinput.charAt(3) == 34) {
+        if (lastinput.charAt(3) == 34) { // TODO: Command 0x22 (35) tcp read
           ex = true;
           displaystuff("get tcp1");
           sendmessage(gettcp1());
         }
-        if (lastinput.charAt(3) == 35) {
+        if (lastinput.charAt(3) == 35) {  // TODO: Command 0x23 (35) tcp write
           ex = true;
           displaystuff("send tcp1");
           sendmessage(sendtcp1());

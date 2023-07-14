@@ -26,7 +26,6 @@ namespace WiC64 {
         }
     }
 
-    // REDESIGN: Add file type in response header
     void Get::expand(String& url) {
         if (url.indexOf("%mac") != -1) {
             ESP_LOGI(TAG, "Replacing \"%%mac\" with MAC address and security token in URL");

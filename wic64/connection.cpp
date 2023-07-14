@@ -86,16 +86,28 @@ namespace WiC64 {
         WiFi.begin(ssid, passphrase);
     }
 
+    const char *Connection::macAddress() {
+        static char mac[18+1];
+        stpncpy(mac, WiFi.macAddress().c_str(), 18);
+        return mac;
+    }
+
     const char* Connection::ipAddress() {
         static char ip[16+1];
-        strncpy(ip, WiFi.localIP().toString().c_str(), 16);
+        stpncpy(ip, WiFi.localIP().toString().c_str(), 16);
         return ip;
     }
 
-    const char *Connection::macAddress() {
-        static char mac[18+1];
-        strncpy(mac, WiFi.macAddress().c_str(), 18);
-        return mac;
+    const char *Connection::SSID(void) {
+        static char ssid[MAX_SSID_LEN+1];
+        stpncpy(ssid, getStoredSSID().c_str(), MAX_SSID_LEN);
+        return ssid;
+    }
+
+    const char *Connection::RSSI(void) {
+        static char rssi[8+1];
+        snprintf(rssi, 8+1, "%ddbm", WiFi.RSSI());
+        return rssi;
     }
 
     uint16_t Connection::scanNetworks(void) {

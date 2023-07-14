@@ -20,8 +20,10 @@ namespace WiC64 {
             bool reconnecting(void) { return m_reconnecting; }
             void reconnecting(bool reconnecting) { m_reconnecting = reconnecting; }
 
-            const char* ipAddress(void);
             const char* macAddress(void);
+            const char* ipAddress(void);
+            const char* SSID(void);
+            const char* RSSI(void);
 
             uint16_t scanNetworks(void);
 
