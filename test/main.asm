@@ -117,7 +117,7 @@ menu !zone menu {
 +   +scan key_three
     beq +
 
-    jsr test_get_ip
+    jsr test_wifi_info
     jmp menu
 
 +   jmp .scan
@@ -126,9 +126,9 @@ menu !zone menu {
 !text "WIC64 TEST FW ", $00
 
 .menu_text
-!text "", ron, "1", roff, " DATA TRANSFER", $0d
-!text "", ron, "2", roff, " NOISE RESISTANCE", $0d
-!text "", ron, "3", roff, " GET IP ADDRESS", $0d
+!text ron, "1", roff, " DATA TRANSFER", $0d
+!text ron, "2", roff, " NOISE RESISTANCE", $0d
+!text ron, "3", roff, " GET WIFI INFO", $0d
 !byte $00
 }
 
