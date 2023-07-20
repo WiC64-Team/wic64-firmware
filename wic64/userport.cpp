@@ -1,4 +1,5 @@
 #include "driver/gpio.h"
+#include "driver/dac_common.h"
 #include "esp32-hal.h"
 
 #include <cmath>
@@ -11,6 +12,7 @@ ESP_EVENT_DEFINE_BASE(USERPORT_EVENTS);
 
 namespace WiC64 {
     const char* Userport::TAG = "USERPORT";
+    portMUX_TYPE Userport::mutex = portMUX_INITIALIZER_UNLOCKED;
 
     extern Userport *userport;
     extern Service *service;
@@ -49,17 +51,24 @@ namespace WiC64 {
     }
 
     void Userport::connect() {
+        dac_output_disable(DAC_CHANNEL_1);
+        dac_output_disable(DAC_CHANNEL_2);
+
         gpio_set_direction(PA2, GPIO_MODE_INPUT);
-        gpio_pullup_en(PA2);
+        gpio_set_drive_capability(PA2, GPIO_DRIVE_CAP_3);
 
         gpio_set_direction(PC2, GPIO_MODE_INPUT);
-        gpio_pulldown_en(PC2);
+        gpio_set_drive_capability(PC2, GPIO_DRIVE_CAP_3);
 
         gpio_set_direction(FLAG2, GPIO_MODE_OUTPUT);
+        gpio_set_drive_capability(FLAG2, GPIO_DRIVE_CAP_3);
 
         setPortToInput();
 
-        attachInterrupt(HANDSHAKE_LINE_C64_TO_ESP, onHandshakeSignalReceived, RISING);
+        gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
+        gpio_set_intr_type(HANDSHAKE_LINE_C64_TO_ESP, GPIO_INTR_LOW_LEVEL);
+        gpio_isr_handler_add(HANDSHAKE_LINE_C64_TO_ESP, (gpio_isr_t) onHandshakeSignalReceived, NULL);
+
         connected = true;
 
         ESP_LOGI(TAG, "Userport connected, accepting requests");
@@ -67,10 +76,8 @@ namespace WiC64 {
 
     void Userport::disconnect() {
         gpio_set_direction(PA2, GPIO_MODE_INPUT);
-        gpio_pullup_dis(PA2);
 
         gpio_set_direction(PC2, GPIO_MODE_INPUT);
-        gpio_pulldown_dis(PC2);
 
         gpio_set_direction(FLAG2, GPIO_MODE_INPUT);
 
@@ -186,10 +193,10 @@ namespace WiC64 {
             ? TRANSFER_STATE_PENDING
             : TRANSFER_STATE_RUNNING;
 
+        ESP_LOGD(TAG, "%s %d bytes...", isSending(type) ? "Sending" : "Receiving", size);
+
         createTimeoutTask();
         timeTransferStarted = millis();
-
-        ESP_LOGD(TAG, "%s %d bytes...", isSending(type) ? "Sending" : "Receiving", size);
 
         if (isInitiallySending()) {
             ESP_LOGV(TAG, "Sending initial handshake to start pending transfer");
@@ -216,6 +223,7 @@ namespace WiC64 {
     }
 
     void Userport::onTransferCompleted(void* arg, esp_event_base_t base, int32_t id, void* data) {
+        userport->deleteTimeoutTask();
 
         float sec = (millis() - userport->timeTransferStarted) / 1000.0;
         float kbs = userport->size/sec/1024;
@@ -227,8 +235,6 @@ namespace WiC64 {
             ESP_LOGI(TAG, "%d bytes %s, transfer completed",
                 userport->size, userport->isSending() ? "sent" : "received");
         }
-
-        userport->deleteTimeoutTask();
 
         TRANSFER_TYPE currentTransferType = userport->transferType;
         userport->previousTransferType = currentTransferType;
@@ -247,12 +253,12 @@ namespace WiC64 {
             vTaskDelay(pdMS_TO_TICKS(10));
         }
 
-        if(currentTransferType != TRANSFER_TYPE_SEND_PARTIAL) {
-            userport->setPortToInput();
+        if (userport->onSuccessCallback != NULL) {
+            userport->onSuccessCallback((uint8_t*) userport->buffer, userport->size);
         }
 
-        if (userport->onSuccessCallback != NULL) {
-            userport->onSuccessCallback(userport->buffer, userport->size);
+        if (currentTransferType != TRANSFER_TYPE_SEND_PARTIAL) {
+            userport->setPortToInput();
         }
     }
 
@@ -265,7 +271,7 @@ namespace WiC64 {
         transferState = TRANSFER_STATE_NONE;
 
         if (onFailureCallback != NULL) {
-            onFailureCallback(buffer, pos);
+            onFailureCallback((uint8_t*) buffer, pos);
             onFailureCallback = NULL;
         }
 
@@ -273,27 +279,22 @@ namespace WiC64 {
     }
 
     void Userport::createTimeoutTask(void) {
-        xTaskCreatePinnedToCore(timeoutTask, "TIMEOUT", 4096, NULL, 10, &timeoutTaskHandle, 0);
+        xTaskCreatePinnedToCore(timeoutTask, "TIMEOUT", 4096, NULL, 5, &timeoutTaskHandle, 0);
 
-        timeoutTaskCreated = (timeoutTaskHandle != NULL);
-
-        if (!timeoutTaskCreated) {
+        if (timeoutTaskHandle == NULL) {
             abortTransfer("Could not create timeout supervisor task");
         }
     }
 
     void Userport::deleteTimeoutTask(void) {
-        if (isTimeoutTaskRunning()) {
-            vTaskDelete(timeoutTaskHandle);
-            timeoutTaskCreated = false;
-        }
-    }
+        if (timeoutTaskHandle != NULL) {
+            portENTER_CRITICAL(&mutex);
 
-    bool Userport::isTimeoutTaskRunning(void) {
-        return
-            (timeoutTaskHandle != NULL) &&                  // Task has been created successfully before
-            (timeoutTaskCreated) &&                         // Task has been created and should be running
-            (eTaskGetState(timeoutTaskHandle) != eDeleted); // Task has not previously been deleted
+            vTaskDelete(timeoutTaskHandle);
+            timeoutTaskHandle = NULL;
+
+            portEXIT_CRITICAL(&mutex);
+        }
     }
 
     void Userport::resetTimeout(void) {
@@ -373,38 +374,37 @@ namespace WiC64 {
     }
 
     void Userport::onHandshakeSignalReceived(void) {
+        portENTER_CRITICAL_ISR(&mutex);
+
         userport->resetTimeout();
 
         if (userport->transferState == TRANSFER_STATE_TERMINATING) {
-            // received final handshake caused by last read of $dd01
             userport->transferState = TRANSFER_STATE_NONE;
         }
+
         else if (userport->transferState == TRANSFER_STATE_PENDING) {
             userport->post(USERPORT_READY_TO_SEND);
         }
-        else {
-            switch(userport->transferType) {
-                case TRANSFER_TYPE_NONE:
-                    userport->post(USERPORT_REQUEST_INITIATED);
-                    break;
 
-                case TRANSFER_TYPE_RECEIVE_FULL:
-                case TRANSFER_TYPE_RECEIVE_PARTIAL:
-                    userport->readNextByte();
-                    break;
-
-                case TRANSFER_TYPE_SEND_FULL:
-                case TRANSFER_TYPE_SEND_PARTIAL:
-                    userport->writeNextByte();
-                    break;
-            }
+        else if (userport->transferType == TRANSFER_TYPE_NONE) {
+            userport->post(USERPORT_REQUEST_INITIATED);
         }
+
+        else if (userport->transferType == TRANSFER_TYPE_RECEIVE_FULL ||
+            userport->transferType == TRANSFER_TYPE_RECEIVE_PARTIAL) {
+            userport->readNextByte();
+        }
+        else if (userport->transferType == TRANSFER_TYPE_SEND_FULL ||
+            userport->transferType == TRANSFER_TYPE_SEND_PARTIAL) {
+            userport->writeNextByte();
+        }
+
+        portEXIT_CRITICAL_ISR(&mutex);
+        portYIELD_FROM_ISR();
     }
 
     void IRAM_ATTR Userport::post(userport_event_t event) {
         BaseType_t task_unblocked;
-
-        // esp_rom_printf("HANDSHAKE => %s\n", userport->eventName(event));
 
         esp_event_isr_post_to(
             userport->event_loop_handle,

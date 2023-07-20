@@ -91,22 +91,22 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             };
 
             bool connected = false;
+            static portMUX_TYPE mutex;
 
             static const uint16_t TIMEOUT_DEFAULT_1000MS = 1000;
-            uint16_t timeout = TIMEOUT_DEFAULT_1000MS;
-            uint32_t timeOfLastActivity;
-            uint32_t timeTransferStarted;
+            volatile uint16_t timeout = TIMEOUT_DEFAULT_1000MS;
+            volatile uint32_t timeOfLastActivity;
+            volatile uint32_t timeTransferStarted;
 
             TaskHandle_t timeoutTaskHandle;
-            bool timeoutTaskCreated = false;
 
-            TRANSFER_TYPE transferType = TRANSFER_TYPE_NONE;
-            TRANSFER_TYPE previousTransferType = TRANSFER_TYPE_NONE;
-            TRANSFER_STATE transferState = TRANSFER_STATE_NONE;
+            volatile TRANSFER_TYPE transferType = TRANSFER_TYPE_NONE;
+            volatile TRANSFER_TYPE previousTransferType = TRANSFER_TYPE_NONE;
+            volatile TRANSFER_STATE transferState = TRANSFER_STATE_NONE;
 
-            uint8_t *buffer;
-            uint16_t size;
-            uint16_t pos;
+            volatile uint8_t *buffer;
+            volatile uint16_t size;
+            volatile uint16_t pos;
 
             callback_t onSuccessCallback = NULL;
             callback_t onFailureCallback = NULL;
@@ -136,7 +136,6 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
 
             void createTimeoutTask(void);
             void deleteTimeoutTask(void);
-            bool isTimeoutTaskRunning(void);
 
             static void IRAM_ATTR post(userport_event_t event);
 
