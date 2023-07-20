@@ -12,9 +12,11 @@ test_echo !zone test_echo {
     lda #$ff
     sta iterations
     sta iterations+1
+    sta iterations+2
+    sta iterations+3
 
 .next_iteration
-    +incw iterations
+    +incl iterations
     jsr randomize
     jsr echo
     bcs .timed_out
@@ -31,7 +33,7 @@ test_echo !zone test_echo {
 .prompt
     +restart_or_return_prompt .restart
 
-iterations !word $0000
+iterations !byte $00, $00, $00, $00
 
 randomize !zone randomize {
     ; calculate a random payload size up to 16kb
@@ -163,10 +165,20 @@ status !zone status {
 
     +plot 1, 4
     +wait_raster $30
-    lda iterations+1
+    lda iterations+3
     jsr hexprint
 
     +plot 3, 4
+    +wait_raster $30
+    lda iterations+2
+    jsr hexprint
+
+    +plot 5, 4
+    +wait_raster $30
+    lda iterations+1
+    jsr hexprint
+
+    +plot 7, 4
     +wait_raster $30
     lda iterations
     jsr hexprint
@@ -180,7 +192,7 @@ status !zone status {
 !text $0d
 !text "           $  00 BYTES OF RANDOM DATA", $0d
 !text $0d
-!text "$     SUCCESSFUL TRANSFERS", $0d
+!text "$         SUCCESSFUL TRANSFERS", $0d
 !text $0d
 !text $0d
 !text "-- THIS TEST SHOULD RUN INDEFINITELY --", $0d

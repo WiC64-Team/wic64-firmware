@@ -16,6 +16,17 @@
 .done
 }
 
+!macro incl .addr {
+    inc .addr
+    bne .done
+    inc .addr+1
+    bne .done
+    inc .addr+2
+    bne .done
+    inc .addr+3
+.done
+}
+
 !macro decw .addr {
     dec .addr
     cmp #$ff
