@@ -75,14 +75,6 @@ test_wifi_info !zone test_wifi_info {
 !text $0d, $0d, $00
 
 get_info !zone wifi_info {
-    ; FIXME: Firmware sometimes fails on fast succession of commands
-    ldy #$00
-    ldx #$00
--   dey
-    bne -
-    dex
-    bne -
-
     ; need to null the response buffer
     ; because strings are always send WITHOUT
     ; a terminating nullbyte by the original

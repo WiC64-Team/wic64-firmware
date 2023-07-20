@@ -193,6 +193,7 @@ namespace WiC64 {
 
         if (isInitiallySending()) {
             ESP_LOGV(TAG, "Sending initial handshake to start pending transfer");
+            vTaskDelay(pdMS_TO_TICKS(10));
             sendHandshakeSignal(); // first handshake the c64 is waiting for after changing direction
         }
 
@@ -201,6 +202,7 @@ namespace WiC64 {
             previousTransferType == TRANSFER_TYPE_SEND_PARTIAL) {
 
             ESP_LOGV(TAG, "Sending initial handshake signal");
+            vTaskDelay(pdMS_TO_TICKS(10));
             sendHandshakeSignal();
         }
     }
@@ -242,6 +244,7 @@ namespace WiC64 {
             currentTransferType == TRANSFER_TYPE_SEND_FULL) {
             ESP_LOGD(TAG, "Sending final handshake signal");
             userport->sendHandshakeSignal();
+            vTaskDelay(pdMS_TO_TICKS(10));
         }
 
         if(currentTransferType != TRANSFER_TYPE_SEND_PARTIAL) {
