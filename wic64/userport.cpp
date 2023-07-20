@@ -428,13 +428,4 @@ namespace WiC64 {
             }
         }
     }
-
-    const char *Userport::eventName(userport_event_t event) {
-        switch (event) {
-            case USERPORT_REQUEST_INITIATED: return "REQUEST INITIATED"; break;
-            case USERPORT_READY_TO_SEND: return "READY TO SEND"; break;
-            case USERPORT_TRANSFER_COMPLETED: return "TRANSFER COMPLETED"; break;
-        }
-        return "UNNAMED EVENT";
-    }
 }

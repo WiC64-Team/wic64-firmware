@@ -177,8 +177,6 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             static void timeoutTask(void*);
 
             static void IRAM_ATTR onHandshakeSignalReceived(void);
-
-            const char* eventName(userport_event_t event);
     };
 
 }
