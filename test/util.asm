@@ -16,14 +16,12 @@
 .done
 }
 
-!macro incl .addr {
+!macro inc24 .addr {
     inc .addr
     bne .done
     inc .addr+1
     bne .done
     inc .addr+2
-    bne .done
-    inc .addr+3
 .done
 }
 
@@ -81,6 +79,7 @@ clrhome !zone clrhome {
 !macro plot .x, .y {
     ldy #.x
     ldx #.y
+    clc
     jsr $fff0
 }
 
@@ -94,6 +93,12 @@ clrhome !zone clrhome {
     ldx #<.addr
     ldy #>.addr
     jsr print
+}
+
+!macro print_ascii .addr {
+    ldx #<.addr
+    ldy #>.addr
+    jsr print_ascii
 }
 
 !macro print_indirect .ptr {
@@ -110,6 +115,26 @@ print !zone print {
 .loop
     lda (zp2),y
     beq .done
+    jsr chrout
+    inc zp2
+    bne .loop
+    inc zp2+1
+    jmp .loop
+
+.done
+    rts
+}
+
+print_ascii !zone print_ascii {
+    stx zp2
+    sty zp2+1
+    ldy #$00
+
+.loop
+    lda (zp2),y
+    beq .done
+    tax
+    lda ascii2petscii,x
     jsr chrout
     inc zp2
     bne .loop
@@ -196,5 +221,14 @@ hexprint !zone hexprint {
 .digits
     !text "0123456789ABCDEF"
 }
+
+ascii2petscii:
+!for i, 0, 255 { !byte i }
+
+* = ascii2petscii+65, overlay
+!for i, 1, 26 {!byte *-ascii2petscii + 128}
+
+* = ascii2petscii+97, overlay
+!for i, 1, 26 {!byte *-ascii2petscii - 32}
 
 }

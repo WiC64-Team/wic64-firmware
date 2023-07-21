@@ -13,10 +13,9 @@ test_echo !zone test_echo {
     sta iterations
     sta iterations+1
     sta iterations+2
-    sta iterations+3
 
 .next_iteration
-    +incl iterations
+    +inc24 iterations
     jsr randomize
     jsr echo
     bcs .timed_out
@@ -64,10 +63,11 @@ randomize !zone randomize {
     bne .next_page
 
     rts
-.randomizing !text "GENERATING", $00
+.randomizing !text "gENERATING", $00
 }
 
 echo !zone echo {
+    sei
     jsr wic64_init
 
     +status .sending
@@ -99,6 +99,7 @@ echo !zone echo {
 
     jsr wic64_exit
 
+    cli
     clc
     rts
 
@@ -106,8 +107,8 @@ echo !zone echo {
     sec
     rts
 
-.sending !text "SENDING   ", $00
-.receiving !text "RECEIVING ", $00
+.sending !text "sENDING   ", $00
+.receiving !text "rECEIVING ", $00
 }
 
 verify !zone verify {
@@ -139,14 +140,13 @@ verify !zone verify {
     sec
     rts
 
-.verifying !text "VERIFYING ", $00
+.verifying !text "vERIFYING ", $00
 }
 
 status !zone status {
     stx .task
     sty .task+1
 
-    sei
     lda $0400
     cmp #$20
     bne +
@@ -165,43 +165,37 @@ status !zone status {
 
     +plot 1, 4
     +wait_raster $30
-    lda iterations+3
+    lda iterations+2
     jsr hexprint
 
     +plot 3, 4
     +wait_raster $30
-    lda iterations+2
-    jsr hexprint
-
-    +plot 5, 4
-    +wait_raster $30
     lda iterations+1
     jsr hexprint
 
-    +plot 7, 4
+    +plot 5, 4
     +wait_raster $30
     lda iterations
     jsr hexprint
 
     +plot 0, 17
-    cli
     rts
 
 .text
-!text "WIC64 TEST: DATA TRANSFER (ECHO $FF)", $0d
+!text "wIc64 tEST: dATA tRANSFER (ECHO $FF)", $0d
 !text $0d
 !text "           $  00 BYTES OF RANDOM DATA", $0d
 !text $0d
-!text "$         SUCCESSFUL TRANSFERS", $0d
+!text "$       SUCCESSFUL TRANSFERS", $0d
 !text $0d
 !text $0d
-!text "-- THIS TEST SHOULD RUN INDEFINITELY --", $0d
+!text "-- tHIS TEST SHOULD RUN INDEFINITELY --", $0d
 !text $0d
 !text $0d
-!text "IF THE ESP IS RESET, THIS TEST SHOULD", $0d
+!text "iF THE esp IS RESET, THIS TEST SHOULD", $0d
 !text "TIME OUT AFTER APPROX. TWO SECONDS.", $0d
 !text $0d
-!text "IF THIS TEST IS ABORTED, THE ESP SHOULD", $0d
+!text "iF THIS TEST IS ABORTED, THE esp SHOULD", $0d
 !text "TIME OUT AFTER APPROX. ONE SECOND.", $0d, $00
 .task !16 $0000
 }

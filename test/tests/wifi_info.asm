@@ -12,7 +12,7 @@ test_wifi_info !zone test_wifi_info {
     bcc +
     jmp .timeout
 
-+   +print response
++   +print_ascii response
     +newline
 
     +print .text_rssi
@@ -23,7 +23,7 @@ test_wifi_info !zone test_wifi_info {
     bcc +
     jmp .timeout
 
-+   +print response
++   +print_ascii response
     +newline
 
     +print .text_ip
@@ -60,16 +60,16 @@ test_wifi_info !zone test_wifi_info {
     +restart_or_return_prompt .restart
 
 .text
-!text "WIC64 TEST: WIFI INFO ($10,$11,$06,$14)", $0d
+!text "wIc64 tEST: wIfI iNFO ($10,$11,$06,$14)", $0d
 !text $0d, $00
 .text_ssid
-!text "SSID: ", $00
+!text "ssid: ", $00
 .text_rssi
-!text "RSSI: ", $00
+!text "rssi: ", $00
 .text_ip
-!text "ADDR: ", $00
+!text "addr: ", $00
 .text_mac
-!text "MAC:: ", $00
+!text "mac : ", $00
 
 .paragraph
 !text $0d, $0d, $00

@@ -142,21 +142,21 @@ test_resistance !zone test_resistance {
     rts
 
 .text
-!text "WIC64 TEST: NOISE RESISTANCE", $0d, $0d
-!text "SENDING $2000 BYTES OF LINE NOISE", $0d
+!text "wIc64 tEST: nOISE rESISTANCE", $0d, $0d
+!text "sENDING $2000 BYTES OF LINE NOISE", $0d
 !text $0d
 !text "$     TEST ITERATIONS", $0d
 !text $0d
 !text $0d
-!text "-- THIS TEST SHOULD RUN INDEFINITELY --", $0d
+!text "-- tHIS TEST SHOULD RUN INDEFINITELY --", $0d
 !text $0d
 !text $0d
-!text "THE ESP SHOULD NOT RESET ITSELF DUE TO", $0d
+!text "tHE esp SHOULD NOT RESET ITSELF DUE TO", $0d
 !text "WATCHDOG TIMERS TRIGGERING, EXCEPTIONS", $0d
 !text "BEING THROWN OR MEMORY ALLOCATIONS", $0d
 !text "FAILING.", $0d
 !text $0d
-!text "THIS ALSO APPLIES WHEN THE ESP IS RESET", $0d
+!text "tHIS ALSO APPLIES WHEN THE esp IS RESET", $0d
 !text "MANUALLY WHILE THIS TEST IS RUNNING.", $0d
 !text $00
 }

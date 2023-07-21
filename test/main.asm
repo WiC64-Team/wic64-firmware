@@ -92,6 +92,10 @@ menu !zone menu {
     ; clear screen and home cursor
     jsr clrhome
 
+    ; lower case
+    lda #$0e
+    jsr $ffd2
+
     ; print menu
     +print .menu_title
     +print version
@@ -123,12 +127,12 @@ menu !zone menu {
 +   jmp .scan
 
 .menu_title
-!text "WIC64 TEST FW ", $00
+!text "wIc64 tEST fw ", $00
 
 .menu_text
-!text ron, "1", roff, " DATA TRANSFER", $0d
-!text ron, "2", roff, " NOISE RESISTANCE", $0d
-!text ron, "3", roff, " GET WIFI INFO", $0d
+!text ron, "1", roff, " dATA tRANSFER", $0d
+!text ron, "2", roff, " nOISE rESISTANCE", $0d
+!text ron, "3", roff, " gET wIfI iNFO", $0d
 !byte $00
 }
 
@@ -137,16 +141,16 @@ menu !zone menu {
 !src "tests/wifi_info.asm"
 
 verify_error_text
-!text red, "          => VERIFY ERROR <=", green, $0d, $0d, $00
+!text red, "          => vERIFY eRROR <=", green, $0d, $0d, $00
 
 timeout_error_text
-!text red, "       => TRANSFER TIMED OUT <=", green, $0d, $0d, $00
+!text red, "       => tRANSFER TIMED OUT <=", green, $0d, $0d, $00
 
 restart_or_return_text
-!text "  -- PRESS ANY KEY TO RESTART TEST --", $0d
+!text "  -- pRESS any key TO RESTART TEST --", $0d
 !text $0d
 restore_text
-!text " -- PRESS RESTORE TO RETURN TO MENU --", $00
+!text " -- pRESS restore TO RETURN TO MENU --", $00
 
 request
 request_api  !text "W"
