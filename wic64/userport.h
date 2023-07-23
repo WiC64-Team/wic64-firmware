@@ -156,7 +156,7 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             bool isSending(void);
             bool isSending(TRANSFER_TYPE type);
 
-            static void onRequestInitiated(void* arg, esp_event_base_t base, int32_t id, void* data);
+            static void IRAM_ATTR onRequestInitiated(void* arg, esp_event_base_t base, int32_t id, void* data);
 
             void receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess);
             void receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);

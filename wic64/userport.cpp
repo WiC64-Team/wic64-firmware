@@ -1,5 +1,4 @@
 #include "driver/gpio.h"
-#include "driver/dac_common.h"
 #include "esp32-hal.h"
 
 #include <cmath>
@@ -18,10 +17,16 @@ namespace WiC64 {
     extern Service *service;
 
     Userport::Userport() {
+        gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
+
+        gpio_isr_handler_add(HANDSHAKE_LINE_C64_TO_ESP,
+            (gpio_isr_t) onHandshakeSignalReceived,
+            NULL);
+
         esp_event_loop_args_t event_loop_args = {
             .queue_size = 32,
             .task_name = TAG,
-            .task_priority = 10,
+            .task_priority = 15,
             .task_stack_size = 8192,
             .task_core_id = 0
         };
@@ -51,23 +56,12 @@ namespace WiC64 {
     }
 
     void Userport::connect() {
-        dac_output_disable(DAC_CHANNEL_1);
-        dac_output_disable(DAC_CHANNEL_2);
-
-        gpio_set_direction(PA2, GPIO_MODE_INPUT);
-        gpio_set_drive_capability(PA2, GPIO_DRIVE_CAP_3);
-
-        gpio_set_direction(PC2, GPIO_MODE_INPUT);
-        gpio_set_drive_capability(PC2, GPIO_DRIVE_CAP_3);
-
-        gpio_set_direction(FLAG2, GPIO_MODE_OUTPUT);
-        gpio_set_drive_capability(FLAG2, GPIO_DRIVE_CAP_3);
+        gpio_set_direction(DATA_DIRECTION_LINE, GPIO_MODE_INPUT);
+        gpio_set_direction(HANDSHAKE_LINE_ESP_TO_C64, GPIO_MODE_OUTPUT);
+        gpio_set_direction(HANDSHAKE_LINE_C64_TO_ESP, GPIO_MODE_INPUT);
+        gpio_set_intr_type(HANDSHAKE_LINE_C64_TO_ESP, GPIO_INTR_LOW_LEVEL);
 
         setPortToInput();
-
-        gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
-        gpio_set_intr_type(HANDSHAKE_LINE_C64_TO_ESP, GPIO_INTR_LOW_LEVEL);
-        gpio_isr_handler_add(HANDSHAKE_LINE_C64_TO_ESP, (gpio_isr_t) onHandshakeSignalReceived, NULL);
 
         connected = true;
 
@@ -75,18 +69,16 @@ namespace WiC64 {
     }
 
     void Userport::disconnect() {
-        gpio_set_direction(PA2, GPIO_MODE_INPUT);
-
-        gpio_set_direction(PC2, GPIO_MODE_INPUT);
-
-        gpio_set_direction(FLAG2, GPIO_MODE_INPUT);
+        gpio_set_direction(DATA_DIRECTION_LINE, GPIO_MODE_INPUT);
+        gpio_set_direction(HANDSHAKE_LINE_ESP_TO_C64, GPIO_MODE_INPUT);
+        gpio_set_direction(HANDSHAKE_LINE_C64_TO_ESP, GPIO_MODE_INPUT);
+        gpio_set_intr_type(HANDSHAKE_LINE_C64_TO_ESP, GPIO_INTR_DISABLE);
 
         setPortToInput();
 
-        detachInterrupt(HANDSHAKE_LINE_C64_TO_ESP);
         connected = false;
 
-        ESP_LOGI(TAG, "Userport disconnected");
+        ESP_LOGI(TAG, "Userport disconnected, ignoring requests");
     }
 
     bool Userport::isConnected() {
@@ -138,17 +130,19 @@ namespace WiC64 {
 
     inline void Userport::sendHandshakeSignal() {
         SET_HIGH(HANDSHAKE_LINE_ESP_TO_C64);
-        ets_delay_us(5);
         SET_LOW(HANDSHAKE_LINE_ESP_TO_C64);
     }
 
     inline void Userport::readByte(uint8_t *byte) {
         (*byte) = 0;
-        for (uint8_t bit=0; bit<8; bit++) {
-            if(IS_HIGH(PORT_PIN[bit])) {
-                (*byte) |= (1<<bit);
-            }
-        }
+        IS_HIGH(PB0) && ((*byte) |= 1);
+        IS_HIGH(PB1) && ((*byte) |= 2);
+        IS_HIGH(PB2) && ((*byte) |= 4);
+        IS_HIGH(PB3) && ((*byte) |= 8);
+        IS_HIGH(PB4) && ((*byte) |= 16);
+        IS_HIGH(PB5) && ((*byte) |= 32);
+        IS_HIGH(PB6) && ((*byte) |= 64);
+        IS_HIGH(PB7) && ((*byte) |= 128);
     }
 
     inline void Userport::readNextByte() {
@@ -157,15 +151,18 @@ namespace WiC64 {
     }
 
     inline void Userport::writeByte(uint8_t *byte) {
-        uint8_t value = (*byte);
-        for (uint8_t bit=0; bit<8; bit++) {
-            (value & (1<<bit))
-                ? SET_HIGH(PORT_PIN[bit])
-                : SET_LOW(PORT_PIN[bit]);
-        }
+        register uint8_t value = (*byte);
+        (value & 1)   ? SET_HIGH(PB0) : SET_LOW(PB0);
+        (value & 2)   ? SET_HIGH(PB1) : SET_LOW(PB1);
+        (value & 4)   ? SET_HIGH(PB2) : SET_LOW(PB2);
+        (value & 8)   ? SET_HIGH(PB3) : SET_LOW(PB3);
+        (value & 16)  ? SET_HIGH(PB4) : SET_LOW(PB4);
+        (value & 32)  ? SET_HIGH(PB5) : SET_LOW(PB5);
+        (value & 64)  ? SET_HIGH(PB6) : SET_LOW(PB6);
+        (value & 128) ? SET_HIGH(PB7) : SET_LOW(PB7);
     }
 
-    inline void IRAM_ATTR Userport::writeFirstByte(void) {
+    inline void IRAM_ATTR Userport::writeFirstByte() {
         writeNextByte();
     }
 
@@ -200,7 +197,6 @@ namespace WiC64 {
 
         if (isInitiallySending()) {
             ESP_LOGV(TAG, "Sending initial handshake to start pending transfer");
-            vTaskDelay(pdMS_TO_TICKS(10));
             sendHandshakeSignal(); // first handshake the c64 is waiting for after changing direction
         }
 
@@ -250,7 +246,6 @@ namespace WiC64 {
             currentTransferType == TRANSFER_TYPE_SEND_FULL) {
             ESP_LOGD(TAG, "Sending final handshake signal");
             userport->sendHandshakeSignal();
-            vTaskDelay(pdMS_TO_TICKS(10));
         }
 
         if (userport->onSuccessCallback != NULL) {
@@ -374,8 +369,6 @@ namespace WiC64 {
     }
 
     void Userport::onHandshakeSignalReceived(void) {
-        portENTER_CRITICAL_ISR(&mutex);
-
         userport->resetTimeout();
 
         if (userport->transferState == TRANSFER_STATE_TERMINATING) {
@@ -398,9 +391,6 @@ namespace WiC64 {
             userport->transferType == TRANSFER_TYPE_SEND_PARTIAL) {
             userport->writeNextByte();
         }
-
-        portEXIT_CRITICAL_ISR(&mutex);
-        portYIELD_FROM_ISR();
     }
 
     void IRAM_ATTR Userport::post(userport_event_t event) {

@@ -453,7 +453,7 @@ void loop() {
           displaystuff("get ssid");
           sendmessage(WiFi.SSID());
         }
-        if (lastinput.charAt(3) == 17) { // TODO: Command 0x11 (17) Get RSSI
+        if (lastinput.charAt(3) == 17) {
           ex = true;
           displaystuff("get rssi");
           sendmessage(String(WiFi.RSSI()));
