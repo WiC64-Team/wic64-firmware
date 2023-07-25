@@ -24,7 +24,7 @@ namespace WiC64 {
             NULL);
 
         esp_event_loop_args_t event_loop_args = {
-            .queue_size = 32,
+            .queue_size = 1,
             .task_name = TAG,
             .task_priority = 15,
             .task_stack_size = 8192,
@@ -302,6 +302,7 @@ namespace WiC64 {
 
     void Userport::onRequestInitiated(void* arg, esp_event_base_t base, int32_t id, void* data) {
         uint8_t api;
+        static uint8_t line_noise = 0;
 
         ESP_LOGV(TAG, "Received initial handshake");
 
@@ -315,9 +316,21 @@ namespace WiC64 {
         ESP_LOGI(TAG, "Received API id " WIC64_FORMAT_API, api);
 
         if (service->supports(api)) {
+            line_noise = 0;
             service->acceptRequest(api);
+
         } else {
-            ESP_LOGE(TAG, "unsupported API id " WIC64_FORMAT_API, api);
+            ESP_LOGE(TAG, "Unsupported API id " WIC64_FORMAT_API, api);
+
+            if (++line_noise == 8) {
+                ESP_LOGE(TAG, "Line noise detected => disconnecting userport for 500ms");
+
+                userport->disconnect();
+                vTaskDelay(pdMS_TO_TICKS(500));
+                userport->connect();
+
+                line_noise = 0;
+            }
         }
     }
 
