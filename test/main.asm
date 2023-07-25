@@ -23,7 +23,7 @@ key_three !byte %11111101, %00000001
 key_stop  !byte %01111111, %10000000
 
 !src "version.asm"
-!src "universal.asm"
+!src "wic64.asm"
 !src "util.asm"
 
 setup !zone setup {

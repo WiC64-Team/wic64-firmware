@@ -82,8 +82,8 @@ get_info !zone wifi_info {
 
     ldy #$40  ; max length of SSID (63) + 1 nullbyte
     lda #$00
-    +pointer $a7, response
--   sta ($a7),y
+    +pointer wic64_response_pointer, response
+-   sta (wic64_response_pointer),y
     dey
     bne -
 
@@ -93,36 +93,7 @@ get_info !zone wifi_info {
     lda #$00
     sta request_size+1
 
-    jsr wic64_init
-
-    lda #timeout
-    sta z_timeout
-    +pointer $a7, request
-
-    jsr wic64_push
-
-    lda z_timeout
-    cmp #$00
-    beq .timeout
-
-    lda #timeout
-    sta z_timeout
-    +pointer $a7, response
-
-    jsr wic64_pull
-
-    lda z_timeout
-    cmp #$00
-    beq .timeout
-
-    jsr wic64_exit
-
-.success
-    clc
-    rts
-
-.timeout
-    sec
+    +wic64_execute request, response, timeout
     rts
 }
 

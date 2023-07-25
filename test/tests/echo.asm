@@ -45,7 +45,7 @@ randomize !zone randomize {
 +   sta request_size+1
 
     ; fill input buffer with random bytes for size+1 pages
-    +status .randomizing
+    +status .generating
 
     +pointer zp1, request_data
     ldx request_size+1 ; num pages to fill
@@ -63,48 +63,32 @@ randomize !zone randomize {
     bne .next_page
 
     rts
-.randomizing !text "gENERATING", $00
+.generating !text "gENERATING", $00
 }
 
 echo !zone echo {
-    sei
-    jsr wic64_init
-
-    +status .sending
-
-    lda #timeout
-    sta z_timeout
-    +pointer $a7, request
-
     lda #$ff
     sta request_id
 
-    jsr wic64_push
+    lda #timeout
+    sta wic64_timeout
 
-    lda z_timeout
-    cmp #$00
-    beq .timeout
+    +pointer wic64_request_pointer, request
+    +pointer wic64_response_pointer, response
+
+    jsr wic64_initialize
+
+    +status .sending
+    jsr wic64_send
+    bcs .timeout
 
     +status .receiving
+    jsr wic64_receive
+    bcs .timeout
 
-    lda #timeout
-    sta z_timeout
-    +pointer $a7, response
-
-    jsr wic64_pull
-
-    lda z_timeout
-    cmp #$00
-    beq .timeout
-
-    jsr wic64_exit
-
-    cli
-    clc
-    rts
+    jsr wic64_finalize
 
 .timeout
-    sec
     rts
 
 .sending !text "sENDING   ", $00

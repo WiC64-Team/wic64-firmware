@@ -1,8 +1,7 @@
 ASM = acme
-ASMFLAGS = -f cbm -l main.sym -v3
+ASMFLAGS = -f cbm -l main.sym -v3 --color -Wno-label-indent
 VERSION = $(shell git describe --tags --dirty)
 SOURCES = *.asm tests/*.asm version.asm
-
 
 .PHONY: all clean version.asm
 
