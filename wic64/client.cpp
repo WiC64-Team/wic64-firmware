@@ -97,7 +97,7 @@ namespace WiC64 {
         // qualified error information in the future.
         static char error[] = "!0";
 
-        uint8_t retries = 3;
+        uint8_t retries = 5;
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
@@ -155,8 +155,15 @@ namespace WiC64 {
         }
 
         if ((result = esp_http_client_fetch_headers(m_client)) == ESP_FAIL) {
-            ESP_LOGE(TAG, "Failed to fetch headers");
-            goto ERROR;
+            ESP_LOGW(TAG, "Failed to fetch headers, retrying %d more time%s...",
+                retries, (retries > 1) ? "s" : "");
+
+            if (retries-- > 0) {
+                closeConnection();
+                goto RETRY;
+            } else {
+                goto ERROR;
+            }
         }
 
         content_length = result;
