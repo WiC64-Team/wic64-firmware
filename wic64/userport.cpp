@@ -302,12 +302,12 @@ namespace WiC64 {
 
     void Userport::onRequestInitiated(void* arg, esp_event_base_t base, int32_t id, void* data) {
         uint8_t api;
-        static uint8_t line_noise = 0;
 
         ESP_LOGV(TAG, "Received initial handshake");
 
         if (!userport->isReadyToReceive()) {
             ESP_LOGE(TAG, "Userport not ready to receive - PA2 is not HIGH");
+            userport->handleLineNoise();
             return;
         }
 
@@ -316,21 +316,12 @@ namespace WiC64 {
         ESP_LOGI(TAG, "Received API id " WIC64_FORMAT_API, api);
 
         if (service->supports(api)) {
-            line_noise = 0;
+            userport->resetLineNoiseCount();
             service->acceptRequest(api);
 
         } else {
             ESP_LOGE(TAG, "Unsupported API id " WIC64_FORMAT_API, api);
-
-            if (++line_noise == 8) {
-                ESP_LOGE(TAG, "Line noise detected => disconnecting userport for 500ms");
-
-                userport->disconnect();
-                vTaskDelay(pdMS_TO_TICKS(500));
-                userport->connect();
-
-                line_noise = 0;
-            }
+            userport->handleLineNoise();
         }
     }
 
@@ -355,9 +346,10 @@ namespace WiC64 {
 
         if (!userport->isReadyToSend()) {
             ESP_LOGE(TAG, "Userport not ready to send - PA2 is still HIGH");
+            userport->handleLineNoise();
             return;
         }
-
+        userport->resetLineNoiseCount();
         userport->setPortToOutput();
         userport->setTransferRunning();
 
@@ -403,6 +395,26 @@ namespace WiC64 {
         else if (userport->transferType == TRANSFER_TYPE_SEND_FULL ||
             userport->transferType == TRANSFER_TYPE_SEND_PARTIAL) {
             userport->writeNextByte();
+        }
+    }
+
+    void Userport::resetLineNoiseCount(void) {
+        lineNoiseCount = 0;
+    }
+
+    void Userport::handleLineNoise(void) {
+        if (++lineNoiseCount >= 8) {
+            if (transferType != TRANSFER_TYPE_NONE) {
+                abortTransfer("Line noise detected");
+            }
+
+            ESP_LOGE(TAG, "Line noise detected => disconnecting userport for 500ms");
+
+            userport->disconnect();
+            vTaskDelay(pdMS_TO_TICKS(500));
+            userport->connect();
+
+            resetLineNoiseCount();
         }
     }
 

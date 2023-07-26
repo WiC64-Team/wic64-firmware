@@ -96,6 +96,8 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             volatile uint32_t timeOfLastActivity;
             volatile uint32_t timeTransferStarted;
 
+            uint8_t lineNoiseCount = 0;
+
             TaskHandle_t timeoutTaskHandle;
 
             volatile TRANSFER_TYPE transferType = TRANSFER_TYPE_NONE;
@@ -173,6 +175,9 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             void resetTimeout(void);
             bool hasTimedOut(void);
             static void timeoutTask(void*);
+
+            void resetLineNoiseCount(void);
+            void handleLineNoise(void);
 
             static void IRAM_ATTR onHandshakeSignalReceived(void);
     };
