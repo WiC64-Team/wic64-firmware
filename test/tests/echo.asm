@@ -166,7 +166,7 @@ status !zone status {
     rts
 
 .text
-!text "wIc64 tEST: dATA tRANSFER (ECHO $FF)", $0d
+!text "wIc64 tEST: dATA tRANSFER (eCHO $FF)", $0d
 !text $0d
 !text "           $  00 BYTES OF RANDOM DATA", $0d
 !text $0d

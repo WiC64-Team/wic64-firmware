@@ -37,7 +37,7 @@ namespace WiC64 {
     WiC64::WiC64() {
         transferBuffer = (uint8_t*) calloc(0x10000+1, sizeof(uint8_t));
 
-        loglevel(ESP_LOG_VERBOSE);
+        loglevel(ESP_LOG_INFO);
         ESP_LOGW(TAG, "Firmware version %s", WIC64_VERSION_STRING);
 
         userport   = new Userport();
@@ -54,6 +54,8 @@ namespace WiC64 {
 
         log_free_mem(TAG, ESP_LOG_WARN);
         log_task_list(TAG, ESP_LOG_WARN);
+
+        loglevel(ESP_LOG_WARN);
     }
 
     void WiC64::loglevel(esp_log_level_t loglevel) {
