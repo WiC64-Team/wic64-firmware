@@ -102,6 +102,10 @@ menu !zone menu {
     +paragraph
     +print .menu_text
 
+    ; don't blank screen by default
+    lda #$00
+    sta wic64_blank_screen
+
 .scan:
     +scan key_none
     beq .scan

@@ -80,15 +80,12 @@ echo !zone echo {
 
     +status .sending
     jsr wic64_send
-    bcs .timeout
+    bcs +
 
     +status .receiving
     jsr wic64_receive
-    bcs .timeout
 
-    jsr wic64_finalize
-
-.timeout
++   jsr wic64_finalize
     rts
 
 .sending !text "sENDING   ", $00
