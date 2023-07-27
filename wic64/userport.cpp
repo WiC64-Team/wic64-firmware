@@ -19,10 +19,6 @@ namespace WiC64 {
     Userport::Userport() {
         gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
 
-        gpio_isr_handler_add(HANDSHAKE_LINE_C64_TO_ESP,
-            (gpio_isr_t) onHandshakeSignalReceived,
-            NULL);
-
         esp_event_loop_args_t event_loop_args = {
             .queue_size = 1,
             .task_name = TAG,
@@ -56,10 +52,15 @@ namespace WiC64 {
     }
 
     void Userport::connect() {
-        gpio_set_direction(DATA_DIRECTION_LINE, GPIO_MODE_INPUT);
         gpio_set_direction(HANDSHAKE_LINE_ESP_TO_C64, GPIO_MODE_OUTPUT);
+
         gpio_set_direction(HANDSHAKE_LINE_C64_TO_ESP, GPIO_MODE_INPUT);
         gpio_set_intr_type(HANDSHAKE_LINE_C64_TO_ESP, GPIO_INTR_LOW_LEVEL);
+        gpio_isr_handler_add(HANDSHAKE_LINE_C64_TO_ESP, (gpio_isr_t) onHandshakeSignalReceived, NULL);
+
+        gpio_set_direction(DATA_DIRECTION_LINE, GPIO_MODE_INPUT);
+        gpio_set_intr_type(DATA_DIRECTION_LINE, GPIO_INTR_POSEDGE);
+        gpio_isr_handler_add(DATA_DIRECTION_LINE, (gpio_isr_t) onDataDirectionChanged, NULL);
 
         setPortToInput();
 
@@ -69,10 +70,15 @@ namespace WiC64 {
     }
 
     void Userport::disconnect() {
-        gpio_set_direction(DATA_DIRECTION_LINE, GPIO_MODE_INPUT);
         gpio_set_direction(HANDSHAKE_LINE_ESP_TO_C64, GPIO_MODE_INPUT);
+
         gpio_set_direction(HANDSHAKE_LINE_C64_TO_ESP, GPIO_MODE_INPUT);
         gpio_set_intr_type(HANDSHAKE_LINE_C64_TO_ESP, GPIO_INTR_DISABLE);
+        gpio_isr_handler_remove(HANDSHAKE_LINE_C64_TO_ESP);
+
+        gpio_set_direction(DATA_DIRECTION_LINE, GPIO_MODE_INPUT);
+        gpio_set_intr_type(DATA_DIRECTION_LINE, GPIO_INTR_DISABLE);
+        gpio_isr_handler_remove(DATA_DIRECTION_LINE);
 
         setPortToInput();
 
@@ -146,7 +152,7 @@ namespace WiC64 {
     }
 
     inline void Userport::readNextByte() {
-        readByte((uint8_t*) buffer+pos);
+        readByte(buffer+pos);
         continueTransfer();
     }
 
@@ -167,7 +173,7 @@ namespace WiC64 {
     }
 
     inline void Userport::writeNextByte() {
-        writeByte((uint8_t*) buffer+pos);
+        writeByte(buffer+pos);
         continueTransfer();
     }
 
@@ -231,6 +237,7 @@ namespace WiC64 {
             ESP_LOGI(TAG, "%d bytes %s, transfer completed",
                 userport->size, userport->isSending() ? "sent" : "received");
         }
+        vTaskDelay(pdMS_TO_TICKS(1));
 
         TRANSFER_TYPE currentTransferType = userport->transferType;
         userport->previousTransferType = currentTransferType;
@@ -249,7 +256,7 @@ namespace WiC64 {
         }
 
         if (userport->onSuccessCallback != NULL) {
-            userport->onSuccessCallback((uint8_t*) userport->buffer, userport->size);
+            userport->onSuccessCallback(userport->buffer, userport->size);
         }
 
         if (currentTransferType != TRANSFER_TYPE_SEND_PARTIAL) {
@@ -266,7 +273,7 @@ namespace WiC64 {
         transferState = TRANSFER_STATE_NONE;
 
         if (onFailureCallback != NULL) {
-            onFailureCallback((uint8_t*) buffer, pos);
+            onFailureCallback(buffer, pos);
             onFailureCallback = NULL;
         }
 
@@ -398,6 +405,10 @@ namespace WiC64 {
         }
     }
 
+    void IRAM_ATTR Userport::onDataDirectionChanged(void) {
+        userport->transferType = TRANSFER_TYPE_NONE;
+    }
+
     void Userport::resetLineNoiseCount(void) {
         lineNoiseCount = 0;
     }
@@ -408,7 +419,7 @@ namespace WiC64 {
                 abortTransfer("Line noise detected");
             }
 
-            ESP_LOGE(TAG, "Line noise detected => disconnecting userport for 500ms");
+            ESP_LOGW(TAG, "Line noise detected => disconnecting userport for 500ms");
 
             userport->disconnect();
             vTaskDelay(pdMS_TO_TICKS(500));

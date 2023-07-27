@@ -104,9 +104,9 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
             volatile TRANSFER_TYPE previousTransferType = TRANSFER_TYPE_NONE;
             volatile TRANSFER_STATE transferState = TRANSFER_STATE_NONE;
 
-            volatile uint8_t *buffer;
-            volatile uint16_t size;
-            volatile uint16_t pos;
+            uint8_t *buffer;
+            uint16_t size;
+            uint16_t pos;
 
             callback_t onSuccessCallback = NULL;
             callback_t onFailureCallback = NULL;
@@ -172,14 +172,15 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
 
             void abortTransfer(const char* reason);
 
-            void resetTimeout(void);
-            bool hasTimedOut(void);
+            inline void resetTimeout(void);
+            inline bool hasTimedOut(void);
             static void timeoutTask(void*);
 
             void resetLineNoiseCount(void);
             void handleLineNoise(void);
 
             static void IRAM_ATTR onHandshakeSignalReceived(void);
+            static void IRAM_ATTR onDataDirectionChanged(void);
     };
 
 }
