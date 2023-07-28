@@ -97,7 +97,7 @@ namespace WiC64 {
         // qualified error information in the future.
         static char error[] = "!0";
 
-        uint8_t retries = 5;
+        uint8_t retries = MAX_RETRIES;
 
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
@@ -113,6 +113,8 @@ namespace WiC64 {
             .user_agent = "ESP32HTTPClient",
             .method = HTTP_METHOD_GET,
             .timeout_ms = 5 * 1000,
+            .disable_auto_redirect = false,
+            .max_redirection_count = 10,
             .event_handler = eventHandler,
         };
 
@@ -172,7 +174,29 @@ namespace WiC64 {
         ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", status_code, content_length);
         ESP_LOGI(TAG, "Keep alive: %s", m_keepAlive ? "true" : "false");
 
-        if (content_length > 0x10000) {
+        // The client should handle redirects automatically, but this does not always seem to work,
+        // see  https://www.esp32.com/viewtopic.php?t=26701 (no answers from Espressif yet)
+        // If we end up with a redirection code here, try again manually up to MAX_RETRIES
+        if (status_code == 301 || status_code == 302 || status_code == 307 || status_code == 308) {
+            if (retries-- > 0) {
+                ESP_LOGW(TAG, "Failed autoredirect (HTTP status %d), retrying manually %d more time%s...",
+                    status_code, retries, (retries > 1) ? "s" : "");
+
+                esp_http_client_set_redirection(m_client);
+                goto RETRY;
+            } else {
+                goto ERROR;
+            }
+        }
+
+        // The previous firmware sends an error response for any status code != 200 or 201
+        // There are more successful status codes, so we only send an error if code is >= 400
+        if (status_code >= 400) {
+            ESP_LOGE(TAG, "Received HTTP status code %d >= 400, Sending error response", status_code);
+            goto ERROR;
+        }
+
+        if (content_length > 0xffff) {
             // Start queued transfer if content length is known and exceeds transferBuffer
             ESP_LOGI(TAG, "Starting queued send of %d bytes", content_length);
 
@@ -189,8 +213,12 @@ namespace WiC64 {
             // content_length variable via the pvParameters argument.
             xTaskCreatePinnedToCore(queueTask, "SENDER", 4096, &content_length, 30, NULL, 1);
         }
-        else { // Content-Length not send by server or Transfer-Encoding: chunked
-            ESP_LOGI(TAG, "Reading response data of unknown length (limited to 64kb)");
+        else { // Content-Length <= 0xff, not send by server or Transfer-Encoding: chunked
+            if (content_length == 0) {
+                ESP_LOGI(TAG, "Reading response data of unknown length (up to 64kb)");
+            } else {
+                ESP_LOGI(TAG, "Reading %d bytes of response data", content_length);
+            }
 
             // Read up to 64kb from the connection into the static transfer buffer
             if ((size = esp_http_client_read(m_client, (char*) transferBuffer, 0x10000)) == -1) {
