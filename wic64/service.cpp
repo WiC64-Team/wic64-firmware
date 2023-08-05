@@ -244,7 +244,7 @@ namespace WiC64 {
         }
         else {
             ESP_LOGE(TAG, "Request has already been finalized: "
-                "Protocol violation or firmware bug");
+                "protocol violation or firmware bug");
         }
 
         vTaskDelay(pdMS_TO_TICKS(10));
