@@ -20,6 +20,7 @@ namespace WiC64 {
 
             static const uint8_t MAX_RETRIES = 10;
             bool m_keepAlive = false;
+            int32_t m_statusCode = -1;
 
             esp_http_client_handle_t handle() { return m_client; }
             QueueHandle_t queue() { return m_queue; }
@@ -35,6 +36,7 @@ namespace WiC64 {
 
         public:
             Client();
+            int32_t statusCode() { return m_statusCode; }
             void get(Command *command, String url);
     };
 }

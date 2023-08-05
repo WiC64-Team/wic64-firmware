@@ -65,6 +65,11 @@ namespace WiC64 {
                 if (strcmp(event->header_key, "WiC64-Security-Token-Key") == 0) {
                     settings->securityTokenKey(event->header_value);
                 }
+
+                // WiC64-Security-Token: <token>
+                if (strcmp(event->header_key, "WiC64-Security-Token") == 0) {
+                    settings->securityToken(event->header_value);
+                }
                 break;
 
             case HTTP_EVENT_ON_DATA:
@@ -88,7 +93,7 @@ namespace WiC64 {
     void Client::get(Command *command, String url) {
         int32_t size = 0;
 
-        int32_t status_code = -1;
+        m_statusCode = -1;
         static int32_t content_length;
 
         int32_t result;
@@ -169,18 +174,18 @@ namespace WiC64 {
         }
 
         content_length = result;
-        status_code = esp_http_client_get_status_code(m_client);
+        m_statusCode = esp_http_client_get_status_code(m_client);
 
-        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", status_code, content_length);
+        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", m_statusCode, content_length);
         ESP_LOGI(TAG, "Keep alive: %s", m_keepAlive ? "true" : "false");
 
         // The client should handle redirects automatically, but this does not always seem to work,
         // see  https://www.esp32.com/viewtopic.php?t=26701 (no answers from Espressif yet)
         // If we end up with a redirection code here, try again manually up to MAX_RETRIES
-        if (status_code == 301 || status_code == 302 || status_code == 307 || status_code == 308) {
+        if (m_statusCode == 301 || m_statusCode == 302 || m_statusCode == 307 || m_statusCode == 308) {
             if (retries-- > 0) {
                 ESP_LOGW(TAG, "Failed autoredirect (HTTP status %d), retrying manually %d more time%s...",
-                    status_code, retries, (retries > 1) ? "s" : "");
+                    m_statusCode, retries, (retries > 1) ? "s" : "");
 
                 esp_http_client_set_redirection(m_client);
                 goto RETRY;
@@ -191,8 +196,8 @@ namespace WiC64 {
 
         // The previous firmware sends an error response for any status code != 200 or 201
         // There are more successful status codes, so we only send an error if code is >= 400
-        if (status_code >= 400) {
-            ESP_LOGE(TAG, "Received HTTP status code %d >= 400, Sending error response", status_code);
+        if (m_statusCode >= 400) {
+            ESP_LOGE(TAG, "Received HTTP status code %d >= 400, Sending error response", m_statusCode);
             goto ERROR;
         }
 
@@ -221,7 +226,7 @@ namespace WiC64 {
             }
 
             // Read up to 64kb from the connection into the static transfer buffer
-            if ((size = esp_http_client_read(m_client, (char*) transferBuffer, 0x10000)) == -1) {
+            if ((size = esp_http_client_read(m_client, (char*) transferBuffer, 0xffff)) == -1) {
                 ESP_LOGE(TAG, "Read Error");
                 goto ERROR;
             }
