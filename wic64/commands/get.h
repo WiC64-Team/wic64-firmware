@@ -22,6 +22,8 @@ namespace WiC64 {
             void expand(String& url);
 
             void execute(void);
+            void adjustResponseSizeForProgramFiles(void);
+            void handleSettingChangeRequestFromServer(void);
             void responseReady(void);
     };
 }

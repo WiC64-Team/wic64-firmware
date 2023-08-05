@@ -40,38 +40,36 @@ namespace WiC64 {
         return "HTTP GET (fetch URL)";
     }
 
-    // REDESIGN: Remove this hack, just POST binary data
+    // REDESIGN: Remove this hack, just POST binary data or use base64
     void Get::encode(String& url) {
-        // If this command has id 0x0f, encode HEX data after the
-        // marker "$<" in the request data using two lowercase hex
-        // digits per byte. This was required in the original firmware
-        // for reasons I still don't quite understand.
+        // If this command is executed via id 0x0f, encode HEX data
+        // after "<$" markers in the request data using two lowercase
+        // hex digits per byte. The marker is followed by a 16-bit little
+        // endian value denoting the number of bytes to encode, followed
+        // by the actual bytes.
 
-        int16_t start;
+        if (request()->id() != 0x0f) return;
+        if (url.indexOf("<$") == -1) return;
 
-        if (request()->id() == 0x0f && (start = url.indexOf("<$")) != -1) {
-            // remove the data marker and the rest of the data that made
-            // it into the url String before the first nullbyte occured
-            url = url.substring(0, start);
+        const char* src = (char*) request()->argument()->data();
+        const uint16_t len = request()->argument()->size();
+        String encoded = "";
 
-            // get a pointer to the start of the data in the original request
-            uint8_t* data = request()->argument()->data() + start + 2;
+        for (uint16_t i=0; i<len; i++) {
+            if (src[i] == '<' && src[i+1] == '$') {
+                i += 2; // skip "<$"
+                uint16_t data_size = (src[i+1]<<8) | src[i];
 
-            // the first two bytes contain the size of the data
-            uint16_t size = (*((uint16_t*) data));
-
-            // skip ahead to the actual data
-            data += 2;
-
-            // use snprintf into a temporary char* and append it to the url
-            // String  we'll later pass to client.get()
-            char tmp[3];
-
-            for (uint16_t i=0; i<size; i++) {
-                snprintf(tmp, 3, "%02x", data[i]);
-                url += tmp;
+                i += 2; // skip size
+                for (uint16_t k=0; k<data_size; k++, i++) {
+                    encoded.concat(String(src[i], HEX));
+                }
+                i -= 1;
+            } else {
+                encoded.concat(String(src[i]));
             }
         }
+        url = encoded;
     }
 
     void Get::execute(void) {
@@ -88,10 +86,62 @@ namespace WiC64 {
         client->get(this, url); // client will call responseReady()
     }
 
-    void Get::responseReady(void) {
-        if (isVersion1() && isProgramFile() && response()->size() > 2) {
+    void Get::adjustResponseSizeForProgramFiles(void) {
+        // If a cbm "program" file is requested, lie about the size of the
+        // response data by subtracting 2. This has been done in the original
+        // firmware to "simplify" the transfer routine for loading files that
+        // contain a specific load address in the first two bytes.
+        //
+        // REDESIGN: Make the client side library responsible for dealing with
+        // such cases, allow the user to specify whether the expected response
+        // contains a load address.
+
+        if (isProgramFile() && response()->size() > 2) {
             response()->sizeToReport(response()->size() - 2);
         }
+    }
+
+    void Get::handleSettingChangeRequestFromServer(void) {
+        // When the server replies with HTTP status 201, the response contains
+        // a request to change a specific setting in the ESP flash. The request
+        // contains the setting key, value and a reply value that is sent to
+        // the client instead of the server response.
+        //
+        // The original firmware allows values t0 be added and/or changed in the
+        // ESP flash. Here we limit this behaviour to the "security token key" and
+        // the actual "security token".
+        //
+        // REDESIGN: Have the server send custom headers for this purpose
+
+        if (client->statusCode() == 201) {
+            char key[256] = "";
+            char value[256] = "";
+            char reply[256] = "";
+
+            strncpy(key, response()->field(1), 255);
+            strncpy(value, response()->field(2), 255);
+            strncpy(reply, response()->field(3), 255);
+
+            ESP_LOGI(TAG, "Change of setting requested by sever: [%s] = [%s] => [%s]", key, value, reply);
+
+            if (strcmp(key, "sectokenname") == 0) {
+                settings->securityTokenKey(value);
+            }
+            else if (strcmp(key, settings->securityTokenKey().c_str()) == 0) {
+                settings->securityToken(value);
+            }
+            else {
+                ESP_LOGE(TAG, "Unknown setting: [%s]", key);
+                response()->copy("!0");
+                return;
+            }
+            response()->copy(reply);
+        }
+    }
+
+    void Get::responseReady(void) {
+        adjustResponseSizeForProgramFiles();
+        handleSettingChangeRequestFromServer();
         Command::responseReady();
     }
 }
