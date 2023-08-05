@@ -24,6 +24,7 @@ namespace WiC64 {
     void Data::wrap(uint8_t *data, uint16_t size) {
         m_data = data;
         m_size = size;
+        m_data[m_size] = '\0';
     }
 
     void Data::wrap(const char *c_str) {
@@ -54,6 +55,7 @@ namespace WiC64 {
         char* begin = (char*) m_data;
         char* end = begin;
         char* previous_end;
+        uint8_t size;
 
         for (uint16_t i=0; i<=index; i++) {
             previous_end = end;
@@ -62,7 +64,7 @@ namespace WiC64 {
                 if (index == i) {
                     begin = previous_end;
 
-                    uint8_t size =
+                    size =
                         (end - (char*) m_data) -
                         (begin - (char*) m_data);
 
@@ -72,6 +74,16 @@ namespace WiC64 {
                     return value;
                 }
                 end++;
+            }
+            else { // Last field, not terminated by separator byte
+                begin = previous_end;
+                size =  strlen(begin);
+
+                if (size > 0) {
+                    memcpy(value, begin, size);
+                    value[size] = '\0';
+                    return value;
+                }
             }
         }
         value[0] = '\0';
