@@ -49,7 +49,9 @@ namespace WiC64 {
 
     void Settings::string(const char *key, const String& value) {
         ESP_LOGI(TAG, "Setting %s = \"%s\"", key, value.c_str());
-        m_preferences.putString(key, value);
+        if (m_preferences.getString(key) != value) {
+            m_preferences.putString(key, value);
+        }
     }
 
     bool Settings::boolean(const char *key) {
@@ -58,7 +60,9 @@ namespace WiC64 {
 
     void Settings::boolean(const char *key, const bool value) {
         ESP_LOGI(TAG, "Setting %s = %s", key, value ? "true" : "false");
-        m_preferences.putBool(key, value);
+        if (m_preferences.getBool(key) != value) {
+            m_preferences.putBool(key, value);
+        }
     }
 
     int32_t Settings::int32(const char *key) {
@@ -66,7 +70,9 @@ namespace WiC64 {
     }
 
     void Settings::int32(const char *key, const int32_t value) {
-       ESP_LOGI(TAG, "Setting %s = %d", key, value);
-       m_preferences.putLong(key, value);
+        ESP_LOGI(TAG, "Setting %s = %d", key, value);
+        if (m_preferences.getLong(key) != value) {
+            m_preferences.putLong(key, value);
+        }
     }
 }
