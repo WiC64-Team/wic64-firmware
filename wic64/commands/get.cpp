@@ -64,6 +64,7 @@ namespace WiC64 {
         const char* src = (char*) request()->argument()->data();
         const uint16_t len = request()->argument()->size();
         String encoded = "";
+        char code[3];
 
         for (uint16_t i=0; i<len; i++) {
             if (src[i] == '<' && src[i+1] == '$') {
@@ -72,11 +73,12 @@ namespace WiC64 {
 
                 i += 2; // skip size
                 for (uint16_t k=0; k<data_size; k++, i++) {
-                    encoded.concat(String(src[i], HEX));
+                    snprintf(code, 3, "%02x", src[i]);
+                    encoded.concat(code, 2);
                 }
                 i -= 1;
             } else {
-                encoded.concat(String(src[i]));
+                encoded.concat(src[i]);
             }
         }
         url = encoded;
