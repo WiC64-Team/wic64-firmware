@@ -402,7 +402,7 @@ void loop() {
           String stats = __DATE__ " " __TIME__;
           sendmessage(stats);
         }
-        if (lastinput.charAt(3) == 8) { // TODO: Command 0x08 (8) "Set server"
+        if (lastinput.charAt(3) == 8) {
           ex = true;
           displaystuff("set server");
           lastinput.remove(0, 4);
@@ -458,7 +458,7 @@ void loop() {
           displaystuff("get rssi");
           sendmessage(String(WiFi.RSSI()));
         }
-        if (lastinput.charAt(3) == 18) { // TODO: Command 0x12 (18) "Get default server"
+        if (lastinput.charAt(3) == 18) {
           ex = true;
           displaystuff("get server");
           if (setserver != "") {
