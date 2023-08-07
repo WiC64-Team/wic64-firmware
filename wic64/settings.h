@@ -21,6 +21,7 @@ namespace WiC64 {
             void int32(const char* key, const int32_t value);
 
             const char* SECURITY_TOKEN_KEY = "sectokenname";
+            const char* SERVER_KEY = "server";
             const char* GMT_OFFSET_SECONDS_KEY = "gmtoffset";
 
         public:
@@ -31,6 +32,9 @@ namespace WiC64 {
 
             String securityToken(void);
             void securityToken(const String& value);
+
+            String server(void);
+            void server(const String& value);
 
             int32_t gmtOffsetSeconds(void);
             void gmtOffsetSeconds(int32_t value);

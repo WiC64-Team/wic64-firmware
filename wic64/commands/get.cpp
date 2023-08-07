@@ -34,6 +34,16 @@ namespace WiC64 {
             mac.replace(":", "");
             url.replace("%mac", mac + settings->securityToken());
         }
+
+        if (url.indexOf("%ser") != -1) {
+            ESP_LOGI(TAG, "Replacing \"%%ser\" with configured server in URL");
+            url.replace("%ser", settings->server());
+        }
+
+        if (url.startsWith("!")) {
+            ESP_LOGI(TAG, "Replacing leading \"!\" with configured server in URL");
+            url.replace("!", settings->server());
+        }
     }
 
     const char *Get::describe(void) {
@@ -107,7 +117,7 @@ namespace WiC64 {
         // contains the setting key, value and a reply value that is sent to
         // the client instead of the server response.
         //
-        // The original firmware allows values t0 be added and/or changed in the
+        // The original firmware allows values to be added and/or changed in the
         // ESP flash. Here we limit this behaviour to the "security token key" and
         // the actual "security token".
         //
