@@ -1,4 +1,4 @@
-wic64/version.h
+generated-version.h
 build
 dependencies.lock
 sdkconfig.old

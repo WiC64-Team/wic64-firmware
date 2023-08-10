@@ -9,6 +9,7 @@ idf_component_register(
     SRCS "service.cpp"
     SRCS "data.cpp"
     SRCS "request.cpp"
+    SRCS "commands/version.cpp"
     SRCS "command.cpp"
     SRCS "commands/http.cpp"
     SRCS "commands/ip.cpp"
@@ -26,7 +27,7 @@ idf_component_register(
     SRCS "clock.cpp"
     SRCS "utilities.cpp"
     SRCS "main.cpp"
-    SRCS "version.h"
+    SRCS "../generated-version.h"
 
     REQUIRES "wic64"
     REQUIRES "arduino"

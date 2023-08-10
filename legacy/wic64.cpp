@@ -356,7 +356,7 @@ void loop() {
         Serial.println(lastinput.length());
 
 #endif
-        if (lastinput.charAt(3) == 0) { // TODO: Command 0x00 (0) Firmware Version String
+        if (lastinput.charAt(3) == 0) {
           ex = true;
           displaystuff("get FW version");
           sendmessage("WIC64FWV:" + firmwareversion);
@@ -582,7 +582,7 @@ void loop() {
           bigloader(lastinput);
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
         }
-        if (lastinput.charAt(3) == 38) { // TODO: Command 0x26 (38) Firmware Version
+        if (lastinput.charAt(3) == 38) {
           ex = true;
           displaystuff("getVersion");
           String FWLowHigh;

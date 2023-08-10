@@ -3,7 +3,6 @@
 #include "connection.h"
 #include "utilities.h"
 #include "settings.h"
-#include "version.h"
 
 #include "esp_log.h"
 #include "nvs_flash.h"

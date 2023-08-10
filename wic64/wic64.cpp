@@ -9,7 +9,6 @@
 #include "settings.h"
 #include "clock.h"
 #include "utilities.h"
-#include "version.h"
 #include "commands/http.h"
 #include "commands/scan.h"
 #include "commands/connect.h"

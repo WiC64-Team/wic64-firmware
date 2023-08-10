@@ -2,6 +2,7 @@
 #define WIC64_H
 
 #include <cstdint>
+#include "../generated-version.h"
 #include "esp_log.h"
 
 #define WIC64_QUEUE_ITEM_SIZE 1024

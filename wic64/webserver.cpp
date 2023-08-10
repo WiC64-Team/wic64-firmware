@@ -1,6 +1,5 @@
 #include "webserver.h"
 #include "utilities.h"
-#include "version.h"
 
 namespace WiC64 {
     extern Webserver *webserver;
