@@ -79,10 +79,15 @@ echo !zone echo {
     jsr wic64_initialize
 
     +status .sending
+
     jsr wic64_send
     bcs +
 
     +status .receiving
+
+    jsr wic64_prepare_receive
+    bcs +
+
     jsr wic64_receive
 
 +   jsr wic64_finalize

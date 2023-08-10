@@ -13,7 +13,7 @@
 ; Assembly time options
 ;
 ; Define the symbols in the following section before
-; including this file to change the defaults
+; including this file to change the defaults.
 ;*********************************************************
 
 !ifndef wic64_request_pointer {
@@ -27,13 +27,13 @@
 ;*********************************************************
 ; Runtime options
 ;
-; Set the following memory location to control runtime
-; behaviour
+; Set the following memory locations to control runtime
+; behaviour.
 ;*********************************************************
 
 ; wic64_timeout
 ;
-; Set the timeout value, where $01 is approximately one second.
+; Set the timeout value, where $02 is approximately one second.
 ;
 ; If timeout is set to $00, a timeout of $01 will be used by
 ; default.
@@ -83,6 +83,9 @@ wic64_blank_screen !byte $00
     jsr wic64_send
     bcs .done
 
+    jsr wic64_prepare_receive
+    bcs .done
+
     jsr wic64_receive
 
 .done
@@ -92,16 +95,9 @@ wic64_blank_screen !byte $00
 ; ********************************************************
 
 !macro .wait_for_handshake {
-        ; do two cheap tests for FLAG2 before wasting cycles
+        ; do a first cheap test for FLAG2 before wasting cycles
         ; setting up the counters.
-        ;
-        ; two seems to be the magic number here, adding more
-        ; actually slows things down again.
-
         lda #$10
-
-        bit $dd0d
-        bne .success
 
         bit $dd0d
         bne .success
@@ -192,7 +188,7 @@ wic64_initialize
 ; ********************************************************
 
 wic64_send
-    clc ; carry will be set if transfer times out
+    clc ; carry will be set if send times out
 
     ; ask esp to switch to input
     lda $dd00
@@ -247,9 +243,7 @@ wic64_send
 
 ; ********************************************************
 
-wic64_receive
-    clc ; carry will be set if transfer times out
-
+wic64_prepare_receive
     ; switch userport to input
     lda #$00
     sta $dd03
@@ -264,6 +258,13 @@ wic64_receive
 
     ; esp now expects a handshake (accessing $dd01 asserts PC2 line)
     lda $dd01
+
+    rts
+
+; ********************************************************
+
+wic64_receive
+    clc ; carry will be set if receive times out
 
     ; first read the response size (big-endian for unknown reasons)
     +.wait_for_handshake
@@ -328,7 +329,7 @@ wic64_finalize
     ; carry clear => transfer complete
     ; carry set => transfer timed out
 
-    ; restore user interrupt flag
+    ; restore user interrupt flag and rts
     lda .user_interrupt_flag
     beq +
 
