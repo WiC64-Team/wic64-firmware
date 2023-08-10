@@ -100,7 +100,7 @@ namespace WiC64 {
     void Client::request(Command *command, esp_http_client_method_t method, String& url, Data* data) {
         int32_t size = 0;
 
-        int32_t request_content_length = HTTP_METHOD_POST
+        int32_t request_content_length = method == HTTP_METHOD_POST
             ? strlen(HEADER) + data->size() + strlen(FOOTER)
             : 0;
 
