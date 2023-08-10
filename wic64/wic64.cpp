@@ -10,7 +10,7 @@
 #include "clock.h"
 #include "utilities.h"
 #include "version.h"
-#include "commands/get.h"
+#include "commands/http.h"
 #include "commands/scan.h"
 #include "commands/connect.h"
 #include "commands/time.h"
@@ -70,7 +70,7 @@ namespace WiC64 {
         esp_log_level_set(Request::TAG, loglevel);
         esp_log_level_set(Clock::TAG, loglevel);
         esp_log_level_set(Command::TAG, loglevel);
-        esp_log_level_set(Get::TAG, loglevel);
+        esp_log_level_set(Http::TAG, loglevel);
         esp_log_level_set(Scan::TAG, loglevel);
         esp_log_level_set(Connect::TAG, loglevel);
         esp_log_level_set(Time::TAG, loglevel);

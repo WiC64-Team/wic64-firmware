@@ -90,11 +90,23 @@ namespace WiC64 {
         return ESP_OK;
     }
 
-    void Client::get(Command *command, String url) {
+    void Client::get(Command *command, String& url) {
+        request(command, HTTP_METHOD_GET, url, NULL);
+    }
+
+    void Client::post(Command *command, String &url, Data *data) {
+        request(command, HTTP_METHOD_POST, url, data);
+    }
+
+    void Client::request(Command *command, esp_http_client_method_t method, String& url, Data* data) {
         int32_t size = 0;
 
+        int32_t request_content_length = HTTP_METHOD_POST
+            ? strlen(HEADER) + data->size() + strlen(FOOTER)
+            : 0;
+
         m_statusCode = -1;
-        static int32_t content_length;
+        static int32_t content_length; // TODO: why static?
 
         int32_t result;
 
@@ -116,7 +128,7 @@ namespace WiC64 {
         esp_http_client_config_t config = {
             .url = url.c_str(),
             .user_agent = "ESP32HTTPClient",
-            .method = HTTP_METHOD_GET,
+            .method = method,
             .timeout_ms = 5 * 1000,
             .disable_auto_redirect = false,
             .max_redirection_count = 10,
@@ -137,13 +149,19 @@ namespace WiC64 {
                 goto ERROR;
             }
         } else {
-            if(esp_http_client_set_url(m_client, url.c_str()) == ESP_FAIL) {
+            esp_http_client_set_method(m_client, method);
+
+            if (esp_http_client_set_url(m_client, url.c_str()) == ESP_FAIL) {
                 ESP_LOGE(TAG, "Failed to set URL");
                 goto ERROR;
             };
         }
 
-        if ((result = esp_http_client_open(m_client, 0) != ESP_OK)) {
+        if (method == HTTP_METHOD_POST) {
+            esp_http_client_set_header(m_client, "Content-Type", "multipart/form-data;boundary=\"WiC64-Binary-Data\"");
+        }
+
+        if ((result = esp_http_client_open(m_client, request_content_length) != ESP_OK)) {
             ESP_LOGE(TAG, "Failed to open connection: %s", esp_err_to_name(result));
 
             const char* reason = m_keepAlive
@@ -160,6 +178,28 @@ namespace WiC64 {
                 goto ERROR;
             }
         }
+
+        if (method == HTTP_METHOD_POST) {
+            ESP_LOGI(TAG, "Sending POST request body (%d bytes)", request_content_length);
+            bool success =
+                (esp_http_client_write(m_client, HEADER, strlen(HEADER)) == strlen(HEADER)) &&
+                (esp_http_client_write(m_client, (const char*) data->data(), data->size()) == data->size()) &&
+                (esp_http_client_write(m_client, FOOTER, strlen(FOOTER)) == strlen(FOOTER));
+
+            if (!success) {
+                ESP_LOGW(TAG, "Failed to send POST request body, retrying %d more time%s...",
+                    retries, (retries > 1) ? "s" : "");
+
+                if (retries-- > 0) {
+                    closeConnection();
+                    goto RETRY;
+                } else {
+                    goto ERROR;
+                }
+            }
+        }
+
+        ESP_LOGI(TAG, "Request sent, fetching response headers");
 
         if ((result = esp_http_client_fetch_headers(m_client)) == ESP_FAIL) {
             ESP_LOGW(TAG, "Failed to fetch headers, retrying %d more time%s...",

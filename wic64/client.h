@@ -25,6 +25,9 @@ namespace WiC64 {
             esp_http_client_handle_t handle() { return m_client; }
             QueueHandle_t queue() { return m_queue; }
 
+            const char* HEADER = "--WiC64-Binary-Data\nContent-Disposition: form-data; name=\"data\"\n\n";
+            const char* FOOTER = "\n--WiC64-Binary-Data--\n";
+
             void keepAlive(bool keepAlive) { m_keepAlive = keepAlive; }
 
             void closeConnection(void);
@@ -34,10 +37,14 @@ namespace WiC64 {
             static esp_err_t eventHandler(esp_http_client_event_t *evt);
             static void queueTask(void* content_length_ptr);
 
+            void request(Command *command, esp_http_client_method_t method, String& url, Data* data);
+
         public:
             Client();
             int32_t statusCode() { return m_statusCode; }
-            void get(Command *command, String url);
+
+            void get(Command* command, String& url);
+            void post(Command* command, String& url, Data* data);
     };
 }
 
