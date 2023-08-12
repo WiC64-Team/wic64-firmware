@@ -1,11 +1,5 @@
 test_echo !zone test_echo {
 
-!macro status .addr {
-    ldx #<.addr
-    ldy #>.addr
-    jsr status
-}
-
 .restart:
     jsr clrhome
 
@@ -16,11 +10,11 @@ test_echo !zone test_echo {
 
 .next_iteration
     +inc24 iterations
-    jsr randomize
-    jsr echo
+    jsr .randomize
+    jsr .echo
     bcs .timed_out
 
-    jsr verify
+    jsr .verify
     bcc .next_iteration
 
     +print verify_error_text
@@ -32,9 +26,7 @@ test_echo !zone test_echo {
 .prompt
     +restart_or_return_prompt .restart
 
-iterations !byte $00, $00, $00, $00
-
-randomize !zone randomize {
+.randomize !zone randomize {
     ; calculate a random payload size up to 16kb
     lda #$04
     sta request_size
@@ -45,7 +37,7 @@ randomize !zone randomize {
 +   sta request_size+1
 
     ; fill input buffer with random bytes for size+1 pages
-    +status .generating
+    +status .generating, status_echo
 
     +pointer zp1, request_data
     ldx request_size+1 ; num pages to fill
@@ -66,7 +58,7 @@ randomize !zone randomize {
 .generating !text "gENERATING", $00
 }
 
-echo !zone echo {
+.echo !zone echo {
     lda #$ff
     sta request_id
 
@@ -78,12 +70,12 @@ echo !zone echo {
 
     jsr wic64_initialize
 
-    +status .sending
+    +status .sending, status_echo
 
     jsr wic64_send
     bcs +
 
-    +status .receiving
+    +status .receiving, status_echo
 
     jsr wic64_prepare_receive
     bcs +
@@ -97,8 +89,8 @@ echo !zone echo {
 .receiving !text "rECEIVING ", $00
 }
 
-verify !zone verify {
-    +status .verifying
+.verify !zone verify {
+    +status .verifying, status_echo
     +pointer zp1, request_data
     +pointer zp2, response
 
@@ -129,7 +121,7 @@ verify !zone verify {
 .verifying !text "vERIFYING ", $00
 }
 
-status !zone status {
+status_echo !zone status_echo {
     stx .task
     sty .task+1
 

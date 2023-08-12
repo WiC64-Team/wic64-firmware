@@ -45,6 +45,12 @@
     rti
 }
 
+!macro status .addr, .routine {
+    ldx #<.addr
+    ldy #>.addr
+    jsr .routine
+}
+
 !macro scan .k {
     sei
     lda .k

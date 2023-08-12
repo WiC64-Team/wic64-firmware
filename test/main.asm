@@ -165,12 +165,14 @@ restart_or_return_text
 restore_text
 !text " -- pRESS restore TO RETURN TO MENU --", $00
 
+iterations !byte $00, $00, $00, $00
+
 request
 request_api  !text "W"
 request_size !byte $00, $00
 request_id   !byte $00
-request_data ; Up to 16kb of random payload data
+request_data ; Up to 16kb of random payload data + one extra page for post url
 
-* = * + $4000
+* = * + $4100
 
 response ; at least 16kb free for response data
