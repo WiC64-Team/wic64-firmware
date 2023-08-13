@@ -21,9 +21,10 @@ key_one   !byte %01111111, %00000001
 key_two   !byte %01111111, %00001000
 key_three !byte %11111101, %00000001
 key_four  !byte %11111101, %00001000
+key_five  !byte %11111011, %00000001
 key_stop  !byte %01111111, %10000000
 
-!src "version.asm"
+!src "generated-version.asm"
 !src "wic64.asm"
 !src "util.asm"
 
@@ -135,6 +136,12 @@ menu !zone menu {
     jsr test_post
     jmp menu
 
++   +scan key_five
+    beq +
+
+    jsr test_version
+    jmp menu
+
 +   jmp .scan
 
 .menu_title
@@ -145,6 +152,7 @@ menu !zone menu {
 !text ron, "2", roff, " nOISE rESISTANCE", $0d
 !text ron, "3", roff, " gET wIfI iNFO", $0d
 !text ron, "4", roff, " hTTP post REQUEST", $0d
+!text ron, "5", roff, " gET FIRMWARE VERSION", $0d
 !byte $00
 }
 
@@ -152,6 +160,7 @@ menu !zone menu {
 !src "tests/noise.asm"
 !src "tests/wifi_info.asm"
 !src "tests/post.asm"
+!src "tests/version.asm"
 
 verify_error_text
 !text red, "          => vERIFY eRROR <=", green, $0d, $0d, $00

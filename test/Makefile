@@ -1,13 +1,12 @@
 ASM = acme
 ASMFLAGS = -f cbm -l main.sym -v3 --color -Wno-label-indent
-VERSION = $(shell git describe --tags --dirty)
-SOURCES = *.asm tests/*.asm version.asm
+SOURCES = *.asm tests/*.asm generated-version.asm
 
 .PHONY: all clean version.asm
 
 all: main.prg
 
-version.asm:
+generated-version.asm:
 	./make-version.sh
 
 main.prg: $(SOURCES)
@@ -15,4 +14,4 @@ main.prg: $(SOURCES)
 
 clean:
 	rm -f *.{prg,sym}
-	rm -f version.asm
+	rm -f generated-version.asm

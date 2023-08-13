@@ -71,9 +71,6 @@ test_wifi_info !zone test_wifi_info {
 .text_mac
 !text "mac : ", $00
 
-.paragraph
-!text $0d, $0d, $00
-
 get_info !zone wifi_info {
     ; need to null the response buffer
     ; because strings are always send WITHOUT

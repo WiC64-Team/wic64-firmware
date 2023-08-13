@@ -1,3 +1,3 @@
 *.prg
 *.sym
-version.asm
+generated-version.asm

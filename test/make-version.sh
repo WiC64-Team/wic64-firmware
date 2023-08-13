@@ -2,4 +2,4 @@
 
 VERSION="$(git describe --tags --dirty)"
 
-echo "version !text \"${VERSION^^}\", 0" > version.asm
+echo "version !text \"${VERSION^^}\", 0" > generated-version.asm
