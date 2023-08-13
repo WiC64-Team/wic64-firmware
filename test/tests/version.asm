@@ -67,7 +67,7 @@ test_version !zone test_version {
 !text "mAJOR: $", $00
 
 .text_minor
-!text "mAJOR: $", $00
+!text "mINOR: $", $00
 
 .text_patch
 !text "pATCH: $", $00
