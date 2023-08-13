@@ -9,7 +9,7 @@ namespace WiC64 {
     }
 
     void Version::execute(void) {
-        static const uint8_t version[3] = {
+        static uint8_t version[3] = {
             WIC64_VERSION_MAJOR,
             WIC64_VERSION_MINOR,
             WIC64_VERSION_PATCH,
