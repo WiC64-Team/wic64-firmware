@@ -35,7 +35,7 @@ namespace WiC64 {
 
     String Settings::server(void) {
         if (!m_preferences.isKey(SERVER_KEY) || string(SERVER_KEY).isEmpty()) {
-            return "http://www.wic64.de/prg/";
+            return "http://www.wic64.net/prg/";
         }
         return string(SERVER_KEY);
     }
