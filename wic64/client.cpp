@@ -105,7 +105,10 @@ namespace WiC64 {
             : 0;
 
         m_statusCode = -1;
-        int32_t content_length;
+
+        // content_length needs to be static because it is eventually
+        // passed by reference to the queue transfer task later on
+        static int32_t content_length;
 
         int32_t result;
 
