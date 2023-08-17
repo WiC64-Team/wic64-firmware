@@ -105,7 +105,7 @@ namespace WiC64 {
             : 0;
 
         m_statusCode = -1;
-        static int32_t content_length; // TODO: why static?
+        int32_t content_length;
 
         int32_t result;
 
@@ -215,7 +215,11 @@ namespace WiC64 {
         content_length = result;
         m_statusCode = esp_http_client_get_status_code(m_client);
 
-        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d", m_statusCode, content_length);
+        ESP_LOGI(TAG, "HTTP %s Status = %d, content_length = %d",
+            method == HTTP_METHOD_GET ? "GET" : "POST",
+            m_statusCode,
+            content_length);
+
         ESP_LOGI(TAG, "Keep alive: %s", m_keepAlive ? "true" : "false");
 
         // The client should handle redirects automatically, but this does not always seem to work,
@@ -257,7 +261,7 @@ namespace WiC64 {
             // content_length variable via the pvParameters argument.
             xTaskCreatePinnedToCore(queueTask, "SENDER", 4096, &content_length, 30, NULL, 1);
         }
-        else { // Content-Length <= 0xff, not send by server or Transfer-Encoding: chunked
+        else { // Content-Length <= 0xffff, not send by server or Transfer-Encoding: chunked
             if (content_length == 0) {
                 ESP_LOGI(TAG, "Reading response data of unknown length (up to 64kb)");
             } else {
