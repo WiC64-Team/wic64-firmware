@@ -90,7 +90,7 @@ get_info !zone wifi_info {
     lda #$00
     sta request_size+1
 
-    +wic64_execute request, response, timeout
+    +wic64_execute request, response
     rts
 }
 

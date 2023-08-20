@@ -1,8 +1,6 @@
 !addr zp1 = $22
 !addr zp2 = $50
 
-timeout = $02
-
 !addr random_byte = $d41b
 
 red = $1c

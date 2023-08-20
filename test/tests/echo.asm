@@ -62,7 +62,7 @@ test_echo !zone test_echo {
     lda #$ff
     sta request_id
 
-    lda #timeout
+    lda #$02
     sta wic64_timeout
 
     +pointer wic64_request_pointer, request

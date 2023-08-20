@@ -4,6 +4,7 @@
 
 ; TODO: wic64_protect_io
 ; TODO: wic64_protect_cpu_regs
+; TODO: wic64_optimize_for_size => use subroutine to wait for handshakes
 
 ; TODO: response address $0000 -> get dst from response
 ;       this can be used to load cbm format files
@@ -24,6 +25,10 @@
     wic64_response_pointer = $a8
 }
 
+!ifndef wic64_optimize_for_size {
+    wic64_optimize_for_size = 0
+}
+
 ;*********************************************************
 ; Runtime options
 ;
@@ -33,12 +38,25 @@
 
 ; wic64_timeout
 ;
-; Set the timeout value, where $02 is approximately one second.
+; This value defines the time to wait for a handshake.
 ;
-; If timeout is set to $00, a timeout of $01 will be used by
-; default.
+; Note that this includes waiting for the WiC64 to process
+; the request before sending a response, so this value
+; may need to be adjusted, e.g. when a HTTP request is sent
+; to a server that is slow to respond.
 ;
-; The default value is $02, so roughly two seconds.
+; The minimum value is $02, which corresponds to a timeout
+; of approximately two seconds. If a value lower than $02
+; is specified, $02 will be used by default.
+;
+; If a timeout occurs, the carry flag will be set to signal
+; a timeout to the calling routine.
+;
+; Higher values will increase the timeout in a non-linear
+; fashion.
+;
+; TODO: List example values.
+;
 wic64_timeout !byte $02
 
 ; wic64_enable_irqs
@@ -46,7 +64,8 @@ wic64_timeout !byte $02
 ; Set to a nonzero value to keep irqs enabled during
 ; transfers.
 ;
-; The interrupt flag will be reset to its initial state.
+; The interrupt flag will be reset to its initial state
+; after a transfer has completed.
 ;
 ; The default is to disable irqs during transfer.
 ;
@@ -56,13 +75,18 @@ wic64_enable_irqs !byte $00
 ;
 ; Set to a nonzero value to blank screen during transfer.
 ;
-; The screen will be reset to its previous state afterwards.
+; The screen will be reset to its previous state after the
+; transfer has completed.
 ;
 ; Note that this increases transfer speed only marginally
-; (about 1kb/s faster)
+; by approximately 1kb/s
 wic64_blank_screen !byte $00
 
 ; ********************************************************
+
+!macro wic64_execute .request, .response {
+    +wic64_execute .request, .response, $02
+}
 
 !macro wic64_execute .request, .response, .timeout {
     lda #<.request
@@ -78,59 +102,119 @@ wic64_blank_screen !byte $00
     lda #.timeout
     sta wic64_timeout
 
-    jsr wic64_initialize
-
-    jsr wic64_send
-    bcs .done
-
-    jsr wic64_prepare_receive
-    bcs .done
-
-    jsr wic64_receive
-
-.done
-    jsr wic64_finalize
+    jsr wic64_execute
 }
 
 ; ********************************************************
 
-!macro .wait_for_handshake {
-        ; do a first cheap test for FLAG2 before wasting cycles
-        ; setting up the counters.
-        lda #$10
+wic64_execute
+    jsr wic64_initialize
 
-        bit $dd0d
-        bne .success
+    jsr wic64_send
+    bcs .execute_done
 
-        ; no fast response, setup timeout delay loop
+    jsr wic64_prepare_receive
+    bcs .execute_done
 
-        lda #$00
-        sta _wic64_counter_1
-        lda wic64_timeout
-        sta _wic64_counter_2
-        sta _wic64_counter_3
+    jsr wic64_receive
 
-        ; keep testing for FLAG2 until all counters are zero
+.execute_done
+    jsr wic64_finalize
+    rts
 
-        lda #$10
-    .wait
-        bit $dd0d
-        bne .success
+; ********************************************************
+; Define macro .wait_for_handshake
+; ********************************************************
+;
+; If wic64_optimize_for_size is set to a nonzero value,
+; a subroutine will be defined by sourcing the code from
+; wait-for-handshake.asm and the macro will be defined
+; to simply call this subroutine.
+;
+; Otherwise the macro will contain the code directly.
+;
+; Note that Optimizing for size will significantly decrease
+; transfer speed due to the jsr overhead added for every
+; byte transferred.
+;
+; A separate sourcefile has been used to avoid duplicating
+; code here.
 
-        dec _wic64_counter_1
-        bne .wait
+!macro _wic64_wait_for_handshake_code {
 
-        dec _wic64_counter_2
-        bne .wait
+    ; wait until a handshake has been received from the ESP,
+    ; e.g. the FLAG2 line on the userport has been asserted,
+    ; with sets bit 4 of $dd0d. Set the carry flag to indicate
+    ; a timeout if the timeout length specified in wic64_timeout
+    ; has been exceeded.
 
-        dec _wic64_counter_3
-        bne .wait
+    ; do a first cheap test for FLAG2 before wasting cycles
+    ; setting up the counters.
+    lda #$10
 
-    .timeout
-        sec
+    bit $dd0d
+    bne .success
+
+    ; no fast response, setup timeout delay loop
+
+    lda #$00
+    sta _wic64_counter_1
+    lda wic64_timeout
+    sta _wic64_counter_2
+    sta _wic64_counter_3
+
+    ; keep testing for FLAG2 until all counters are zero
+
+    lda #$10
+.wait
+    bit $dd0d
+    bne .success
+
+    dec _wic64_counter_1
+    bne .wait
+
+    dec _wic64_counter_2
+    bne .wait
+
+    dec _wic64_counter_3
+    bne .wait
+
+.timeout
+    ; set carry flag to indicate timeout
+    sec
+
+!if (wic64_optimize_for_size != 0) {
+    ; When a timeout has occurred, the rts needs to return
+    ; to the user subroutine that originally called the API
+    ; routines (wic64_*), where a timeout can then be detected
+    ; by checking the carry flag.
+
+    ; In case this code is part of a subroutine, the return
+    ; address on the stack points to the API routine
+    ; instead of the user routine, so in order to return
+    ; to the user routine, the first return address on
+    ; the stack needs to be skipped.
+    pla
+    pla
+}
+    rts
+
+.success
+}
+
+!if (wic64_optimize_for_size == 0) {
+    !macro .wait_for_handshake {
+        +_wic64_wait_for_handshake_code
+    }
+} else {
+    _wic64_wait_for_handshake_routine !zone _wic64_wait_for_handshake {
+        +_wic64_wait_for_handshake_code
         rts
+    }
 
-    .success
+    !macro .wait_for_handshake {
+        jsr _wic64_wait_for_handshake_routine
+    }
 }
 
 ; ********************************************************

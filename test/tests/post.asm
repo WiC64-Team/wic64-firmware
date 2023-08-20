@@ -25,6 +25,8 @@ test_post !zone test_post {
     jsr .post
     bcs .timed_out
 
+    ; TODO: Test for error reply
+
     jsr .verify
     bcc .next_iteration
 

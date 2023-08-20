@@ -83,7 +83,7 @@ test_version !zone test_version {
     dey
     bne -
 
-    +wic64_execute request, response, timeout
+    +wic64_execute request, response
     rts
 }
 

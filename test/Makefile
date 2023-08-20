@@ -12,6 +12,9 @@ generated-version.asm:
 main.prg: clean $(SOURCES)
 	$(ASM) $(ASMFLAGS) -o main.prg  main.asm
 
+small.prg: clean $(SOURCES)
+	$(ASM) $(ASMFLAGS) -Dwic64_optimize_for_size=1 -o small.prg main.asm
+
 clean:
-	rm -f *.{prg,sym}
+	rm -f *.{prg,sym,bin}
 	rm -f generated-version.asm
