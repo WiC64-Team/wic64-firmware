@@ -1,5 +1,5 @@
-#ifndef WIC64_CLIENT_H
-#define WIC64_CLIENT_H
+#ifndef WIC64_HTTP_CLIENT_H
+#define WIC64_HTTP_CLIENT_H
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -11,7 +11,7 @@
 #include "command.h"
 
 namespace WiC64 {
-    class Client {
+    class HttpClient {
         public: static const char* TAG;
 
         private:
@@ -40,7 +40,7 @@ namespace WiC64 {
             void request(Command *command, esp_http_client_method_t method, String& url, Data* data);
 
         public:
-            Client();
+            HttpClient();
             int32_t statusCode() { return m_statusCode; }
 
             void get(Command* command, String& url);
@@ -48,4 +48,4 @@ namespace WiC64 {
     };
 }
 
-#endif // WIC64_CLIENT_H
+#endif // WIC64_HTTP_CLIENT_H

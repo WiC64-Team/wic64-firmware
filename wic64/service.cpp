@@ -6,7 +6,6 @@
 #include "userport.h"
 #include "data.h"
 #include "command.h"
-#include "client.h"
 #include "utilities.h"
 
 ESP_EVENT_DEFINE_BASE(SERVICE_EVENTS);

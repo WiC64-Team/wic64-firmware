@@ -2,7 +2,7 @@
 #include "settings.h"
 #include "display.h"
 #include "connection.h"
-#include "client.h"
+#include "httpClient.h"
 #include "webserver.h"
 #include "userport.h"
 #include "service.h"
@@ -22,7 +22,7 @@ using namespace WiC64;
 namespace WiC64 {
     Userport   *userport;
     Service    *service;
-    Client     *client;
+    HttpClient *httpClient;
     Settings   *settings;
     Display    *display;
     Connection *connection;
@@ -41,7 +41,7 @@ namespace WiC64 {
 
         userport   = new Userport();
         service    = new Service();
-        client     = new Client();
+        httpClient = new HttpClient();
         settings   = new Settings();
         display    = new Display();
         connection = new Connection();
@@ -64,7 +64,7 @@ namespace WiC64 {
         esp_log_level_set(Settings::TAG, loglevel);
         esp_log_level_set(Connection::TAG, loglevel);
         esp_log_level_set(Display::TAG, loglevel);
-        esp_log_level_set(Client::TAG, loglevel);
+        esp_log_level_set(HttpClient::TAG, loglevel);
         esp_log_level_set(Webserver::TAG, loglevel);
         esp_log_level_set(Request::TAG, loglevel);
         esp_log_level_set(Clock::TAG, loglevel);

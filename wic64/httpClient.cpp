@@ -1,5 +1,5 @@
 #include "wic64.h"
-#include "client.h"
+#include "httpClient.h"
 #include "connection.h"
 #include "utilities.h"
 #include "settings.h"
@@ -17,13 +17,13 @@
 #include "WString.h"
 
 namespace WiC64 {
-    const char* Client::TAG = "CLIENT";
+    const char* HttpClient::TAG = "HTTPCLIENT";
 
-    extern Client* client;
+    extern HttpClient* httpClient;
     extern Connection *connection;
     extern Settings *settings;
 
-    Client::Client() {
+    HttpClient::HttpClient() {
         m_queue = xQueueCreate(WIC64_QUEUE_SIZE, WIC64_QUEUE_ITEM_SIZE);
 
         if (m_queue == NULL) {
@@ -31,7 +31,7 @@ namespace WiC64 {
         }
     }
 
-    esp_err_t Client::eventHandler(esp_http_client_event_t *event) {
+    esp_err_t HttpClient::eventHandler(esp_http_client_event_t *event) {
         static bool connection_header_sent = false;
 
         switch(event->event_id) {
@@ -57,7 +57,7 @@ namespace WiC64 {
                 // Connection: keep-alive
                 if (strcmp(event->header_key, "Connection") == 0) {
                     connection_header_sent = true;
-                    client->keepAlive(strcasecmp(event->header_value, "keep-alive") == 0);
+                    httpClient->keepAlive(strcasecmp(event->header_value, "keep-alive") == 0);
                 }
 
                 // WiC64-Security-Token-Key: <key>
@@ -74,7 +74,7 @@ namespace WiC64 {
             case HTTP_EVENT_ON_DATA:
                 ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, size=%d", event->data_len);
                 if (!connection_header_sent) {
-                    client->keepAlive(false);
+                    httpClient->keepAlive(false);
                 }
                 break;
 
@@ -89,15 +89,15 @@ namespace WiC64 {
         return ESP_OK;
     }
 
-    void Client::get(Command *command, String& url) {
+    void HttpClient::get(Command *command, String& url) {
         request(command, HTTP_METHOD_GET, url, NULL);
     }
 
-    void Client::post(Command *command, String &url, Data *data) {
+    void HttpClient::post(Command *command, String &url, Data *data) {
         request(command, HTTP_METHOD_POST, url, data);
     }
 
-    void Client::request(Command *command, esp_http_client_method_t method, String& url, Data* data) {
+    void HttpClient::request(Command *command, esp_http_client_method_t method, String& url, Data* data) {
         int32_t size = 0;
 
         int32_t request_content_length = method == HTTP_METHOD_POST
@@ -252,7 +252,7 @@ namespace WiC64 {
             ESP_LOGI(TAG, "Starting queued send of %d bytes", content_length);
 
             // Set the queue and the size of the reponse in the response object
-            command->response()->queue(client->queue(), (uint16_t) content_length);
+            command->response()->queue(httpClient->queue(), (uint16_t) content_length);
 
             // Ask the command to send the SERVICE_RESPONSE_READY event so that
             // Service will start reading and sending data down to the C64 as soon as
@@ -295,7 +295,7 @@ namespace WiC64 {
         goto DONE;
     }
 
-    void Client::closeConnection(void) {
+    void HttpClient::closeConnection(void) {
         if (m_client != NULL) {
             ESP_LOGW(TAG, "Closing connection");
             esp_err_t result;
@@ -311,17 +311,17 @@ namespace WiC64 {
         }
     }
 
-    void Client::closeConnectionUnlessKeptAlive() {
+    void HttpClient::closeConnectionUnlessKeptAlive() {
         if (!m_keepAlive) {
             closeConnection();
         }
     }
 
-    bool Client::isConnectionClosed() {
+    bool HttpClient::isConnectionClosed() {
         return m_client == NULL;
     }
 
-    void Client::queueTask(void *content_length_ptr) {
+    void HttpClient::queueTask(void *content_length_ptr) {
         int32_t content_length = *((int32_t *) content_length_ptr);
         static uint8_t data[WIC64_QUEUE_ITEM_SIZE];
 
@@ -331,14 +331,14 @@ namespace WiC64 {
         ESP_LOGD(TAG, "Client queue task queueing %d bytes...", content_length);
 
         do {
-            bytes_read = esp_http_client_read(client->handle(), (char*) data, WIC64_QUEUE_ITEM_SIZE);
+            bytes_read = esp_http_client_read(httpClient->handle(), (char*) data, WIC64_QUEUE_ITEM_SIZE);
 
             if (bytes_read == -1) {
                 ESP_LOGE(TAG, "Read Error");
                 break;
             }
             ESP_LOGV(TAG, "Queueing %d bytes", WIC64_QUEUE_ITEM_SIZE);
-            if (xQueueSend(client->queue(), data, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
+            if (xQueueSend(httpClient->queue(), data, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
                 ESP_LOGW(TAG, "Could not send to queue for more than %dms", timeout_ms);
                 break;
             }

@@ -4,7 +4,7 @@ idf_component_register(
     SRCS "wic64.cpp"
     SRCS "settings.cpp"
     SRCS "connection.cpp"
-    SRCS "client.cpp"
+    SRCS "httpClient.cpp"
     SRCS "userport.cpp"
     SRCS "service.cpp"
     SRCS "data.cpp"

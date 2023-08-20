@@ -1,5 +1,5 @@
 #include "http.h"
-#include "client.h"
+#include "httpClient.h"
 #include "connection.h"
 #include "settings.h"
 #include "utilities.h"
@@ -9,7 +9,7 @@
 namespace WiC64 {
     const char* Http::TAG = "HTTP";
 
-    extern Client *client;
+    extern HttpClient *httpClient;
     extern Connection *connection;
     extern Settings *settings;
 
@@ -28,7 +28,7 @@ namespace WiC64 {
         analyze(url);
 
         ESP_LOGI(TAG, "Fetching URL [%s]", url.c_str());
-        client->get(this, url); // client will call responseReady()
+        httpClient->get(this, url); // client will call responseReady()
     }
 
     void Http::post(void) {
@@ -47,7 +47,7 @@ namespace WiC64 {
         ESP_LOGI(TAG, "POSTing %d bytes to URL [%s]", data->size(), url.c_str());
         ESP_LOG_HEXV(TAG, "POST data", data->data(), data->size());
 
-        client->post(this, url, data); // client will call responseReady()
+        httpClient->post(this, url, data); // client will call responseReady()
 
         delete data;
     }
@@ -154,7 +154,7 @@ namespace WiC64 {
         //
         // REDESIGN: Have the server send custom headers for this purpose
 
-        if (client->statusCode() == 201) {
+        if (httpClient->statusCode() == 201) {
             char key[256] = "";
             char value[256] = "";
             char reply[256] = "";
