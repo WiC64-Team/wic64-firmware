@@ -118,14 +118,14 @@ namespace WiC64 {
 
         uint8_t retries = MAX_RETRIES;
 
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-
         // The Arduino HTTPClient sends "ESP32HTTPClient" as the user-agent
         // Some programs test for this value, so we will mimic this behaviour
         // for compatibility.
         //
         // REDESIGN: Send "WiC64/<version>" as user-agent
+
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
         esp_http_client_config_t config = {
             .url = url.c_str(),
@@ -135,9 +135,16 @@ namespace WiC64 {
             .disable_auto_redirect = false,
             .max_redirection_count = 10,
             .event_handler = eventHandler,
+            .buffer_size_tx = MAX_URL_LENGTH,
         };
 
         #pragma GCC diagnostic pop
+
+        if (url.length() > MAX_URL_LENGTH) {
+            ESP_LOGE(TAG, "URL length is limited to 2000 bytes");
+            ESP_LOGE(TAG, "Please use HTTP POST to transfer large amounts of data");
+            goto ERROR;
+        }
 
         closeConnectionUnlessKeptAlive();
 

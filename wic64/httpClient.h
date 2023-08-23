@@ -18,6 +18,7 @@ namespace WiC64 {
             esp_http_client_handle_t m_client = NULL;
             QueueHandle_t m_queue = NULL;
 
+            static const uint16_t MAX_URL_LENGTH = 2000; // see https://stackoverflow.com/a/417184
             static const uint8_t MAX_RETRIES = 10;
             bool m_keepAlive = false;
             int32_t m_statusCode = -1;
