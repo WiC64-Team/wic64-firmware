@@ -2,7 +2,7 @@ execute_process(COMMAND git describe --tag --dirty
     OUTPUT_VARIABLE VERSION_STRING
     ERROR_QUIET)
 
-execute_process(COMMAND git tag
+execute_process(COMMAND git describe --tags
     OUTPUT_VARIABLE VERSION_FROM_TAG)
 
 string(REGEX MATCHALL [0-9]+ VERSION_AS_LIST "${VERSION_FROM_TAG}")
