@@ -33,6 +33,10 @@ namespace WiC64 {
         m_data[m_size] = '\0';
     }
 
+    void Data::wrap(Data *data) {
+        wrap(data->data(), data->size());
+    }
+
     void Data::copy(const char *c_str) {
         m_data = transferBuffer;
         m_size = strlen(c_str);
