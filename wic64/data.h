@@ -32,6 +32,7 @@ namespace WiC64 {
 
             void appendField(const String& string);
             const char* field(uint8_t index);
+            const char* field(uint8_t index, char separator);
 
             uint16_t size() { return m_size; }
 

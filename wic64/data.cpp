@@ -54,7 +54,12 @@ namespace WiC64 {
     }
 
     const char* Data::field(uint8_t index) {
+        return field(index, '\1');
+    }
+
+    const char* Data::field(uint8_t index, char separator) {
         static char value[256];
+        char separator_str[2] = { separator, '\0' };
 
         char* begin = (char*) m_data;
         char* end = begin;
@@ -64,7 +69,7 @@ namespace WiC64 {
         for (uint16_t i=0; i<=index; i++) {
             previous_end = end;
 
-            if ((end = strstr(end, "\01")) != NULL) {
+            if ((end = strstr(end, separator_str)) != NULL) {
                 if (index == i) {
                     begin = previous_end;
 
