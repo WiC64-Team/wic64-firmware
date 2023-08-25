@@ -4,11 +4,8 @@
 
 ; TODO: wic64_protect_io
 ; TODO: wic64_protect_cpu_regs
-; TODO: wic64_optimize_for_size => use subroutine to wait for handshakes
 
-; TODO: response address $0000 -> get dst from response
-;       this can be used to load cbm format files
-;       that are prefixed with a load address ("PRG-Files")
+; TODO: optionally store response to load address
 
 ;*********************************************************
 ; Assembly time options
@@ -55,7 +52,7 @@
 ; Higher values will increase the timeout in a non-linear
 ; fashion.
 ;
-; TODO: List example values.
+; TODO: list timeout example values
 ;
 wic64_timeout !byte $02
 

@@ -119,7 +119,7 @@
 
 OneButton button(specialbutton, false, false);
 
-// TODO: LED (GPIO_NUM_2): Disable/Enable, receive => on, send => off
+// TODO: LED (GPIO_NUM_2): Disable/Enable
 void setup() {
   firmwareversion = "0034";
 
