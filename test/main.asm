@@ -22,7 +22,6 @@ key_four  !byte %11111101, %00001000
 key_five  !byte %11111011, %00000001
 key_stop  !byte %01111111, %10000000
 
-!src "generated-version.asm"
 !src "wic64.asm"
 !src "util.asm"
 
@@ -98,7 +97,6 @@ menu !zone menu {
 
     ; print menu
     +print .menu_title
-    +print version
     +paragraph
     +print .menu_text
 
@@ -143,7 +141,7 @@ menu !zone menu {
 +   jmp .scan
 
 .menu_title
-!text "wIc64 tEST fw ", $00
+!text "wIc64 tESTSUITE", $00
 
 .menu_text
 !text ron, "1", roff, " dATA tRANSFER", $0d

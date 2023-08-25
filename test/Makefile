@@ -1,13 +1,10 @@
 ASM = acme
 ASMFLAGS = -f cbm -l main.sym -v3 --color -Wno-label-indent
-SOURCES = *.asm tests/*.asm generated-version.asm
+SOURCES = *.asm tests/*.asm
 
-.PHONY: all clean generated-version.asm
+.PHONY: all clean
 
 all: main.prg
-
-generated-version.asm:
-	./make-version.sh
 
 main.prg: clean $(SOURCES)
 	$(ASM) $(ASMFLAGS) -o main.prg  main.asm
@@ -17,4 +14,3 @@ small.prg: clean $(SOURCES)
 
 clean:
 	rm -f *.{prg,sym,bin}
-	rm -f generated-version.asm
