@@ -13,6 +13,7 @@
 #include "mac.h"
 #include "time.h"
 #include "timezone.h"
+#include "tcp.h"
 #include "echo.h"
 
 namespace WiC64 {
@@ -32,6 +33,9 @@ namespace WiC64 {
         WIC64_COMMAND(0x15, Time),
         WIC64_COMMAND(0x16, Timezone),
         WIC64_COMMAND(0x17, Timezone),
+        WIC64_COMMAND(0x21, Tcp),
+        WIC64_COMMAND(0x22, Tcp),
+        WIC64_COMMAND(0x23, Tcp),
         WIC64_COMMAND(0x24, Http),
         WIC64_COMMAND(0x26, Version),
         WIC64_COMMAND(0xff, Echo),

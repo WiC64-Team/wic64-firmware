@@ -96,6 +96,11 @@ namespace WiC64 {
         return dst;
     }
 
+    void Data::size(uint16_t size) {
+        m_size = size;
+        m_data[size] = '\0';
+    }
+
     void Data::queue(QueueHandle_t queue, uint16_t size) {
         m_queue = queue;
         m_size = size;
@@ -116,5 +121,13 @@ namespace WiC64 {
 
     uint16_t Data::sizeToReport() {
         return (m_sizeToReport > -1) ? m_sizeToReport : m_size;
+    }
+
+    Data* Data::zeroTerminated() {
+        if (m_data[m_size-1] != 0) {
+            m_size++;
+            m_data[m_size] = '\0';
+        }
+        return this;
     }
 }

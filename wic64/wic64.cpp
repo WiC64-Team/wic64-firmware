@@ -3,6 +3,7 @@
 #include "display.h"
 #include "connection.h"
 #include "httpClient.h"
+#include "tcpClient.h"
 #include "webserver.h"
 #include "userport.h"
 #include "service.h"
@@ -14,6 +15,7 @@
 #include "commands/connect.h"
 #include "commands/time.h"
 #include "commands/timezone.h"
+#include "commands/tcp.h"
 
 #include "esp_log.h"
 
@@ -23,6 +25,7 @@ namespace WiC64 {
     Userport   *userport;
     Service    *service;
     HttpClient *httpClient;
+    TcpClient  *tcpClient;
     Settings   *settings;
     Display    *display;
     Connection *connection;
@@ -42,6 +45,7 @@ namespace WiC64 {
         userport   = new Userport();
         service    = new Service();
         httpClient = new HttpClient();
+        tcpClient  = new TcpClient();
         settings   = new Settings();
         display    = new Display();
         connection = new Connection();
@@ -65,6 +69,7 @@ namespace WiC64 {
         esp_log_level_set(Connection::TAG, loglevel);
         esp_log_level_set(Display::TAG, loglevel);
         esp_log_level_set(HttpClient::TAG, loglevel);
+        esp_log_level_set(TcpClient::TAG, loglevel);
         esp_log_level_set(Webserver::TAG, loglevel);
         esp_log_level_set(Request::TAG, loglevel);
         esp_log_level_set(Clock::TAG, loglevel);

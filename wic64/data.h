@@ -35,9 +35,12 @@ namespace WiC64 {
             const char* field(uint8_t index, char separator, char *dst);
 
             uint16_t size() { return m_size; }
+            void size(uint16_t size);
 
             void sizeToReport(uint16_t sizeToReport) { m_sizeToReport = sizeToReport; }
             uint16_t sizeToReport();
+
+            Data* zeroTerminated();
 
             QueueHandle_t queue() { return m_queue; }
             void queue(QueueHandle_t queue, uint16_t size);

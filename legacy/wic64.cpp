@@ -549,24 +549,24 @@ void loop() {
           sendmessage("");
           log_i("tcp send %s", lastinput);
         }
-        if (lastinput.charAt(3) == 32) { // TODO: Command 0x20 (32) tcp set port (?)
+        if (lastinput.charAt(3) == 32) {
           ex = true;
           displaystuff("set tcp port");
           httpstring = lastinput;
           settcpport();
         }
 
-        if (lastinput.charAt(3) == 33) { // TODO: Command 0x21 (33) tcp connect
+        if (lastinput.charAt(3) == 33) {
           ex = true;
           displaystuff("connect tcp1");
           sendmessage(connecttcp1());
         }
-        if (lastinput.charAt(3) == 34) { // TODO: Command 0x22 (35) tcp read
+        if (lastinput.charAt(3) == 34) {
           ex = true;
           displaystuff("get tcp1");
           sendmessage(gettcp1());
         }
-        if (lastinput.charAt(3) == 35) {  // TODO: Command 0x23 (35) tcp write
+        if (lastinput.charAt(3) == 35) {
           ex = true;
           displaystuff("send tcp1");
           sendmessage(sendtcp1());
