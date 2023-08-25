@@ -10,7 +10,7 @@ namespace WiC64 {
         public: static const char* TAG;
 
         private:
-            const String ssid();
+            const char* ssid();
             const char* passphrase();
 
         public:

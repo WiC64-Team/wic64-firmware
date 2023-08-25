@@ -53,23 +53,22 @@ namespace WiC64 {
         m_size += len + 1;
     }
 
-    const char* Data::field(uint8_t index) {
-        return field(index, '\1');
+    const char* Data::field(uint8_t index, char *dst) {
+        return field(index, '\1', dst);
     }
 
-    const char* Data::field(uint8_t index, char separator) {
-        static char value[256];
-        char separator_str[2] = { separator, '\0' };
+    const char* Data::field(uint8_t index, char separator, char* dst) {
+        dst[0] = '\0';
 
         char* begin = (char*) m_data;
         char* end = begin;
-        char* previous_end;
+        char* previous_end = end;
         uint8_t size;
 
         for (uint16_t i=0; i<=index; i++) {
             previous_end = end;
 
-            if ((end = strstr(end, separator_str)) != NULL) {
+            if ((end = strchr(end, separator)) != NULL) {
                 if (index == i) {
                     begin = previous_end;
 
@@ -77,10 +76,9 @@ namespace WiC64 {
                         (end - (char*) m_data) -
                         (begin - (char*) m_data);
 
-                    memcpy(value, begin, size);
-                    value[size] = '\0';
-
-                    return value;
+                    memcpy(dst, begin, size);
+                    dst[size] = '\0';
+                    break;
                 }
                 end++;
             }
@@ -89,14 +87,13 @@ namespace WiC64 {
                 size =  strlen(begin);
 
                 if (size > 0) {
-                    memcpy(value, begin, size);
-                    value[size] = '\0';
-                    return value;
+                    memcpy(dst, begin, size);
+                    dst[size] = '\0';
+                    break;
                 }
             }
         }
-        value[0] = '\0';
-        return value;
+        return dst;
     }
 
     void Data::queue(QueueHandle_t queue, uint16_t size) {

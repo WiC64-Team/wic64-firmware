@@ -12,25 +12,29 @@ namespace WiC64 {
         return "Connect (connect to WiFi with specified credentials)";
     }
 
-    const String Connect::ssid() {
+    const char* Connect::ssid() {
+        static char ssid[MAX_SSID_LEN+1];
+        static char indexAsString[3];
+
         if (request()->id() == SSID_PASSED_AS_STRING) {
-            return String(request()->argument()->field(0));
+            request()->argument()->field(0, ssid);
         }
         else if (request()->id() == SSID_PASSED_VIA_INDEX) {
-            uint8_t indexInLastScan = atoi(request()->argument()->field(0));
-            return String(WiFi.SSID(indexInLastScan));
+            request()->argument()->field(0, indexAsString);
+            uint8_t indexInLastScan = atoi(indexAsString);
+            return WiFi.SSID(indexInLastScan).c_str();
         }
-        return String();
+        return ssid;
     }
 
     const char *Connect::passphrase() {
         static const char UPARROW = '~';
-        char hexcode[5] = { '0', 'x', 0, 0, 0 };
+        static char hexcode[5] = { '0', 'x', 0, 0, 0 };
+        static char escaped[MAX_PASSPHRASE_LEN+1];
+        static char unescaped[MAX_PASSPHRASE_LEN+1];
 
-        const char* escaped = request()->argument()->field(1);
-
-        static char unescaped[MAX_PASSPHRASE_LEN];
-        memset(unescaped, 0, MAX_PASSPHRASE_LEN);
+        request()->argument()->field(1, escaped);
+        memset(unescaped, 0, MAX_PASSPHRASE_LEN+1);
 
         uint8_t len = strlen(escaped);
         char* pos = unescaped;
@@ -65,19 +69,19 @@ namespace WiC64 {
     }
 
     void Connect::execute(void) {
-        const String& ssid = this->ssid();
+        const char* ssid = this->ssid();
         const char* passphrase = this->passphrase();
 
         if (passphrase == NULL) {
             ESP_LOGE(TAG, "Failed to decode passphrase");
             response()->copy("wifi config not changed: passphrase decode failed");
         }
-        else if (ssid.isEmpty()) {
+        else if (strlen(ssid) == 0) {
             ESP_LOGE(TAG, "SSID is empty");
             response()->copy("wifi config not changed: ssid empty");
         }
         else {
-            connection->connect(ssid.c_str(), passphrase);
+            connection->connect(ssid, passphrase);
             response()->copy("wifi config changed");
 
             // After receiving the response, the portal's wifi.prg

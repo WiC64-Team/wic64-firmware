@@ -31,8 +31,8 @@ namespace WiC64 {
             void copy(const char* c_str);
 
             void appendField(const String& string);
-            const char* field(uint8_t index);
-            const char* field(uint8_t index, char separator);
+            const char* field(uint8_t index, char *dst);
+            const char* field(uint8_t index, char separator, char *dst);
 
             uint16_t size() { return m_size; }
 

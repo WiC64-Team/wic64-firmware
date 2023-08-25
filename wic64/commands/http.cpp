@@ -155,13 +155,13 @@ namespace WiC64 {
         // REDESIGN: Have the server send custom headers for this purpose
 
         if (httpClient->statusCode() == 201) {
-            char key[256] = "";
-            char value[256] = "";
-            char reply[256] = "";
+            static char key[256];
+            static char value[256];
+            static char reply[256];
 
-            strncpy(key, response()->field(1), 255);
-            strncpy(value, response()->field(2), 255);
-            strncpy(reply, response()->field(3), 255);
+            response()->field(1, key);
+            response()->field(2, value);
+            response()->field(3, reply);
 
             ESP_LOGI(TAG, "Change of setting requested by sever: [%s] = [%s] => [%s]", key, value, reply);
 
