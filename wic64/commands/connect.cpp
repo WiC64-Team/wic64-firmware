@@ -15,14 +15,17 @@ namespace WiC64 {
     const char* Connect::ssid() {
         static char ssid[MAX_SSID_LEN+1];
         static char indexAsString[3];
+        uint8_t indexInLastScan;
+        String ssid_string;
 
         if (request()->id() == SSID_PASSED_AS_STRING) {
             request()->argument()->field(0, ssid);
         }
         else if (request()->id() == SSID_PASSED_VIA_INDEX) {
             request()->argument()->field(0, indexAsString);
-            uint8_t indexInLastScan = atoi(indexAsString);
-            return WiFi.SSID(indexInLastScan).c_str();
+            indexInLastScan = atoi(indexAsString);
+            ssid_string = WiFi.SSID(indexInLastScan);
+            strncpy(ssid, ssid_string.c_str(), ssid_string.length());
         }
         return ssid;
     }
