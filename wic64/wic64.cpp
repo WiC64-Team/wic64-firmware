@@ -9,6 +9,7 @@
 #include "service.h"
 #include "settings.h"
 #include "clock.h"
+#include "led.h"
 #include "utilities.h"
 #include "commands/http.h"
 #include "commands/scan.h"
@@ -31,6 +32,7 @@ namespace WiC64 {
     Connection *connection;
     Webserver  *webserver;
     Clock      *clock;
+    Led        *led;
 
     const char* WiC64::TAG = "WIC64";
 
@@ -51,6 +53,7 @@ namespace WiC64 {
         connection = new Connection();
         webserver  = new Webserver();
         clock      = new Clock();
+        led        = new Led(GPIO_NUM_2);
 
         connection->connect();
         userport->connect();

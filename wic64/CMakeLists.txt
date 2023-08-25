@@ -27,6 +27,7 @@ idf_component_register(
     SRCS "display.cpp"
     SRCS "webserver.cpp"
     SRCS "clock.cpp"
+    SRCS "led.cpp"
     SRCS "utilities.cpp"
     SRCS "main.cpp"
     SRCS "../generated-version.h"

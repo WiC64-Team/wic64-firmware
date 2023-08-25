@@ -5,6 +5,7 @@
 
 #include "userport.h"
 #include "service.h"
+#include "led.h"
 #include "utilities.h"
 
 ESP_EVENT_DEFINE_BASE(USERPORT_EVENTS);
@@ -15,6 +16,7 @@ namespace WiC64 {
 
     extern Userport *userport;
     extern Service *service;
+    extern Led *led;
 
     Userport::Userport() {
         gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
@@ -125,12 +127,14 @@ namespace WiC64 {
     void Userport::setPortToInput() {
         port_config.mode = GPIO_MODE_INPUT;
         gpio_config(&port_config);
+        led->off();
         ESP_LOGV(TAG, "Port set to input");
     }
 
     void Userport::setPortToOutput() {
         port_config.mode = GPIO_MODE_OUTPUT;
         gpio_config(&port_config);
+        led->on();
         ESP_LOGV(TAG, "Port set to output");
     }
 

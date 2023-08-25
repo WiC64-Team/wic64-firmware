@@ -2,9 +2,16 @@
 #define WIC64_UTILITIES_H
 
 #include <cstdint>
+#include <driver/gpio.h>
 
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)
+
+#define SET_HIGH(PIN) (GPIO.out_w1ts = (1UL<<PIN))
+#define SET_LOW(PIN)  (GPIO.out_w1tc = (1UL<<PIN))
+
+#define IS_HIGH(PIN) (((GPIO.in >> PIN) & 1) == 1)
+#define IS_LOW(PIN)  (((GPIO.in >> PIN) & 1) == 0)
 
 #define WIC64_MAX_HEXDUMP_SIZE 256
 #define ESP_LOG_HEXE(tag, title, data, size) log_hex(tag, ESP_LOG_ERROR, title, data, size)
