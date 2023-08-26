@@ -1,4 +1,4 @@
-execute_process(COMMAND git describe --tag --dirty
+execute_process(COMMAND git describe --tag --dirty --abbrev=4
     OUTPUT_VARIABLE VERSION_STRING
     ERROR_QUIET)
 

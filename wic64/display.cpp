@@ -1,6 +1,7 @@
 #include "Wire.h"
 
 #include "display.h"
+#include "../generated-version.h"
 
 namespace WiC64 {
     const char* Display::TAG = "DISPLAY";
@@ -57,6 +58,11 @@ namespace WiC64 {
         update();
     }
 
+    void Display::userport(bool connected) {
+        m_userport = connected;
+        update();
+    }
+
     char *Display::abbreviated(const String& string) {
         return abbreviated(string, MAX_CHARS_PER_LINE);
     }
@@ -95,6 +101,11 @@ namespace WiC64 {
         display->println(abbreviated(m_ssid));
 
         printStatusAndRSSI();
+
+        display->print("\nUserport ");
+        display->println(m_userport ? "connected" : "disconnected");
+
+        display->println(abbreviated("v" WIC64_VERSION_STRING));
 
         display->display();
     }

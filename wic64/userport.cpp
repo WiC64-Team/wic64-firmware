@@ -5,6 +5,7 @@
 
 #include "userport.h"
 #include "service.h"
+#include "display.h"
 #include "led.h"
 #include "utilities.h"
 
@@ -16,6 +17,7 @@ namespace WiC64 {
 
     extern Userport *userport;
     extern Service *service;
+    extern Display *display;
     extern Led *led;
 
     Userport::Userport() {
@@ -68,6 +70,7 @@ namespace WiC64 {
 
         connected = true;
 
+        display->userport(connected);
         ESP_LOGI(TAG, "Userport connected, accepting requests");
     }
 
@@ -85,7 +88,7 @@ namespace WiC64 {
         setPortToInput();
 
         connected = false;
-
+        display->userport(connected);
         ESP_LOGI(TAG, "Userport disconnected, ignoring requests");
     }
 
