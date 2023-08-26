@@ -75,6 +75,18 @@ namespace WiC64 {
         return strncpy(m_line_buffer, string.c_str(), width);
     }
 
+    void Display::printCenteredLine(const String &string) {
+        int16_t x, y;
+        uint16_t w, h;
+        int16_t cx = display->getCursorX();
+        int16_t cy = display->getCursorY();
+
+        display->getTextBounds(string, cx, cy, &x, &y, &w, &h);
+        int16_t margin = (display->width() - w) / 2;
+        display->setCursor(cx + margin, cy);
+        display->println(string);
+    }
+
     void Display::printStatusAndRSSI(void) {
         uint8_t rssi_width = strlen(m_rssi_buffer);
         display->print(abbreviated(m_status, MAX_CHARS_PER_LINE - rssi_width - 1));
@@ -86,6 +98,14 @@ namespace WiC64 {
         display->println(m_rssi_buffer);
     }
 
+    void Display::printFreeMemory(void) {
+        uint8_t free_heap_size = esp_get_free_heap_size() / 1024;
+        uint8_t minimum_free_heap_size = esp_get_minimum_free_heap_size() / 1024;
+        snprintf(m_line_buffer, MAX_CHARS_PER_LINE, "%dkb free %dkb min",
+            free_heap_size, minimum_free_heap_size);
+        printCenteredLine(String(m_line_buffer));
+    }
+
     void Display::update() {
         if (display == NULL) return;
 
@@ -94,19 +114,22 @@ namespace WiC64 {
 
         display->setFont(FONT_BIG);
         display->setCursor(0, 12);
-        display->println(m_ip);
+        printCenteredLine(m_ip);
 
         display->setFont(FONT_BUILTIN);
-        display->setCursor(0, 20);
-        display->println(abbreviated(m_ssid));
+        display->setCursor(0, 18);
+        printCenteredLine(abbreviated(m_ssid));
 
         printStatusAndRSSI();
 
-        display->print("\nUserport ");
-        display->println(m_userport ? "connected" : "disconnected");
+        display->setCursor(0, display->getCursorY()+3);
 
-        display->println(abbreviated("v" WIC64_VERSION_STRING));
+        printCenteredLine(m_userport ? "Userport connected" : "Userport disconnected");
 
+        display->setCursor(0, display->getCursorY()+3);
+
+        printCenteredLine(abbreviated("Firmware v" WIC64_VERSION_SHORT_STRING));
+        printFreeMemory();
         display->display();
     }
 }

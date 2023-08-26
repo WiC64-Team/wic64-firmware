@@ -6,6 +6,7 @@
 #include "userport.h"
 #include "data.h"
 #include "command.h"
+#include "display.h"
 #include "utilities.h"
 
 ESP_EVENT_DEFINE_BASE(SERVICE_EVENTS);
@@ -15,6 +16,7 @@ namespace WiC64 {
 
     extern Service *service;
     extern Userport *userport;
+    extern Display *display;
 
     Service::Service() {
         esp_event_loop_args_t event_loop_args = {
@@ -249,6 +251,8 @@ namespace WiC64 {
         }
 
         vTaskDelay(pdMS_TO_TICKS(10));
+
         log_free_mem(TAG, ESP_LOG_INFO);
+        display->update();
     }
 }

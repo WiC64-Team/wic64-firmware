@@ -20,6 +20,7 @@ namespace WiC64 {
             void RSSI(int8_t rssi);
             void status(const String& status);
             void userport(bool connected);
+            void update(void);
 
         private:
             const int I2C_SDA_PIN = 13;
@@ -44,10 +45,11 @@ namespace WiC64 {
             char m_rssi_buffer[MAX_CHARS_FOR_RSSI+1] = "";
             char m_line_buffer[MAX_CHARS_PER_LINE+1] = "";
 
-            void update(void);
             char* abbreviated(const String& string);
             char* abbreviated(const String& string, uint8_t width);
+            void printCenteredLine(const String& string);
             void printStatusAndRSSI(void);
+            void printFreeMemory(void);
 
             const unsigned char logo[128*64/8] PROGMEM = {
                 0x00, 0x00, 0x00, 0x0f, 0x80, 0xf8, 0x0f, 0x80, 0xf8, 0x0f, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00,
