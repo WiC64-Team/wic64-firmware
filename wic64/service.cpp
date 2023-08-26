@@ -33,6 +33,8 @@ namespace WiC64 {
             SERVICE_RESPONSE_READY,
             onResponseReady,
             NULL);
+
+        ESP_LOGI(TAG, "Command service initialized");
     }
 
     bool Service::supports(uint8_t api) {

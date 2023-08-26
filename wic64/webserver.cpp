@@ -10,7 +10,7 @@ namespace WiC64 {
         m_arduinoWebServer->on("/", log);
         m_arduinoWebServer->on("/log", log);
         m_arduinoWebServer->begin();
-        ESP_LOGI(TAG, "Webserver listening on port 80");
+        ESP_LOGI(TAG, "Webserver initialized, listening on port 80");
     }
 
     void Webserver::serve(void)  {

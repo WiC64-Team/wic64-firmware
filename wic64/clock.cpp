@@ -8,6 +8,9 @@ namespace WiC64 {
 
     Clock::Clock() {
         configure();
+
+        ESP_LOGI(TAG, "Clock initialized, GMT offset %ds",
+            settings->gmtOffsetSeconds());
     }
 
     void Clock::configure(void) {

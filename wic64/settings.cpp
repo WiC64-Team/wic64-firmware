@@ -5,6 +5,7 @@ namespace WiC64 {
 
     Settings::Settings() {
         m_preferences.begin("credentials");
+        ESP_LOGI(TAG, "Settings initialized");
     }
 
     String Settings::securityTokenKey(void) {

@@ -29,6 +29,7 @@ namespace WiC64 {
         if (m_queue == NULL) {
             ESP_LOGE(TAG, "Failed to create queue");
         }
+        ESP_LOGI(TAG, "HTTP client initialized");
     }
 
     esp_err_t HttpClient::eventHandler(esp_http_client_event_t *event) {

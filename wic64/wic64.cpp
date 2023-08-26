@@ -58,8 +58,8 @@ namespace WiC64 {
         connection->connect();
         userport->connect();
 
-        log_free_mem(TAG, ESP_LOG_WARN);
         log_task_list(TAG, ESP_LOG_WARN);
+        log_free_mem(TAG, ESP_LOG_WARN);
 
         loglevel(ESP_LOG_WARN);
     }
