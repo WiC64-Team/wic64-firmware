@@ -58,11 +58,6 @@ namespace WiC64 {
         update();
     }
 
-    void Display::userport(bool connected) {
-        m_userport = connected;
-        update();
-    }
-
     char *Display::abbreviated(const String& string) {
         return abbreviated(string, MAX_CHARS_PER_LINE);
     }
@@ -122,10 +117,6 @@ namespace WiC64 {
 
         printStatusAndRSSI();
 
-        display->setCursor(0, display->getCursorY()+3);
-        display->println(m_userport ? "Userport connected" : "Userport disconnected");
-
-        display->setCursor(0, display->getCursorY()+3);
         display->println(abbreviated("Firmware v" WIC64_VERSION_SHORT_STRING));
         printFreeMemory();
 
