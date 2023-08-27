@@ -103,7 +103,7 @@ namespace WiC64 {
         uint8_t minimum_free_heap_size = esp_get_minimum_free_heap_size() / 1024;
         snprintf(m_line_buffer, MAX_CHARS_PER_LINE, "%dkb free %dkb min",
             free_heap_size, minimum_free_heap_size);
-        printCenteredLine(String(m_line_buffer));
+        display->println(String(m_line_buffer));
     }
 
     void Display::update() {
@@ -114,22 +114,21 @@ namespace WiC64 {
 
         display->setFont(FONT_BIG);
         display->setCursor(0, 12);
-        printCenteredLine(m_ip);
+        display->println(m_ip);
 
         display->setFont(FONT_BUILTIN);
         display->setCursor(0, 18);
-        printCenteredLine(abbreviated(m_ssid));
+        display->println(abbreviated(m_ssid));
 
         printStatusAndRSSI();
 
         display->setCursor(0, display->getCursorY()+3);
-
-        printCenteredLine(m_userport ? "Userport connected" : "Userport disconnected");
+        display->println(m_userport ? "Userport connected" : "Userport disconnected");
 
         display->setCursor(0, display->getCursorY()+3);
-
-        printCenteredLine(abbreviated("Firmware v" WIC64_VERSION_SHORT_STRING));
+        display->println(abbreviated("Firmware v" WIC64_VERSION_SHORT_STRING));
         printFreeMemory();
+
         display->display();
     }
 }
