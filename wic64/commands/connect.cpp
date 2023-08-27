@@ -1,5 +1,6 @@
 #include "connection.h"
 #include "connect.h"
+#include "commands.h"
 
 #include "WiFi.h"
 
@@ -18,10 +19,10 @@ namespace WiC64 {
         uint8_t indexInLastScan;
         String ssid_string;
 
-        if (request()->id() == SSID_PASSED_AS_STRING) {
+        if (id() == WIC64_CMD_CONNECT_WITH_SSID_STRING) {
             request()->argument()->field(0, ssid);
         }
-        else if (request()->id() == SSID_PASSED_VIA_INDEX) {
+        else if (id() == WIC64_CMD_CONNECT_WITH_SSID_INDEX) {
             request()->argument()->field(0, indexAsString);
             indexInLastScan = atoi(indexAsString);
             ssid_string = WiFi.SSID(indexInLastScan);

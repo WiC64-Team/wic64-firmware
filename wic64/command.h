@@ -6,9 +6,6 @@
 #include "wic64.h"
 #include "service.h"
 
-#define WIC64_COMMANDS command_map_entry_t commands[]
-#define WIC64_COMMAND(ID, CLASS) { .id = ID, .create = [](Request* request) { return new CLASS(request); } }
-
 namespace WiC64 {
     class Command {
         private:
@@ -26,6 +23,8 @@ namespace WiC64 {
             Command(Request* request);
             virtual ~Command();
 
+            uint8_t id(void);
+
             bool isVersion1() { return m_request->api() == WiC64::API_V1; }
             bool isVersion2() { return m_request->api() == WiC64::API_V2; }
 
@@ -37,12 +36,5 @@ namespace WiC64 {
             virtual void execute(void);
             virtual void responseReady();
     };
-
-    struct command_map_entry_t {
-        uint8_t id;
-        std::function<Command* (Request *request)> create;
-    };
-
-    extern WIC64_COMMANDS;
 }
 #endif // WIC64_COMMAND_H

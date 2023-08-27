@@ -14,9 +14,6 @@ namespace WiC64 {
             const char* passphrase();
 
         public:
-            static const uint8_t SSID_PASSED_AS_STRING = 0x02;
-            static const uint8_t SSID_PASSED_VIA_INDEX = 0x0d;
-
             using Command::Command;
             const char* describe();
             void execute(void);

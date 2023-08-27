@@ -1,3 +1,4 @@
+#include "commands.h"
 #include "http.h"
 #include "httpClient.h"
 #include "connection.h"
@@ -14,7 +15,7 @@ namespace WiC64 {
     extern Settings *settings;
 
     void Http::execute(void) {
-        request()->id() == 0x24 ? post() : get();
+        (id() == WIC64_CMD_HTTP_POST) ? post() : get();
     }
 
     void Http::get(void) {
@@ -53,10 +54,16 @@ namespace WiC64 {
     }
 
     const char *Http::describe(void) {
-        switch (request()->id()) {
-            case 0x01: return "HTTP GET (fetch URL)"; break;
-            case 0x0f: return "HTTP GET (fetch encoded URL)"; break;
-            case 0x24: return "HTTP POST (post data to URL)"; break;
+        switch (id()) {
+            case WIC64_CMD_HTTP_GET:
+                return "HTTP GET (fetch URL)";
+
+            case WIC64_CMD_HTTP_GET_ENCODED:
+                return "HTTP GET (fetch encoded URL)";
+
+            case WIC64_CMD_HTTP_POST:
+                return "HTTP POST (post data to URL)";
+
             default: return "HTTP Request";
         }
     }
@@ -101,7 +108,7 @@ namespace WiC64 {
         // endian value denoting the number of bytes to encode, followed
         // by the actual bytes.
 
-        if (request()->id() != 0x0f) return;
+        if (id() != WIC64_CMD_HTTP_GET_ENCODED) return;
         if (url.indexOf("<$") == -1) return;
 
         const char* src = (char*) request()->argument()->data();

@@ -1,4 +1,5 @@
 #include "timezone.h"
+#include "commands.h"
 #include "clock.h"
 
 namespace WiC64 {
@@ -21,9 +22,9 @@ namespace WiC64 {
     }
 
     void Timezone::execute(void) {
-        switch (request()->id()) {
-            case GET: get(); break;
-            case SET: set(); break;
+        switch (id()) {
+            case WIC64_CMD_GET_TIMEZONE: get(); break;
+            case WIC64_CMD_SET_TIMEZONE: set(); break;
         }
         responseReady();
     }

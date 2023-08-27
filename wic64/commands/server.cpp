@@ -1,5 +1,6 @@
 
 #include "server.h"
+#include "commands.h"
 #include "settings.h"
 
 namespace WiC64 {
@@ -13,13 +14,13 @@ namespace WiC64 {
 
     void Server::execute(void) {
 
-        if (request()->id() == 0x08) {
+        if (id() == WIC64_CMD_SET_SERVER) {
             settings->server(String(
                 request()->argument()->data(),
                 request()->argument()->size()));
         }
 
-        if (request()->id() == 0x12) {
+        if (id() == WIC64_CMD_GET_SERVER) {
             response()->copy(settings->server().c_str());
         }
 

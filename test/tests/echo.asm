@@ -59,7 +59,7 @@ test_echo !zone test_echo {
 }
 
 .echo !zone echo {
-    lda #$ff
+    lda #$fe
     sta request_id
 
     lda #$02

@@ -11,9 +11,6 @@ namespace WiC64 {
             static const int32_t timezones[];
 
         public:
-            static const uint8_t GET = 0x17;
-            static const uint8_t SET = 0x16;
-
             using Command::Command;
             const char* describe(void);
             void execute(void);

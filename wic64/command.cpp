@@ -19,11 +19,14 @@ namespace WiC64 {
         delete m_response;
     }
 
+    uint8_t Command::id() {
+        return request()->id();
+    }
+
     bool Command::defined(uint8_t id) {
-        uint8_t num_commands = sizeof(commands) / sizeof(command_map_entry_t);
         command_map_entry_t command;
 
-        for (uint8_t i=0; i<num_commands; i++) {
+        for (uint8_t i=0; commands[i].id != WIC64_CMD_NONE; i++) {
             command = commands[i];
             if (command.id == id) {
                 return true;
@@ -33,10 +36,9 @@ namespace WiC64 {
     }
 
     Command* Command::create(Request* request) {
-        uint8_t num_commands = sizeof(commands) / sizeof(command_map_entry_t);
         command_map_entry_t command;
 
-        for (uint8_t i=0; i<num_commands; i++) {
+        for (uint8_t i=0; commands[i].id != WIC64_CMD_NONE; i++) {
             command = commands[i];
             if (command.id == request->id()) {
                 return command.create(request);

@@ -1,5 +1,6 @@
 
 #include "version.h"
+#include "commands.h"
 
 namespace WiC64 {
     const char* Version::TAG = "VERSION";
@@ -15,12 +16,14 @@ namespace WiC64 {
             WIC64_VERSION_PATCH,
         };
 
-        if (request()->id() == 0x00) {
+        if (id() == WIC64_CMD_VERSION_STRING) {
             response()->copy(WIC64_VERSION_STRING);
         }
-        if (request()->id() == 0x26) {
+
+        if (id() == WIC64_CMD_VERSION_NUMBERS) {
             response()->wrap((uint8_t*) version, 3);
         }
+
         responseReady();
     }
 }
