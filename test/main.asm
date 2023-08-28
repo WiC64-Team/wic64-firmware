@@ -117,22 +117,16 @@ menu !zone menu {
 +   +scan key_two
     beq +
 
-    jsr test_resistance
+    jsr test_wifi_info
     jmp menu
 
 +   +scan key_three
     beq +
 
-    jsr test_wifi_info
-    jmp menu
-
-+   +scan key_four
-    beq +
-
     jsr test_post
     jmp menu
 
-+   +scan key_five
++   +scan key_four
     beq +
 
     jsr test_version
@@ -145,15 +139,13 @@ menu !zone menu {
 
 .menu_text
 !text ron, "1", roff, " dATA tRANSFER", $0d
-!text ron, "2", roff, " nOISE rESISTANCE", $0d
-!text ron, "3", roff, " gET wIfI iNFO", $0d
-!text ron, "4", roff, " hTTP post REQUEST", $0d
-!text ron, "5", roff, " gET FIRMWARE VERSION", $0d
+!text ron, "2", roff, " gET wIfI iNFO", $0d
+!text ron, "3", roff, " hTTP post REQUEST", $0d
+!text ron, "4", roff, " gET FIRMWARE VERSION", $0d
 !byte $00
 }
 
 !src "tests/echo.asm"
-!src "tests/noise.asm"
 !src "tests/wifi_info.asm"
 !src "tests/post.asm"
 !src "tests/version.asm"
