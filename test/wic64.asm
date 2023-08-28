@@ -4,13 +4,12 @@
 
 ; TODO: wic64_protect_io
 ; TODO: wic64_protect_cpu_regs
-
 ; TODO: optionally store response to load address
 
 ;*********************************************************
 ; Assembly time options
 ;
-; Define the symbols in the following section before
+; Define the symbols in the following section *before*
 ; including this file to change the defaults.
 ;*********************************************************
 
@@ -50,10 +49,8 @@
 ; a timeout to the calling routine.
 ;
 ; Higher values will increase the timeout in a non-linear
-; fashion.
-;
-; TODO: list timeout example values
-;
+; fashion
+
 wic64_timeout !byte $02
 
 ; wic64_enable_irqs
@@ -67,17 +64,6 @@ wic64_timeout !byte $02
 ; The default is to disable irqs during transfer.
 ;
 wic64_enable_irqs !byte $00
-
-; wic64_blank_screen
-;
-; Set to a nonzero value to blank screen during transfer.
-;
-; The screen will be reset to its previous state after the
-; transfer has completed.
-;
-; Note that this increases transfer speed only marginally
-; by approximately 1kb/s
-wic64_blank_screen !byte $00
 
 ; ********************************************************
 
@@ -124,9 +110,9 @@ wic64_execute
 ; ********************************************************
 ;
 ; If wic64_optimize_for_size is set to a nonzero value,
-; a subroutine will be defined by sourcing the code from
-; wait-for-handshake.asm and the macro will be defined
-; to simply call this subroutine.
+; a subroutine will be defined using the code defined
+; in _wic64_wait_for_handshake_code and the macro will
+; be defined to simply call this subroutine.
 ;
 ; Otherwise the macro will contain the code directly.
 ;
@@ -251,20 +237,7 @@ wic64_initialize
 	ora #$04
 	sta $dd02
 
-    lda wic64_blank_screen
-    beq +
-
-    ; remember current screen state (on/off)
-    lda $d011
-    and #$10
-    sta .user_screen_state
-
-    ; blank screen
-    lda $d011
-    and #!$10
-    sta $d011
-
-+   rts
+    rts
 
 ; ********************************************************
 
@@ -402,14 +375,6 @@ wic64_finalize
     ; always exit with a cleared FLAG2 bit in $dd0d as well
     lda $dd0d
 
-    ; restore screen state
-    lda $d011
-    ora .user_screen_state
-    sta $d011
-
-    ; carry clear => transfer complete
-    ; carry set => transfer timed out
-
     ; restore user interrupt flag and rts
     lda .user_interrupt_flag
     beq +
@@ -420,8 +385,10 @@ wic64_finalize
 +   sei
     rts
 
+    ; carry clear => transfer complete
+    ; carry set => transfer timed out
+
 .user_interrupt_flag !byte $00
-.user_screen_state !byte $00
 .lowbyte !byte $00
 
 ; ********************************************************
