@@ -21,7 +21,7 @@ namespace WiC64 {
         // userport modules in parallel, causing conflicts if
         // more that one module is using the port at the same time
 
-        m_esp_button.attachClick([] {
+        m_esp_button.attachLongPressStop([] {
             if (userport->isConnected()) {
                 userport->disconnect();
                 display->connected(false);
