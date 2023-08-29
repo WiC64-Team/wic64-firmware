@@ -63,7 +63,7 @@ namespace WiC64 {
             : userport->connect();
 
         if (!userport->isConnected()) {
-            display->connected(false);
+            display->userportConnected(false);
         }
 
         connection->connect();

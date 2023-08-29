@@ -20,7 +20,7 @@ namespace WiC64 {
             void SSID(const String& ssid);
             void RSSI(int8_t rssi);
             void status(const String& status);
-            void connected(bool connected);
+            void userportConnected(bool connected);
             void update(void);
             void notify(const String& message);
 
@@ -43,7 +43,7 @@ namespace WiC64 {
             String m_ip = "";
             String m_ssid = "";
             String m_status = "";
-            bool m_connected = true;
+            bool m_userportConnected = true;
 
             char m_rssi_buffer[MAX_CHARS_FOR_RSSI+1] = "";
             char m_line_buffer[MAX_CHARS_PER_LINE+1] = "";

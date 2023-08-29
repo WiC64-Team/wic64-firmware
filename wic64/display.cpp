@@ -69,8 +69,8 @@ namespace WiC64 {
         update();
     }
 
-    void Display::connected(bool connected) {
-        m_connected = connected;
+    void Display::userportConnected(bool userportConnected) {
+        m_userportConnected = userportConnected;
         update();
     }
 
@@ -127,7 +127,7 @@ namespace WiC64 {
         m_display->setFont(FONT_BIG);
         m_display->setCursor(0, 12);
 
-        if (m_connected) {
+        if (m_userportConnected) {
             m_display->println(m_ip);
 
             m_display->setFont(FONT_BUILTIN);

@@ -24,10 +24,10 @@ namespace WiC64 {
         m_esp_button.attachLongPressStop([] {
             if (userport->isConnected()) {
                 userport->disconnect();
-                display->connected(false);
+                display->userportConnected(false);
             } else {
                 userport->connect();
-                display->connected(true);
+                display->userportConnected(true);
             }
             settings->userportDisconnected(!userport->isConnected());
         });
