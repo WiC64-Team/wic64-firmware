@@ -14,12 +14,15 @@ namespace WiC64 {
             static const char* TAG;
 
             Display();
-            void rotation(uint8_t rotation);
+            bool rotated(void);
+            void rotated(bool rotated);
             void ip(const String& ip);
             void SSID(const String& ssid);
             void RSSI(int8_t rssi);
             void status(const String& status);
+            void connected(bool connected);
             void update(void);
+            void notify(const String& message);
 
         private:
             const int I2C_SDA_PIN = 13;
@@ -34,11 +37,13 @@ namespace WiC64 {
             static const uint8_t MAX_CHARS_FOR_RSSI = 8;
             static const uint8_t MAX_CHARS_PER_LINE = 21;
 
-            Adafruit_SSD1306 *display;
-            uint8_t m_rotation = 0;
+            Adafruit_SSD1306 *m_display;
+            volatile bool m_notifying = false;
+            bool m_rotated = false;
             String m_ip = "";
             String m_ssid = "";
             String m_status = "";
+            bool m_connected = true;
 
             char m_rssi_buffer[MAX_CHARS_FOR_RSSI+1] = "";
             char m_line_buffer[MAX_CHARS_PER_LINE+1] = "";
@@ -48,6 +53,8 @@ namespace WiC64 {
             void printCenteredLine(const String& string);
             void printStatusAndRSSI(void);
             void printFreeMemory(void);
+
+            static void notificationTask(void*);
 
             const unsigned char logo[128*64/8] PROGMEM = {
                 0x00, 0x00, 0x00, 0x0f, 0x80, 0xf8, 0x0f, 0x80, 0xf8, 0x0f, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x00,

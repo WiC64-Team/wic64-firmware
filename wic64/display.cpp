@@ -1,12 +1,18 @@
 #include "Wire.h"
 
 #include "display.h"
+#include "settings.h"
 #include "../generated-version.h"
 
 namespace WiC64 {
     const char* Display::TAG = "DISPLAY";
 
+    extern Display *display;
+    extern Settings *settings;
+
     Display::Display() {
+        m_rotated = settings->displayRotated();
+
         ESP_LOGD(TAG, "Initializing I2C interface");
             if (!Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN)) {
             ESP_LOGE(TAG, "Could not initialize I2C interface");
@@ -14,27 +20,32 @@ namespace WiC64 {
         }
 
         ESP_LOGD(TAG, "Creating display instance");
-        display = new Adafruit_SSD1306(WIDTH, HEIGHT, &Wire, RESET_PIN_NOT_CONNECTED);
+        m_display = new Adafruit_SSD1306(WIDTH, HEIGHT, &Wire, RESET_PIN_NOT_CONNECTED);
 
         ESP_LOGD(TAG, "Allocating SSD1306 buffer");
-        if (!display->begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+        if (!m_display->begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
             ESP_LOGE(TAG, "Could not allocate buffer for SSD1306");
-            display = NULL;
+            m_display = NULL;
             return;
         }
 
         ESP_LOGI(TAG, "Display initialized");
 
-        display->setTextColor(WHITE);
-        display->setTextSize(1);
+        m_display->setRotation(m_rotated ? 2 : 0);
+        m_display->setTextColor(WHITE);
+        m_display->setTextSize(1);
 
-        display->clearDisplay();
-        display->drawBitmap(0, 0, logo, WIDTH, HEIGHT, WHITE);
-        display->display();
+        m_display->clearDisplay();
+        m_display->drawBitmap(0, 0, logo, WIDTH, HEIGHT, WHITE);
+        m_display->display();
     }
 
-    void Display::rotation(uint8_t rotation) {
-        m_rotation = rotation;
+    bool Display::rotated(void) {
+        return m_rotated;
+    }
+
+    void Display::rotated(bool rotated) {
+        m_rotated = rotated;
         update();
     }
 
@@ -58,6 +69,11 @@ namespace WiC64 {
         update();
     }
 
+    void Display::connected(bool connected) {
+        m_connected = connected;
+        update();
+    }
+
     char *Display::abbreviated(const String& string) {
         return abbreviated(string, MAX_CHARS_PER_LINE);
     }
@@ -73,24 +89,24 @@ namespace WiC64 {
     void Display::printCenteredLine(const String &string) {
         int16_t x, y;
         uint16_t w, h;
-        int16_t cx = display->getCursorX();
-        int16_t cy = display->getCursorY();
+        int16_t cx = m_display->getCursorX();
+        int16_t cy = m_display->getCursorY();
 
-        display->getTextBounds(string, cx, cy, &x, &y, &w, &h);
-        int16_t margin = (display->width() - w) / 2;
-        display->setCursor(cx + margin, cy);
-        display->println(string);
+        m_display->getTextBounds(string, cx, cy, &x, &y, &w, &h);
+        int16_t margin = (m_display->width() - w) / 2;
+        m_display->setCursor(cx + margin, cy);
+        m_display->println(string);
     }
 
     void Display::printStatusAndRSSI(void) {
         uint8_t rssi_width = strlen(m_rssi_buffer);
-        display->print(abbreviated(m_status, MAX_CHARS_PER_LINE - rssi_width - 1));
+        m_display->print(abbreviated(m_status, MAX_CHARS_PER_LINE - rssi_width - 1));
 
         uint8_t abbreviated_status_width = strlen(m_line_buffer);
         uint8_t gap = MAX_CHARS_PER_LINE - abbreviated_status_width - rssi_width;
 
-        while(gap--) display->print(" ");
-        display->println(m_rssi_buffer);
+        while(gap--) m_display->print(" ");
+        m_display->println(m_rssi_buffer);
     }
 
     void Display::printFreeMemory(void) {
@@ -98,28 +114,64 @@ namespace WiC64 {
         uint8_t minimum_free_heap_size = esp_get_minimum_free_heap_size() / 1024;
         snprintf(m_line_buffer, MAX_CHARS_PER_LINE, "%dkb free %dkb min",
             free_heap_size, minimum_free_heap_size);
-        display->println(String(m_line_buffer));
+        m_display->println(String(m_line_buffer));
     }
 
     void Display::update() {
-        if (display == NULL) return;
+        if (m_display == NULL) return;
+        if (m_notifying) return;
 
-        display->clearDisplay();
-        display->setRotation(m_rotation);
+        m_display->setRotation(m_rotated ? 2 : 0);
+        m_display->clearDisplay();
 
-        display->setFont(FONT_BIG);
-        display->setCursor(0, 12);
-        display->println(m_ip);
+        m_display->setFont(FONT_BIG);
+        m_display->setCursor(0, 12);
 
-        display->setFont(FONT_BUILTIN);
-        display->setCursor(0, 18);
-        display->println(abbreviated(m_ssid));
+        if (m_connected) {
+            m_display->println(m_ip);
 
-        printStatusAndRSSI();
+            m_display->setFont(FONT_BUILTIN);
+            m_display->setCursor(0, 18);
+            m_display->println(abbreviated(m_ssid));
 
-        display->println(abbreviated("Firmware v" WIC64_VERSION_SHORT_STRING));
-        printFreeMemory();
+            printStatusAndRSSI();
 
-        display->display();
+            m_display->println(abbreviated("Firmware v" WIC64_VERSION_SHORT_STRING));
+            printFreeMemory();
+        }
+        else {
+            m_display->println("DEACTIVATED");
+
+            m_display->setFont(FONT_BUILTIN);
+            m_display->setCursor(0, 18);
+
+            m_display->println();
+            m_display->println("Press ESP BOOT button");
+            m_display->println("to activate WiC64");
+        }
+
+        m_display->display();
+    }
+
+    void Display::notify(const String &message) {
+        m_notifying = true;
+        m_display->setRotation(m_rotated ? 2 : 0);
+        m_display->clearDisplay();
+
+        m_display->setFont(FONT_BIG);
+        m_display->setCursor(0, 12);
+
+        m_display->println(message);
+
+        m_display->display();
+
+        xTaskCreatePinnedToCore(notificationTask, "NOTIFY", 4096, NULL, 5, NULL, 0);
+    }
+
+    void Display::notificationTask(void *) {
+        vTaskDelay(1000);
+        display->m_notifying = false;
+        display->update();
+        vTaskDelete(NULL);
     }
 }

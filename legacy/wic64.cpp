@@ -265,7 +265,6 @@ void setup() {
 
 void loop() {
 
-    // TODO: Button ESP (GPIO_NUM_0): Disconnect/Connect Userport
   if (digitalRead(espbootbutton) == LOW) {
     buttontimeA++;
   } else {
@@ -290,7 +289,6 @@ void loop() {
       ESP.restart();
     }
   }
-  // TODO: Button WiC64 (GPIO_NUM_33): [2-5sec]: Enable/Disable LED
   if (buttontimeBcount > 5 && buttontimeBcount < 20) {
     buttontimeBcount = 0;
     log_i("SpecialButton 2 seconds pressed.");
@@ -307,7 +305,6 @@ void loop() {
   }
   if (buttontimeBcount > 30) {
     buttontimeBcount = 0;
-    // TODO: Button WiC64 (GPIO_NUM_33): [>5sec]: Rotate Display
     log_i("SpecialButton 5 seconds pressed.");
     if (displayrotate == true) {
       displayrotate = false;
@@ -374,7 +371,7 @@ void loop() {
           delay(3000);
           displaystuff("config changed");
         }
-        if (lastinput.charAt(3) == 3) { // TODO: Command 0x03 (3) Firmware Update
+        if (lastinput.charAt(3) == 3) { // TODO: $03 FW Update
           ex = true;
           displaystuff("FW update 1");
           handleUpdate();
@@ -408,17 +405,17 @@ void loop() {
           setserver = lastinput;
           preferences.putString("server", lastinput);
         }
-        if (lastinput.charAt(3) == 9) { // TODO: Command 0x09 (9) "Log to serial console"
+        if (lastinput.charAt(3) == 9) {
           ex = true;
           displaystuff("REM");
           Serial.println(lastinput);
         }  // REM Send messages to debug console.
-        if (lastinput.charAt(3) == 10) { // TODO: Command 0x0a (10) "Get udp"
+        if (lastinput.charAt(3) == 10) {
           ex = true;
           displaystuff("get upd");
           sendmessage(getudpmsg());
         }  // Get UDP data and return them to c64
-        if (lastinput.charAt(3) == 11) { // TODO: Command 0x0b (11) "Send udp"
+        if (lastinput.charAt(3) == 11) {
           ex = true;
           displaystuff("send udp");
           sendudpmsg(lastinput);
@@ -435,7 +432,7 @@ void loop() {
           sendmessage(setCredentialsAndConnect());
           displaystuff("config wifi set");
         }  // wlan setup via scanlist
-        if (lastinput.charAt(3) == 14) { //TODO: Comand 0x0e (14) "Set udp port"
+        if (lastinput.charAt(3) == 14) {
           ex = true;
           displaystuff("change udp port");
           httpstring = lastinput;
@@ -508,7 +505,7 @@ void loop() {
           } else sendmessage("0");
         }
 #else
-        if (lastinput.charAt(3) == 24) { // TODO: Command 0x18 (24) Firmware update required
+        if (lastinput.charAt(3) == 24) { // TODO: $18 FW update required
           ex = true;
           displaystuff("check update");
           loader("XXXXhttp://wic64.com/firmware/stable/version.txt");

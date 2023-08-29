@@ -20,9 +20,14 @@ namespace WiC64 {
             int32_t int32(const char* key);
             void int32(const char* key, const int32_t value);
 
+            const char* DEFAULT_SERVER = "http://www.wic64.net/prg/";
+
             const char* SECURITY_TOKEN_KEY = "sectokenname";
             const char* SERVER_KEY = "server";
             const char* GMT_OFFSET_SECONDS_KEY = "gmtoffset";
+            const char* LED_ENABLED_KEY = "killled";
+            const char* DISPLAY_ROTATED_KEY = "displayrotate";
+            const char* USERPORT_DISCONNECTED_KEY = "killswitch";
 
         public:
             Settings();
@@ -38,6 +43,15 @@ namespace WiC64 {
 
             int32_t gmtOffsetSeconds(void);
             void gmtOffsetSeconds(int32_t value);
+
+            bool ledEnabled(void);
+            void ledEnabled(bool ledEnabled);
+
+            bool displayRotated(void);
+            void displayRotated(bool displayRotated);
+
+            bool userportDisconnected(void);
+            void userportDisconnected(bool userportDisconnected);
     };
 }
 

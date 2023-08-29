@@ -10,6 +10,7 @@
 #include "settings.h"
 #include "clock.h"
 #include "led.h"
+#include "buttons.h"
 #include "utilities.h"
 #include "commands/http.h"
 #include "commands/scan.h"
@@ -33,6 +34,7 @@ namespace WiC64 {
     Webserver  *webserver;
     Clock      *clock;
     Led        *led;
+    Buttons    *buttons;
 
     const char* WiC64::TAG = "WIC64";
 
@@ -53,10 +55,18 @@ namespace WiC64 {
         connection = new Connection();
         webserver  = new Webserver();
         clock      = new Clock();
-        led        = new Led(GPIO_NUM_2);
+        led        = new Led();
+        buttons    = new Buttons();
+
+        settings->userportDisconnected()
+            ? userport->disconnect()
+            : userport->connect();
+
+        if (!userport->isConnected()) {
+            display->connected(false);
+        }
 
         connection->connect();
-        userport->connect();
 
         log_task_list(TAG, ESP_LOG_WARN);
         log_free_mem(TAG, ESP_LOG_WARN);
@@ -82,5 +92,6 @@ namespace WiC64 {
         esp_log_level_set(Connect::TAG, loglevel);
         esp_log_level_set(Time::TAG, loglevel);
         esp_log_level_set(Timezone::TAG, loglevel);
+        esp_log_level_set(Buttons::TAG, loglevel);
     }
 }

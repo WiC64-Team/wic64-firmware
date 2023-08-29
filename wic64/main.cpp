@@ -8,5 +8,6 @@ void setup() {
 
 void loop() {
     webserver->serve();
-    vTaskDelay(pdMS_TO_TICKS(100));
+    buttons->tick();
+    vTaskDelay(pdMS_TO_TICKS(10));
 }

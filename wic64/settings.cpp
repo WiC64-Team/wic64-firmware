@@ -36,7 +36,7 @@ namespace WiC64 {
 
     String Settings::server(void) {
         if (!m_preferences.isKey(SERVER_KEY) || string(SERVER_KEY).isEmpty()) {
-            return "http://www.wic64.net/prg/";
+            return DEFAULT_SERVER;
         }
         return string(SERVER_KEY);
     }
@@ -53,6 +53,36 @@ namespace WiC64 {
 
     void Settings::gmtOffsetSeconds(int32_t value) {
         int32(GMT_OFFSET_SECONDS_KEY, value);
+    }
+
+    bool Settings::ledEnabled(void) {
+        return m_preferences.isKey(LED_ENABLED_KEY)
+            ? boolean(LED_ENABLED_KEY)
+            : true;
+    }
+
+    void Settings::ledEnabled(bool ledEnabled) {
+        boolean(LED_ENABLED_KEY, ledEnabled);
+    }
+
+    bool Settings::displayRotated(void) {
+        return m_preferences.isKey(DISPLAY_ROTATED_KEY)
+            ? boolean(DISPLAY_ROTATED_KEY)
+            : false;
+    }
+
+    void Settings::displayRotated(bool displayRotated) {
+        boolean(DISPLAY_ROTATED_KEY, displayRotated);
+    }
+
+    bool Settings::userportDisconnected(void) {
+        return m_preferences.isKey(USERPORT_DISCONNECTED_KEY)
+            ? boolean(USERPORT_DISCONNECTED_KEY)
+            : false;
+    }
+
+    void Settings::userportDisconnected(bool userportDisconnected) {
+        boolean(USERPORT_DISCONNECTED_KEY, userportDisconnected);
     }
 
     String Settings::string(const char* key) {
