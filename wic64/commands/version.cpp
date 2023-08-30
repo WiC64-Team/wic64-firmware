@@ -10,10 +10,11 @@ namespace WiC64 {
     }
 
     void Version::execute(void) {
-        static uint8_t version[3] = {
+        static uint8_t version[4] = {
             WIC64_VERSION_MAJOR,
             WIC64_VERSION_MINOR,
             WIC64_VERSION_PATCH,
+            WIC64_VERSION_DEVEL,
         };
 
         if (id() == WIC64_CMD_VERSION_STRING) {
@@ -21,7 +22,7 @@ namespace WiC64 {
         }
 
         if (id() == WIC64_CMD_VERSION_NUMBERS) {
-            response()->wrap((uint8_t*) version, 3);
+            response()->wrap((uint8_t*) version, 4);
         }
 
         responseReady();
