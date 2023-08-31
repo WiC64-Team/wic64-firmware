@@ -2,4 +2,7 @@ generated-version.h
 build
 dependencies.lock
 sdkconfig.old
-*.bin
+**/*.bin
+**/*.sym
+**/*.prg
+
