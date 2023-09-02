@@ -93,7 +93,8 @@
 #define espbootbutton 0   // button Boot0 on ESP
 #define specialbutton 33  // function button on WiC64 board
 
-
+// TODO: Implement CMD Deprecated (log & respond with reasons)
+// TODO: Implement CMD Unsupported (properly respond to undefined ids)
 
 #include <WiFi.h>
 #include <Preferences.h>
@@ -371,17 +372,17 @@ void loop() {
           delay(3000);
           displaystuff("config changed");
         }
-        if (lastinput.charAt(3) == 3) { // TODO: $03 FW Update
+        if (lastinput.charAt(3) == 3) { // TODO: DEPRECATE $03 FW Update
           ex = true;
           displaystuff("FW update 1");
           handleUpdate();
         }  // Normal SW update - no debug messages on serial
-        if (lastinput.charAt(3) == 4) {
+        if (lastinput.charAt(3) == 4) { // TODO: DEPRECATE $04 FW Update
           ex = true;
           displaystuff("FW update 2");
           handleDeveloper();
         }  // Developer SW update - debug output to serial
-        if (lastinput.charAt(3) == 5) {
+        if (lastinput.charAt(3) == 5) { // TODO: DEPRECATE $05 FW Update
           ex = true;
           displaystuff("FW update 3");
           handleDeveloper2();
@@ -392,7 +393,7 @@ void loop() {
           String ipaddress = WiFi.localIP().toString();
           sendmessage(ipaddress);
         }
-        if (lastinput.charAt(3) == 7) {
+        if (lastinput.charAt(3) == 7) { //TODO: DEPRECATE $07 "stats"
           ex = true;
           displaystuff("get stats");
           String stats = __DATE__ " " __TIME__;
@@ -405,17 +406,17 @@ void loop() {
           setserver = lastinput;
           preferences.putString("server", lastinput);
         }
-        if (lastinput.charAt(3) == 9) {
+        if (lastinput.charAt(3) == 9) { //TODO: DEPRECATE $09 log to console
           ex = true;
           displaystuff("REM");
           Serial.println(lastinput);
         }  // REM Send messages to debug console.
-        if (lastinput.charAt(3) == 10) {
+        if (lastinput.charAt(3) == 10) { //TODO: DEPRECATE $0a get udp
           ex = true;
           displaystuff("get upd");
           sendmessage(getudpmsg());
         }  // Get UDP data and return them to c64
-        if (lastinput.charAt(3) == 11) {
+        if (lastinput.charAt(3) == 11) { //TODO: DEPRECATE $0b send udp
           ex = true;
           displaystuff("send udp");
           sendudpmsg(lastinput);
@@ -432,7 +433,7 @@ void loop() {
           sendmessage(setCredentialsAndConnect());
           displaystuff("config wifi set");
         }  // wlan setup via scanlist
-        if (lastinput.charAt(3) == 14) {
+        if (lastinput.charAt(3) == 14) { //TODO: DEPRECATE $14 udp port
           ex = true;
           displaystuff("change udp port");
           httpstring = lastinput;
@@ -463,7 +464,7 @@ void loop() {
             sendmessage("no server set");
           }
         }
-        if (lastinput.charAt(3) == 19) {
+        if (lastinput.charAt(3) == 19) { //TODO: Implement $13 get external ip (?)
           ex = true;
           displaystuff("get external ip");
           loader("XXXXhttp://wic64.com/firmware/stable/ip.php");
@@ -505,7 +506,7 @@ void loop() {
           } else sendmessage("0");
         }
 #else
-        if (lastinput.charAt(3) == 24) { // TODO: $18 FW update required
+        if (lastinput.charAt(3) == 24) { // TODO: DEPRECATE $18 FW Update required
           ex = true;
           displaystuff("check update");
           loader("XXXXhttp://wic64.com/firmware/stable/version.txt");
@@ -519,33 +520,33 @@ void loop() {
         }
 #endif
 
-        if (lastinput.charAt(3) == 25) {
+        if (lastinput.charAt(3) == 25) { //TODO: DEPRECATE $19 get prefs
           ex = true;
           displaystuff("read prefs");
           httpstring = lastinput;
           sendmessage(getprefs());
         }
-        if (lastinput.charAt(3) == 26) {
+        if (lastinput.charAt(3) == 26) { //TODO: DEPRECATE $1a set prefs
           ex = true;
           displaystuff("save prefs");
           httpstring = lastinput;
           sendmessage(setprefs());
         }
 
-        if (lastinput.charAt(3) == 30) {
+        if (lastinput.charAt(3) == 30) { //TODO: DEPRECATE $1e get udp duplicate
           ex = true;
           displaystuff("get udp");
           getudpmsg();
           if (messagetoc64 != "") { sendmessage(messagetoc64); }
         }
-        if (lastinput.charAt(3) == 31) {
+        if (lastinput.charAt(3) == 31) { //TODO: DEPRECATE $1f get udp duplicate
           ex = true;
           displaystuff("send udp");
           sendudpmsg(lastinput);
           sendmessage("");
           log_i("tcp send %s", lastinput);
         }
-        if (lastinput.charAt(3) == 32) {
+        if (lastinput.charAt(3) == 32) { // TODO: DEPRECATE $20 set tcp port (never did nothing)
           ex = true;
           displaystuff("set tcp port");
           httpstring = lastinput;
@@ -567,12 +568,12 @@ void loop() {
           displaystuff("send tcp1");
           sendmessage(sendtcp1());
         }
-        if (lastinput.charAt(3) == 36) {
+        if (lastinput.charAt(3) == 36) { // TODO: Move new impl to new id, deprecate this?
           ex = true;
           displaystuff("httppost");
           sendmessage(httppost());
         }
-        if (lastinput.charAt(3) == 37) {
+        if (lastinput.charAt(3) == 37) { // TODO: DEPRECATE $25 "bigloader"
           ex = true;
           displaystuff("loading bighttp");
           bigloader(lastinput);
@@ -589,7 +590,7 @@ void loop() {
           sendmessage(FWLowHigh);
         }
 
-        if (lastinput.charAt(3) == 99) {
+        if (lastinput.charAt(3) == 99) { //TODO: DEPRECATE $63 factory reset (?!)
           ex = true;
           displaystuff("factory reset");
           WiFi.begin("-", "-");
