@@ -44,6 +44,11 @@ test_version !zone test_version {
     jsr hexprint
     +newline
 
+    +print .text_devel
+    lda response+3
+    jsr hexprint
+    +newline
+
     +paragraph
     jmp .prompt
 
@@ -71,6 +76,9 @@ test_version !zone test_version {
 
 .text_patch
 !text "pATCH: $", $00
+
+.text_devel
+!text "dEVEL: $", $00
 
 .get_version !zone get_version {
     ; null response buffer
