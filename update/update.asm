@@ -150,7 +150,7 @@ print_dec !zone print_dec {
 !macro fill .addr, .byte, .len {
     +pointer zp1, .addr
     ldy #.len
-    iny
+    dey
     lda #.byte
 
 -   sta (zp1),y
