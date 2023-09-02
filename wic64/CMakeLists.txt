@@ -25,6 +25,7 @@ idf_component_register(
     SRCS "commands/mac.cpp"
     SRCS "commands/tcp.cpp"
     SRCS "commands/echo.cpp"
+    SRCS "commands/update.cpp"
     SRCS "display.cpp"
     SRCS "webserver.cpp"
     SRCS "clock.cpp"

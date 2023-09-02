@@ -12,6 +12,7 @@
 #include "timezone.h"
 #include "tcp.h"
 #include "echo.h"
+#include "update.h"
 
 namespace WiC64 {
     WIC64_COMMANDS = {
@@ -43,6 +44,8 @@ namespace WiC64 {
         WIC64_COMMAND(WIC64_CMD_GET_TIMEZONE, Timezone),
         WIC64_COMMAND(WIC64_CMD_SET_TIMEZONE, Timezone),
         WIC64_COMMAND(WIC64_CMD_GET_LOCAL_TIME, Time),
+
+        WIC64_COMMAND(WIC64_CMD_UPDATE_FIRMWARE, Update),
 
         WIC64_COMMANDS_END
     };

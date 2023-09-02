@@ -32,6 +32,8 @@
 #define WIC64_CMD_SET_TIMEZONE   0x16
 #define WIC64_CMD_GET_LOCAL_TIME 0x15
 
+#define WIC64_CMD_UPDATE_FIRMWARE 0x27
+
 // DO NOT EDIT BEYOND THIS LINE ---------------------------------------------
 
 #define WIC64_CMD_NONE 0xff
