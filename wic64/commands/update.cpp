@@ -19,8 +19,8 @@ namespace WiC64 {
         ESP_LOGW(TAG, "Installing [%s]", url);
 
         /* The HTTPUpdate.update() method does not actually flash the new firmware,
-         * it simply downloads the specified url, checks if it is a valid ESP32 image
-         * and then writes it to one of the OTA partitions in flash and then
+         * it simply downloads the specified image, checks if it is a valid ESP32
+         * image, writes it to one of the OTA partitions in flash and then
          * immediately resets the ESP.
          *
          * Upon boot, the bootloader then checks for a new firmware image in the
