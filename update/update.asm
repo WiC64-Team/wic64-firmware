@@ -150,12 +150,13 @@ print_dec !zone print_dec {
 !macro fill .addr, .byte, .len {
     +pointer zp1, .addr
     ldy #.len
-    dey
+    iny
     lda #.byte
 
 -   sta (zp1),y
     dey
-    bpl -
+    bne -
+    sta (zp1),y
 }
 
 ; ---------------------------------------------------------------------------
@@ -374,7 +375,7 @@ warning_installed_prefix:
 !text "vERSION ", $00
 
 warning_installed_postfix:
-!text " ALREADY INSTALLED", $0d, $0d, $00
+!text " CURRENTLY INSTALLED", $0d, $0d, $00
 
 press_any_key_text:
 !text "=> pRESS ANY KEY TO CONTINUE", $00
@@ -517,6 +518,7 @@ get_current_unstable_version:
 +   +print current_unstable_text
     +print_version current_unstable_version
     +newline
+    jsr green
 
 get_previous_unstable_version:
     lda #'p'
@@ -536,6 +538,7 @@ get_previous_unstable_version:
 +   +print previous_unstable_text
     +print_version previous_unstable_version
     +newline
+    jsr green
 
 prompt:
     +newline
