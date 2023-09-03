@@ -63,7 +63,7 @@ namespace WiC64 {
 echo "Created ${impl}"
 
 echo
-echo -e "Add this line to ../CMakeLists.txt and rebuild:\n\n\t${cmakelist_entry}\n"
+echo -e "Add this line to ../CMakeLists.txt and run idf.py reconfigure:\n\n\t${cmakelist_entry}\n"
 echo -e "Add this line at the top of ./commands.cpp:\n\n\t${include}\n"
 echo -e "Define the command id(s) in ./commands.h, e.g.:\n\n\t${id_define_example}\n"
 echo -e "For each defined id, insert a line like this into WIC64_COMMANDS in ./commands.cpp:\n\n\t${registry_entry_example}\n"

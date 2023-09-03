@@ -14,6 +14,7 @@
 #include "echo.h"
 #include "update.h"
 #include "deprecated.h"
+#include "undefined.h"
 
 namespace WiC64 {
     WIC64_COMMANDS = {
@@ -68,4 +69,6 @@ namespace WiC64 {
         WIC64_COMMAND(WIC64_CMD_DEPRECATED_FACTORY_RESET_63,            Deprecated),
         WIC64_COMMANDS_END
     };
+
+    command_map_entry_t WIC64_COMMAND_UNDEFINED = WIC64_COMMAND(WIC64_CMD_NONE, Undefined);
 }

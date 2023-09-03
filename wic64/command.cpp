@@ -23,18 +23,6 @@ namespace WiC64 {
         return request()->id();
     }
 
-    bool Command::defined(uint8_t id) {
-        command_map_entry_t command;
-
-        for (uint8_t i=0; commands[i].id != WIC64_CMD_NONE; i++) {
-            command = commands[i];
-            if (command.id == id) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     Command* Command::create(Request* request) {
         command_map_entry_t command;
 
@@ -44,7 +32,7 @@ namespace WiC64 {
                 return command.create(request);
             }
         }
-        return nullptr;
+        return WIC64_COMMAND_UNDEFINED.create(request);
     }
 
     const char *Command::describe() {

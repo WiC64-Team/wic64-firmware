@@ -72,6 +72,7 @@ namespace WiC64 {
     };
 
     extern WIC64_COMMANDS;
+    extern command_map_entry_t WIC64_COMMAND_UNDEFINED;
 }
 
 #endif // WIC64_COMMANDS_H

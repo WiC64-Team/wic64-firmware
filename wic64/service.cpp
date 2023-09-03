@@ -58,11 +58,6 @@ namespace WiC64 {
         uint8_t api = WiC64::API_V1;
         uint8_t id = header[2];
 
-        if (!Command::defined(id)) {
-            ESP_LOGE(TAG, "Unsupported command " WIC64_FORMAT_CMD WIC64_RED(" (%d)"), id, id);
-            return;
-        }
-
         uint16_t argument_size = (*((uint16_t*) header)) - API_V1_ARGUMENT_SIZE_CORRECTION;
         bool has_argument = (argument_size > 0);
 

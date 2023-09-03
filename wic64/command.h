@@ -15,9 +15,7 @@ namespace WiC64 {
 
         public:
             const static char* TAG;
-            class Undefined;
 
-            static bool defined(uint8_t id);
             static Command* create(Request* request);
 
             Command(Request* request);
