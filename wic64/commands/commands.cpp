@@ -13,6 +13,7 @@
 #include "tcp.h"
 #include "echo.h"
 #include "update.h"
+#include "deprecated.h"
 
 namespace WiC64 {
     WIC64_COMMANDS = {
@@ -47,6 +48,23 @@ namespace WiC64 {
 
         WIC64_COMMAND(WIC64_CMD_UPDATE_FIRMWARE, Update),
 
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_UPDATE_FIRMWARE_03,          Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_UPDATE_FIRMWARE_04,          Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_UPDATE_FIRMWARE_05,          Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_FIRMWARE_UPDATE_REQUIRED_18, Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_GET_STATS_07,                Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_LOG_TO_SERIAL_CONSOLE_09,    Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_GET_UPD_0A,                  Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_SEND_UPD_0B,                 Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_SET_UPD_PORT_0E,             Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_GET_UPD_DUPLICATE_1E,        Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_SEND_UPD_DUPLICATE_1F,       Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_GET_EXTERNAL_IP_13,          Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_GET_PREFERENCES_19,          Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_SET_PREFERENCES_1A,          Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_SET_TCP_PORT_20,             Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_BIG_LOADER_25,               Deprecated),
+        WIC64_COMMAND(WIC64_CMD_DEPRECATED_FACTORY_RESET_63,            Deprecated),
         WIC64_COMMANDS_END
     };
 }

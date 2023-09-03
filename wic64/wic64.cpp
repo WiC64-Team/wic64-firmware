@@ -19,6 +19,7 @@
 #include "commands/timezone.h"
 #include "commands/tcp.h"
 #include "commands/update.h"
+#include "commands/deprecated.h"
 
 #include "esp_log.h"
 
@@ -95,5 +96,6 @@ namespace WiC64 {
         esp_log_level_set(Timezone::TAG, loglevel);
         esp_log_level_set(Buttons::TAG, loglevel);
         esp_log_level_set(Update::TAG, loglevel);
+        esp_log_level_set(Deprecated::TAG, loglevel);
     }
 }

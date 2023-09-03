@@ -26,6 +26,7 @@ idf_component_register(
     SRCS "commands/tcp.cpp"
     SRCS "commands/echo.cpp"
     SRCS "commands/update.cpp"
+    SRCS "commands/deprecated.cpp"
     SRCS "display.cpp"
     SRCS "webserver.cpp"
     SRCS "clock.cpp"
