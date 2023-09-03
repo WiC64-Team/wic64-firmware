@@ -116,12 +116,9 @@ wic64_execute
 ;
 ; Otherwise the macro will contain the code directly.
 ;
-; Note that Optimizing for size will significantly decrease
-; transfer speed due to the jsr overhead added for every
-; byte transferred.
-;
-; A separate sourcefile has been used to avoid duplicating
-; code here.
+; Note that optimizing for size will significantly decrease
+; transfer speed by about 30% due to the jsr/rts overhead
+; added for every byte transferred.
 
 !macro _wic64_wait_for_handshake_code {
 
