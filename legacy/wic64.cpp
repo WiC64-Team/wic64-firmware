@@ -564,7 +564,7 @@ void loop() {
           displaystuff("send tcp1");
           sendmessage(sendtcp1());
         }
-        if (lastinput.charAt(3) == 36) { // TODO: Move new impl to new id, deprecate this command
+        if (lastinput.charAt(3) == 36) {
           ex = true;
           displaystuff("httppost");
           sendmessage(httppost());
@@ -1425,5 +1425,3 @@ void bigloader(String httpstring) {  // Daten via HTTP laden
   }
   log_i("Loop counter: %d", crashcounter);
 }
-
-// TODO: Implement CMD Unsupported (properly respond to undefined ids)
