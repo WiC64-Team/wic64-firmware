@@ -9,7 +9,7 @@ test_post !zone test_post {
     sta iterations+2
 
     ; set post command id
-    lda #$24
+    lda #$28
     sta request_id
 
     ; copy post url

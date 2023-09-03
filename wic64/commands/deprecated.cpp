@@ -74,6 +74,13 @@ namespace WiC64 {
                     "variable that was never used.");
                 break;
 
+            case WIC64_CMD_DEPRECATED_LEGACY_HTTP_POST_24:
+                snprintf(cursor, remaining, "%s",
+                    "The previous implementation of HTTP POST was broken and the "
+                    "payload structure was unnecessarily complex. Please use the "
+                    "new HTTP POST command $28 instead.");
+                break;
+
             case WIC64_CMD_DEPRECATED_BIG_LOADER_25:
                 snprintf(cursor, remaining, "%s",
                     "This command was called \"big loader\" and was intended as a"
