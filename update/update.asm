@@ -2,7 +2,6 @@
 !addr zp2 = $50
 
 !addr chrout = $ffd2
-!addr reboot = $fce2
 
 roff = $92
 lowercase = $0e
@@ -15,7 +14,7 @@ lowercase = $0e
 
 * = $0810
 jmp main
-
+;         PA               PB
 key_none  !byte %00000000, %11111111
 key_one   !byte %01111111, %00000001
 key_two   !byte %01111111, %00001000
@@ -24,6 +23,8 @@ key_four  !byte %11111101, %00001000
 key_f5    !byte %11111110, %01000000
 key_esc   !byte %01111111, %00000010
 key_stop  !byte %01111111, %10000000
+key_yes   !byte %11110111, %00000010
+key_no    !byte %11101111, %10000000
 
 !src "../test/wic64.asm"
 !src "../test/util.asm"
@@ -34,6 +35,7 @@ test_menu_code_loaded:
     lda draw_menu_header
     cmp #$4c
     rts
+
 ; ---------------------------------------------------------------------------
 
 print_dec !zone print_dec {
@@ -203,6 +205,13 @@ cyan:
 
 ; ---------------------------------------------------------------------------
 
+yellow:
+    lda #$07
+    sta $0286
+    rts
+
+; ---------------------------------------------------------------------------
+
 compare_versions: !zone compare_versions {
     ldy #$03
 
@@ -249,6 +258,27 @@ compare_versions: !zone compare_versions {
 
 ; ---------------------------------------------------------------------------
 
+!macro rts_to .addr {
+    lda #<.addr
+    sta rts_to_addr
+    lda #>.addr
+    sta rts_to_addr+1
+
+    +decw rts_to_addr
+
+    pla
+    pla
+    lda rts_to_addr+1
+    pha
+    lda rts_to_addr
+    pha
+    rts
+}
+
+rts_to_addr: !byte $00, $00
+
+; ---------------------------------------------------------------------------
+
 wait_any_key:
 -   +scan key_none
     bne -
@@ -258,16 +288,76 @@ wait_any_key:
 
 ; ---------------------------------------------------------------------------
 
+yes_or_no: !zone yes_or_no {
+    jsr wait_any_key
+
+.scan:
+    +scan key_yes
+    bne .yes
+
+    +scan key_no
+    bne .no
+
+    jmp .scan
+
+.yes:
+    clc
+    rts
+
+.no:
+    sec
+    rts
+}
+; ---------------------------------------------------------------------------
+
+continue_or_quit:
+-   jsr wait_any_key
+
+    ++  +scan key_f5
+    bne +
+    jmp ++
+
++   +rts_to main
+
+++  +scan key_stop
+    bne +
+    jmp ++
+
++   jsr return_to_portal
+    jmp -
+
+++  +scan key_esc
+    bne +
+    jmp ++
+
++   jsr return_to_portal
+    jmp -
+
+++  rts
+
+continue_or_quit_text:
+!text "=> pRESS ANY KEY TO CONTINUE", $0d, $00
+
+; ---------------------------------------------------------------------------
+
 !macro print_error_and_jmp .message, .addr {
     jsr red
     +print .message
     jsr green
 
-    +print press_any_key_text
-    jsr wait_any_key
+    +print continue_or_quit_text
+    jsr continue_or_quit
 
     jmp .addr
 }
+
+; ---------------------------------------------------------------------------
+
+return_to_portal:
+    jsr red
+    +print return_not_implemented_text
+    jsr green
+    rts
 
 ; ---------------------------------------------------------------------------
 
@@ -292,17 +382,30 @@ wait_any_key:
 
 .ensure_version_is_not_installed_yet:
     lda .version+4
-    bne .prepare_url_query
+    bne .warn_about_unstable_version
 
-    jsr red
+    jsr yellow
     +print warning_installed_prefix
     +print_version .version
     +print warning_installed_postfix
     jsr green
 
-    +print press_any_key_text
-    jsr wait_any_key
+    +print continue_or_quit_text
+    jsr continue_or_quit
 
+    jmp main
+
+.warn_about_unstable_version:
+    lda .version+3
+    beq .prepare_url_query
+
+    jsr yellow
+    +print unstable_hint_text
+    jsr green
+
+    +print install_unstable_prompt
+    jsr yes_or_no
+    bcc .prepare_url_query
     jmp main
 
 .prepare_url_query:
@@ -324,17 +427,26 @@ wait_any_key:
     +strlen install_request_url
     stx install_request_size
     +add_four_to install_request_size
+    +fill install_response, $00, $ff
 
 .execute_install_request
     +wic64_execute install_request, install_response
-    bcs +
+    bcs .wait_for_wic64_to_reboot
 
-    +print_error_and_jmp install_response, main
+.show_install_request_error
+    jsr red
+    +print_ascii install_response
+    jsr green
 
-+   +print installing_text
-    +print_version .version
+    +paragraph
+    +print continue_or_quit_text
+    jsr continue_or_quit
+    jmp main
 
 .wait_for_wic64_to_reboot
+    +print installing_text
+    +print_version .version
+
 -   jsr dot
     +wic64_execute ping_request, ping_response
     bcs -
@@ -352,8 +464,8 @@ wait_any_key:
     +paragraph
 
     jsr green
-    +print press_any_key_text
-    jsr wait_any_key
+    +print continue_or_quit_text
+    jsr continue_or_quit
 
     jmp main
 
@@ -377,17 +489,18 @@ warning_installed_prefix:
 warning_installed_postfix:
 !text " CURRENTLY INSTALLED", $0d, $0d, $00
 
-press_any_key_text:
-!text "=> pRESS ANY KEY TO CONTINUE", $00
+unstable_hint_text:
+!text "uNSTABLE VERSIONS CONTAIN EXPERIMENTAL", $0d
+!text "CODE AND MAY CAUSE EXISTING PROGRAMS TO", $0d
+!text "STOP WORKING. uSE AT YOUR OWN RISK.", $0d
+!text $0d, $00
 
-press_any_key_quit_text:
-!text "=> pRESS ANY KEY TO QUIT", $00
+install_unstable_prompt:
+!text "iNSTALL UNSTABLE VERSION? (y/n)", $0d, $0d, $00
 
 ; ---------------------------------------------------------------------------
 
 main:
-    sei
-
     lda #$00
     sta $d020
     sta $d021
@@ -428,9 +541,9 @@ bail_on_legacy_firmware:
     jsr green
     +print legacy_firmware_help_text
 
-    +print press_any_key_quit_text
-    jsr wait_any_key
-    jmp reboot
+    +print continue_or_quit_text
+    jsr continue_or_quit
+    jmp main
 
 get_installed_version:
     +wic64_execute installed_version_request, installed_version
@@ -545,29 +658,7 @@ prompt:
     +print prompt_text
 
 scan:
-    jsr wait_any_key
-
-++  +scan key_f5
-    bne +
-    jmp ++
-
-+   jmp main
-
-++  +scan key_stop
-    bne +
-    jmp ++
-
-+   jsr red
-    +print return_not_implemented_text
-    jsr green
-
-++  +scan key_esc
-    bne +
-    jmp ++
-
-+   jsr red
-    +print return_not_implemented_text
-    jsr green
+    jsr continue_or_quit
 
 ++  +scan key_one
     bne +
@@ -609,7 +700,7 @@ legacy_firmware_help_text:
 !text $0d
 !text "tO UPDATE TO A NEWER VERSION, VISIT", $0d
 !text $0d
-!text $9f, "WWW.WIC64-TEAM.GITHUB.IO/ONLINE-FLASHER", $1e, $0d
+!text $9f, "     WWW.WIC64.COM/WIC64-FLASHER", $1e, $0d
 !text $0d
 !text $00
 
