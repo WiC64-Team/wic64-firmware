@@ -24,8 +24,8 @@ namespace WiC64 {
          * immediately resets the ESP.
          *
          * Upon boot, the bootloader then checks for a new firmware image in the
-         * OTA partitions and copies it to the actual application partition and then
-         * boots the updated application.
+         * OTA partitions and simply boots from the most recently written to OTA
+         * partition instead of the factory app partition.
          *
          * This means that contrary to the way all other commands work, this command
          * will NOT send a response at all if the update succeeds, since the ESP is
