@@ -247,7 +247,7 @@ namespace WiC64 {
 
         vTaskDelay(pdMS_TO_TICKS(10));
 
-        log_free_mem(TAG, ESP_LOG_INFO);
+        log_free_mem(TAG, ESP_LOG_VERBOSE);
         display->update();
     }
 }

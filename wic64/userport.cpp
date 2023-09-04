@@ -323,14 +323,14 @@ namespace WiC64 {
 
         userport->readByte(&api);
 
-        ESP_LOGI(TAG, "Received API id " WIC64_FORMAT_API, api);
-
         if (service->supports(api)) {
+            ESP_LOGI(TAG, WIC64_SEPARATOR);
+            ESP_LOGI(TAG, "Received API id " WIC64_FORMAT_API, api);
             userport->resetLineNoiseCount();
             service->acceptRequest(api);
 
         } else {
-            ESP_LOGE(TAG, "Unsupported API id " WIC64_FORMAT_API, api);
+            ESP_LOGE(TAG, "Received unsupported API id " WIC64_FORMAT_API, api);
             userport->handleLineNoise();
         }
     }

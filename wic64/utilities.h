@@ -27,6 +27,7 @@
 #define WIC64_WHITE(str) WIC64_ANSI(37) str
 #define WIC64_FORMAT_CMD WIC64_WHITE("0x%02x")
 #define WIC64_FORMAT_API WIC64_CYAN("0x%02x")
+#define WIC64_SEPARATOR "-------------------------------------------------------------------------------"
 
 namespace WiC64 {
     void log_hex(const char* tag, esp_log_level_t level, const char* title, uint8_t *data, uint32_t size);
