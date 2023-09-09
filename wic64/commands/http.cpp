@@ -100,7 +100,6 @@ namespace WiC64 {
         }
     }
 
-    // REDESIGN: Remove this hack, just POST binary data or use base64
     void Http::encode(String& url) {
         // If this command is executed via id 0x0f, encode HEX data
         // after "<$" markers in the request data using two lowercase
