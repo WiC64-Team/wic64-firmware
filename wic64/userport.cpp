@@ -54,6 +54,7 @@ namespace WiC64 {
     }
 
     void Userport::connect() {
+        gpio_set_level(HANDSHAKE_LINE_ESP_TO_C64, 1);
         gpio_set_direction(HANDSHAKE_LINE_ESP_TO_C64, GPIO_MODE_OUTPUT);
 
         gpio_set_direction(HANDSHAKE_LINE_C64_TO_ESP, GPIO_MODE_INPUT);
@@ -201,8 +202,8 @@ namespace WiC64 {
 
         ESP_LOGD(TAG, "%s %d bytes...", isSending(type) ? "Sending" : "Receiving", size);
 
-        createTimeoutTask();
         timeTransferStarted = millis();
+        createTimeoutTask();
 
         if (isInitiallySending()) {
             ESP_LOGV(TAG, "Sending initial handshake to start pending transfer");
