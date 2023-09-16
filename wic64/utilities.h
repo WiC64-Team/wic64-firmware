@@ -25,7 +25,8 @@
 #define WIC64_GREEN(str) WIC64_ANSI(32) str
 #define WIC64_RED(str) WIC64_ANSI(31) str
 #define WIC64_WHITE(str) WIC64_ANSI(37) str
-#define WIC64_FORMAT_CMD WIC64_WHITE("0x%02x")
+#define WIC64_YELLOW(str) WIC64_ANSI(33) str
+#define WIC64_FORMAT_CMD WIC64_YELLOW("0x%02x")
 #define WIC64_FORMAT_API WIC64_CYAN("0x%02x")
 #define WIC64_SEPARATOR "-------------------------------------------------------------------------------"
 
