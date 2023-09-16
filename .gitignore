@@ -5,4 +5,5 @@ sdkconfig.old
 **/*.bin
 **/*.sym
 **/*.prg
+log.*.txt
 
