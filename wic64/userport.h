@@ -25,8 +25,8 @@ enum userport_event_t {
 #endif
 
 namespace WiC64 {
+    typedef void (*callback_t) (uint8_t* data, uint16_t size);
 
-typedef void (*callback_t) (uint8_t* data, uint16_t size);
     class Userport {
         public: static const char* TAG;
 
@@ -173,6 +173,9 @@ typedef void (*callback_t) (uint8_t* data, uint16_t size);
 
             void resetLineNoiseCount(void);
             void handleLineNoise(void);
+
+            void sendHandshakeSignalBeforeReboot();
+            void sendHanshakeSignalAfterReboot(void);
 
             static void IRAM_ATTR onHandshakeSignalReceived(void);
             static void IRAM_ATTR onDataDirectionChanged(void);

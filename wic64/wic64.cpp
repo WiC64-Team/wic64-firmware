@@ -19,6 +19,7 @@
 #include "commands/timezone.h"
 #include "commands/tcp.h"
 #include "commands/update.h"
+#include "commands/reboot.h"
 #include "commands/deprecated.h"
 #include "commands/undefined.h"
 
@@ -49,7 +50,7 @@ namespace WiC64 {
     WiC64::WiC64() {
         transferBuffer = (uint8_t*) calloc(0x10000+1, sizeof(uint8_t));
 
-        loglevel(ESP_LOG_INFO);
+        loglevel(ESP_LOG_VERBOSE);
         ESP_LOGW(TAG, "Firmware version %s", WIC64_VERSION_STRING);
 
         userport   = new Userport();
@@ -100,6 +101,7 @@ namespace WiC64 {
         esp_log_level_set(Timezone::TAG, loglevel);
         esp_log_level_set(Buttons::TAG, loglevel);
         esp_log_level_set(Update::TAG, loglevel);
+        esp_log_level_set(Reboot::TAG, loglevel);
         esp_log_level_set(Deprecated::TAG, loglevel);
         esp_log_level_set(Undefined::TAG, loglevel);
     }

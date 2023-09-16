@@ -13,6 +13,7 @@
 #include "tcp.h"
 #include "echo.h"
 #include "update.h"
+#include "reboot.h"
 #include "deprecated.h"
 #include "undefined.h"
 
@@ -48,6 +49,8 @@ namespace WiC64 {
         WIC64_COMMAND(WIC64_CMD_GET_LOCAL_TIME, Time),
 
         WIC64_COMMAND(WIC64_CMD_UPDATE_FIRMWARE, Update),
+
+        WIC64_COMMAND(WIC64_CMD_REBOOT, Reboot),
 
         WIC64_COMMAND(WIC64_CMD_DEPRECATED_UPDATE_FIRMWARE_03,          Deprecated),
         WIC64_COMMAND(WIC64_CMD_DEPRECATED_UPDATE_FIRMWARE_04,          Deprecated),

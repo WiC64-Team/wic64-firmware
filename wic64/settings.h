@@ -28,6 +28,7 @@ namespace WiC64 {
             const char* LED_ENABLED_KEY = "killled";
             const char* DISPLAY_ROTATED_KEY = "displayrotate";
             const char* USERPORT_DISCONNECTED_KEY = "killswitch";
+            const char* REBOOTING_KEY = "rebooting";
 
         public:
             Settings();
@@ -52,6 +53,9 @@ namespace WiC64 {
 
             bool userportDisconnected(void);
             void userportDisconnected(bool userportDisconnected);
+
+            bool rebooting(void);
+            void rebooting(bool rebooted);
     };
 }
 

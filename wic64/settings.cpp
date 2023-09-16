@@ -85,6 +85,16 @@ namespace WiC64 {
         boolean(USERPORT_DISCONNECTED_KEY, userportDisconnected);
     }
 
+    bool Settings::rebooting(void) {
+        return m_preferences.isKey(REBOOTING_KEY)
+            ? boolean(REBOOTING_KEY)
+            : false;
+    }
+
+    void Settings::rebooting(bool rebooted) {
+        boolean(REBOOTING_KEY, rebooted);
+    }
+
     String Settings::string(const char* key) {
         return m_preferences.getString(key);
     }

@@ -5,6 +5,7 @@
 
 #include "userport.h"
 #include "service.h"
+#include "settings.h"
 #include "led.h"
 #include "utilities.h"
 
@@ -16,6 +17,7 @@ namespace WiC64 {
 
     extern Userport *userport;
     extern Service *service;
+    extern Settings *settings;
     extern Led *led;
 
     Userport::Userport() {
@@ -70,6 +72,11 @@ namespace WiC64 {
         connected = true;
 
         ESP_LOGI(TAG, "Userport connected, accepting requests");
+
+        if (settings->rebooting()) {
+            userport->sendHanshakeSignalAfterReboot();
+            settings->rebooting(false);
+        }
     }
 
     void Userport::disconnect() {
@@ -431,6 +438,15 @@ namespace WiC64 {
 
             resetLineNoiseCount();
         }
+    }
+
+    void Userport::sendHandshakeSignalBeforeReboot() {
+        sendHandshakeSignal();
+    }
+
+    void Userport::sendHanshakeSignalAfterReboot(void) {
+        ESP_LOGW(TAG, "Confirming Reboot");
+        sendHandshakeSignal();
     }
 
     void IRAM_ATTR Userport::post(userport_event_t event) {
