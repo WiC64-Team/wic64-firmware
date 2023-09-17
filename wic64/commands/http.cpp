@@ -15,6 +15,16 @@ namespace WiC64 {
     extern Settings *settings;
 
     void Http::execute(void) {
+        if (!connection->ready()) {
+            ESP_LOGE(TAG, "Can't send HTTP request: %s", !connection->connected()
+                ? "WiFi not connected "
+                : "No IP address assigned by DHCP server");
+
+            response()->copy("!0");
+            responseReady();
+            return;
+        }
+
         (id() == WIC64_CMD_HTTP_POST) ? post() : get();
     }
 

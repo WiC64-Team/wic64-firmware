@@ -1,11 +1,14 @@
 
 #include "tcp.h"
 #include "commands.h"
+#include "connection.h"
 #include "tcpClient.h"
 
 namespace WiC64 {
     const char* Tcp::TAG = "TCP";
+
     extern TcpClient* tcpClient;
+    extern Connection* connection;
 
     const char* Tcp::describe() {
         switch (id()) {
@@ -28,6 +31,16 @@ namespace WiC64 {
         char portAsString[6];
         uint16_t port;
         int32_t size;
+
+        if (!connection->ready()) {
+            ESP_LOGE(TAG, "Can't execute TCP command: %s", !connection->connected()
+                ? "WiFi not connected "
+                : "no IP address assigned by DHCP server");
+
+            response()->copy("!0");
+            responseReady();
+            return;
+        }
 
         if (id() == WIC64_CMD_TCP_OPEN) {
             request()->argument()->field(0, ':', host);

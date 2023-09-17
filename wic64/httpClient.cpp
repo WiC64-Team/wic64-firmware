@@ -1,6 +1,5 @@
 #include "wic64.h"
 #include "httpClient.h"
-#include "connection.h"
 #include "utilities.h"
 #include "settings.h"
 
@@ -20,7 +19,6 @@ namespace WiC64 {
     const char* HttpClient::TAG = "HTTPCLIENT";
 
     extern HttpClient* httpClient;
-    extern Connection *connection;
     extern Settings *settings;
 
     HttpClient::HttpClient() {
