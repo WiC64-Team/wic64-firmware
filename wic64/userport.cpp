@@ -284,7 +284,7 @@ namespace WiC64 {
         transferState = TRANSFER_STATE_NONE;
 
         if (onFailureCallback != NULL) {
-            onFailureCallback(buffer, pos-1);
+            onFailureCallback(buffer, pos ? pos-1 : 0);
             onFailureCallback = NULL;
         }
 
