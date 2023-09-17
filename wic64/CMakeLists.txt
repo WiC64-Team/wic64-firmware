@@ -38,6 +38,8 @@ idf_component_register(
     SRCS "main.cpp"
     SRCS "../generated-version.h"
 
+    EMBED_TXTFILES "../wic64-net.pem"
+
     REQUIRES "wic64"
     REQUIRES "arduino"
     REQUIRES "Adafruit-GFX-Library"
