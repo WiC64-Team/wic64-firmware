@@ -41,8 +41,6 @@ namespace WiC64 {
         display->RSSI(WiFi.RSSI());
         display->ip("0.0.0.0");
         display->status("Connected");
-
-        connection->reconnecting(true);
     }
 
     void Connection::onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -70,12 +68,25 @@ namespace WiC64 {
 
     void Connection::connect() {
         ESP_LOGI(TAG, "Connecting to WiFi network...");
+        connection->reconnecting(true);
         WiFi.begin();
     }
 
     void Connection::disconnect(void) {
         reconnecting(false);
         WiFi.disconnect();
+    }
+
+    bool Connection::connected(void) {
+        return WiFi.isConnected();
+    }
+
+    bool Connection::ipAddressAssigned(void) {
+        return WiFi.localIP() != IPADDR_NONE;
+    }
+
+    bool Connection::ready(void) {
+        return connected() && ipAddressAssigned();
     }
 
     void Connection::connect(const char* ssid, const char* passphrase) {
