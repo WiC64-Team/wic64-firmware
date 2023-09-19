@@ -11,8 +11,8 @@ namespace WiC64 {
     extern Display *display;
 
     Connection::Connection() {
+        WiFi.setHostname("WiC64");
         WiFi.mode(WIFI_STA);
-        WiFi.setHostname(("WiC64-" + WiFi.macAddress()).c_str());
 
         WiFi.onEvent(onConnected, ARDUINO_EVENT_WIFI_STA_CONNECTED);
         WiFi.onEvent(onDisconnected, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
