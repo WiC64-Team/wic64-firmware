@@ -176,6 +176,7 @@ namespace WiC64 {
 
             void sendHandshakeSignalBeforeReboot();
             void sendHanshakeSignalAfterReboot(void);
+            static void sendHandshakeAfterRebootTask(void*);
 
             static void IRAM_ATTR onHandshakeSignalReceived(void);
             static void IRAM_ATTR onDataDirectionChanged(void);
