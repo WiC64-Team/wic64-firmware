@@ -445,13 +445,13 @@ namespace WiC64 {
     }
 
     void Userport::sendHanshakeSignalAfterReboot(void) {
-        ESP_LOGW(TAG, "Confirming Reboot in 2000ms...");
+        ESP_LOGW(TAG, "Confirming reboot in 2000ms...");
         xTaskCreatePinnedToCore(sendHandshakeAfterRebootTask, "HANDSHAKE", 4096, NULL, 5, NULL, 0);
     }
 
     void Userport::sendHandshakeAfterRebootTask(void *) {
         vTaskDelay(pdMS_TO_TICKS(2000));
-        ESP_LOGW(TAG, "Confirming Reboot by sending single hanshake signal");
+        ESP_LOGW(TAG, "Confirming reboot by sending single handshake signal");
         userport->sendHandshakeSignal();
         vTaskDelete(NULL);
     }
