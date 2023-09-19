@@ -24,14 +24,12 @@ namespace WiC64 {
             .cert_pem = wic64_net_pem,
         };
 
-        ESP_LOGW(TAG, "Installing [%s]", url);
+        ESP_LOGW(TAG, "Installing firmware %s", url);
 
         if (esp_https_ota(&config) == ESP_OK) {
-            response()->appendField("0");
-            response()->appendField("OK");
+            response()->copy("0 OK");
         } else {
-            response()->appendField("1");
-            response()->appendField("FAIL");
+            response()->copy("1 Firmware update failed");
         }
         responseReady();
     }
