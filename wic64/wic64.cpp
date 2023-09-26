@@ -50,8 +50,8 @@ namespace WiC64 {
     WiC64::WiC64() {
         transferBuffer = (uint8_t*) calloc(0x10000+1, sizeof(uint8_t));
 
-        loglevel(ESP_LOG_VERBOSE);
-        ESP_LOGW(TAG, "Firmware version %s", WIC64_VERSION_STRING);
+        loglevel(ESP_LOG_INFO);
+        ESP_LOGW(TAG, "Booting Firmware version %s", WIC64_VERSION_STRING);
 
         userport   = new Userport();
         service    = new Service();
@@ -75,9 +75,7 @@ namespace WiC64 {
 
         connection->connect();
 
-        log_task_list(TAG, ESP_LOG_WARN);
         log_free_mem(TAG, ESP_LOG_WARN);
-
         loglevel(ESP_LOG_WARN);
     }
 
