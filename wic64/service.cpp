@@ -40,35 +40,73 @@ namespace WiC64 {
     }
 
     bool Service::supports(uint8_t api) {
-        return api == WiC64::API_V1;
+        return api == WiC64::API_LAYER_1 || api == WiC64::API_LAYER_2;
     }
 
     void Service::acceptRequest(uint8_t api) {
         static uint8_t header[REQUEST_HEADER_SIZE];
+        userport->receivePartial(header, REQUEST_HEADER_SIZE, getRequestHeaderCallbackFor(api));
+    }
 
-        if (api == WiC64::API_V1) {
-            userport->receivePartial(header, REQUEST_HEADER_SIZE, parseRequestHeaderVersion1);
+    callback_t Service::getRequestHeaderCallbackFor(uint8_t api) {
+        switch(api) {
+            case WiC64::API_LAYER_1:
+                return parseLegacyRequestHeader;
+            case WiC64::API_LAYER_2:
+                return parseRequestHeader;
+            default:
+                return nullptr;
         }
     }
 
-    void Service::parseRequestHeaderVersion1(uint8_t *header, uint16_t size) {
-        ESP_LOGD(TAG, "Parsing api version 1 request header...");
+    void Service::parseLegacyRequestHeader(uint8_t *header, uint16_t size) {
+        ESP_LOGD(TAG, "Parsing legacy request header...");
         ESP_LOG_HEXV(TAG, "Header", (uint8_t*) header, size);
 
-        uint8_t api = WiC64::API_V1;
+        uint8_t api = WiC64::API_LAYER_1;
         uint8_t id = header[2];
 
-        uint16_t argument_size = (*((uint16_t*) header)) - API_V1_ARGUMENT_SIZE_CORRECTION;
+        uint16_t argument_size = (*((uint16_t*) header)) - API_LAYER_1_ARGUMENT_SIZE_CORRECTION;
         bool has_argument = (argument_size > 0);
 
         service->request = new Request(api, id, has_argument ? 1 : 0);
 
-        ESP_LOGI(TAG, "Received request header "
+        ESP_LOGI(TAG, "Received legacy request header "
                       WIC64_CYAN("[0x%02x 0x%02x ") WIC64_FORMAT_CMD WIC64_CYAN("] ")
                       WIC64_GREEN("(payload %d bytes)"),
             header[0],
             header[1],
             service->request->id(),
+            argument_size);
+
+        if (service->request->hasArguments()) {
+            ESP_LOGI(TAG, "Receiving request argument");
+            Data* argument = service->request->addArgument(new Data(transferBuffer, argument_size));
+            userport->receive(argument->data(), argument->size(), onRequestReceived, onRequestAborted);
+        }
+        else {
+            service->onRequestReceived();
+        }
+    }
+
+    void Service::parseRequestHeader(uint8_t *header, uint16_t size) {
+        ESP_LOGD(TAG, "Parsing request header...");
+        ESP_LOG_HEXV(TAG, "Header", (uint8_t*) header, size);
+
+        uint8_t api = WiC64::API_LAYER_2;
+        uint8_t id = header[0];
+
+        uint16_t argument_size = (*((uint16_t*) (header+1))) ;
+        bool has_argument = (argument_size > 0);
+
+        service->request = new Request(api, id, has_argument ? 1 : 0);
+
+        ESP_LOGI(TAG, "Received request header "
+                      WIC64_CYAN("[") WIC64_FORMAT_CMD WIC64_CYAN(" 0x%02x 0x%02x] ")
+                      WIC64_GREEN("(payload %d bytes)"),
+            service->request->id(),
+            header[1],
+            header[2],
             argument_size);
 
         if (service->request->hasArguments()) {
@@ -123,17 +161,21 @@ namespace WiC64 {
     void Service::sendResponseHeader() {
         response = command->response();
 
-        // For unknown reasons the response size is transferred in
-        // big-endian format in API version 1 (high byte first)
         static uint8_t responseSizeBuffer[2];
 
-        responseSizeBuffer[0] = HIGHBYTE(response->sizeToReport());
-        responseSizeBuffer[1] = LOWBYTE(response->sizeToReport());
+        if(command->isLegacyRequest()) {
+            responseSizeBuffer[0] = HIGHBYTE(response->sizeToReport());
+            responseSizeBuffer[1] = LOWBYTE(response->sizeToReport());
+        } else {
+            responseSizeBuffer[0] = LOWBYTE(response->sizeToReport());
+            responseSizeBuffer[1] = HIGHBYTE(response->sizeToReport());
+        }
 
-        ESP_LOGI(TAG, "Sending response size %d [0x%02x, 0x%02x]",
+        ESP_LOGI(TAG, "Sending response size %d [0x%02x, 0x%02x] (%s-endian)",
             response->sizeToReport(),
             responseSizeBuffer[0],
-            responseSizeBuffer[1]);
+            responseSizeBuffer[1],
+            command->isLegacyRequest() ? "big" : "little");
 
         response->isPresent()
             ? userport->sendPartial(responseSizeBuffer, 2, onResponseHeaderSent, onResponseHeaderAborted)

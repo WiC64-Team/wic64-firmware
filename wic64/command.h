@@ -23,8 +23,7 @@ namespace WiC64 {
 
             uint8_t id(void);
 
-            bool isVersion1() { return m_request->api() == WiC64::API_V1; }
-            bool isVersion2() { return m_request->api() == WiC64::API_V2; }
+            bool isLegacyRequest() { return m_request->api() == WiC64::API_LAYER_1; }
 
             Request* request(void) { return m_request; }
             Data* response(void) { return m_response; }

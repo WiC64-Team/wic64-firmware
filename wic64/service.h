@@ -58,7 +58,7 @@ namespace WiC64
         esp_event_loop_handle_t eventLoop() { return event_loop_handle; }
 
         bool supports(uint8_t apiId);
-        callback_t parseRequestHeaderCallbackFor(uint8_t api);
+        callback_t getRequestHeaderCallbackFor(uint8_t api);
         void acceptRequest(uint8_t apiId);
 
         static void parseRequestHeader(uint8_t *header, uint16_t size);

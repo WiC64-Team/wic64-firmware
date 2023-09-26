@@ -45,8 +45,8 @@ namespace WiC64 {
         public:
             static const char* TAG;
 
-            static const uint8_t API_V1 = 'W';
-            static const uint8_t API_V2 = 'I';
+            static const uint8_t API_LAYER_1 = 'W';
+            static const uint8_t API_LAYER_2 = 'R';
 
             static void loglevel(esp_log_level_t level);
 

@@ -197,8 +197,10 @@ namespace WiC64 {
     }
 
     void Http::responseReady(void) {
-        adjustResponseSizeForProgramFiles();
-        handleSettingChangeRequestFromServer();
+        if (isLegacyRequest()) {
+            adjustResponseSizeForProgramFiles();
+            handleSettingChangeRequestFromServer();
+        }
 
         Command::responseReady();
     }
