@@ -6,6 +6,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_event.h"
+#include "callback.h"
 #include "utilities.h"
 
 #ifdef ___cplusplus
@@ -25,7 +26,6 @@ enum userport_event_t {
 #endif
 
 namespace WiC64 {
-    typedef void (*callback_t) (uint8_t* data, uint16_t size);
 
     class Userport {
         public: static const char* TAG;

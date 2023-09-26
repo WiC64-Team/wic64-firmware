@@ -5,6 +5,7 @@
 #include "esp_event.h"
 #include "data.h"
 #include "request.h"
+#include "callback.h"
 
 #define LOWBYTE(UINT16) (uint8_t)((UINT16 >> 0UL) & 0xff)
 #define HIGHBYTE(UINT16) (uint8_t)((UINT16 >> 8UL) & 0xff)
@@ -41,7 +42,7 @@ namespace WiC64
         // but rather the size of the entire payload, so we need to
         // subtract 4 to get the actual size of the argument
         // => api byte + lowbyte size + highbyte size + command id = 4
-        static const uint8_t API_V1_ARGUMENT_SIZE_CORRECTION = 4;
+        static const uint8_t API_LAYER_1_ARGUMENT_SIZE_CORRECTION = 4;
 
         Request *request = NULL;
         Command *command = NULL;
@@ -57,9 +58,12 @@ namespace WiC64
         esp_event_loop_handle_t eventLoop() { return event_loop_handle; }
 
         bool supports(uint8_t apiId);
+        callback_t parseRequestHeaderCallbackFor(uint8_t api);
         void acceptRequest(uint8_t apiId);
 
-        static void parseRequestHeaderVersion1(uint8_t *header, uint16_t size);
+        static void parseRequestHeader(uint8_t *header, uint16_t size);
+        static void parseLegacyRequestHeader(uint8_t *header, uint16_t size);
+
         static void onRequestAborted(uint8_t *data, uint16_t bytes_received);
         static void onRequestReceived(uint8_t *data, uint16_t size);
         void onRequestReceived(void) { onRequestReceived(NULL, 0); }
