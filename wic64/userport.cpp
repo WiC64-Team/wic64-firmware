@@ -56,6 +56,8 @@ namespace WiC64 {
     }
 
     void Userport::connect() {
+        setPortToInput();
+
         gpio_set_level(HANDSHAKE_LINE_ESP_TO_C64, 1);
         gpio_set_direction(HANDSHAKE_LINE_ESP_TO_C64, GPIO_MODE_OUTPUT);
 
@@ -66,8 +68,6 @@ namespace WiC64 {
         gpio_set_direction(DATA_DIRECTION_LINE, GPIO_MODE_INPUT);
         gpio_set_intr_type(DATA_DIRECTION_LINE, GPIO_INTR_POSEDGE);
         gpio_isr_handler_add(DATA_DIRECTION_LINE, (gpio_isr_t) onDataDirectionChanged, NULL);
-
-        setPortToInput();
 
         connected = true;
 
@@ -80,6 +80,8 @@ namespace WiC64 {
     }
 
     void Userport::disconnect() {
+        setPortToInput();
+
         gpio_set_direction(HANDSHAKE_LINE_ESP_TO_C64, GPIO_MODE_INPUT);
 
         gpio_set_direction(HANDSHAKE_LINE_C64_TO_ESP, GPIO_MODE_INPUT);
@@ -89,8 +91,6 @@ namespace WiC64 {
         gpio_set_direction(DATA_DIRECTION_LINE, GPIO_MODE_INPUT);
         gpio_set_intr_type(DATA_DIRECTION_LINE, GPIO_INTR_DISABLE);
         gpio_isr_handler_remove(DATA_DIRECTION_LINE);
-
-        setPortToInput();
 
         connected = false;
         ESP_LOGI(TAG, "Userport disconnected, ignoring requests");
