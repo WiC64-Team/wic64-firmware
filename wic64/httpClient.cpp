@@ -33,8 +33,6 @@ namespace WiC64 {
     }
 
     esp_err_t HttpClient::eventHandler(esp_http_client_event_t *event) {
-        static bool connection_header_sent = false;
-
         switch(event->event_id) {
             case HTTP_EVENT_ERROR:
                 if(event->data != NULL && event->data_len > 0) {
@@ -49,17 +47,10 @@ namespace WiC64 {
 
             case HTTP_EVENT_HEADER_SENT:
                 ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
-                connection_header_sent = false;
                 break;
 
             case HTTP_EVENT_ON_HEADER:
                 ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER: %s: %s", event->header_key, event->header_value);
-
-                // Connection: keep-alive
-                if (strcmp(event->header_key, "Connection") == 0) {
-                    connection_header_sent = true;
-                    httpClient->keepAlive(strcasecmp(event->header_value, "keep-alive") == 0);
-                }
 
                 // WiC64-Security-Token-Key: <key>
                 if (strcmp(event->header_key, "WiC64-Security-Token-Key") == 0) {
@@ -74,9 +65,6 @@ namespace WiC64 {
 
             case HTTP_EVENT_ON_DATA:
                 ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, size=%d", event->data_len);
-                if (!connection_header_sent) {
-                    httpClient->keepAlive(false);
-                }
                 break;
 
             case HTTP_EVENT_ON_FINISH:
@@ -148,8 +136,6 @@ namespace WiC64 {
             goto ERROR;
         }
 
-        closeConnectionUnlessKeptAlive();
-
     RETRY:
         if (isConnectionClosed()) {
             ESP_LOGV(TAG, "Opening new connection");
@@ -175,12 +161,8 @@ namespace WiC64 {
         if ((result = esp_http_client_open(m_client, request_content_length) != ESP_OK)) {
             ESP_LOGE(TAG, "Failed to open connection: %s", esp_err_to_name(result));
 
-            const char* reason = m_keepAlive
-                ? "Assuming keep-alive connection timed out"
-                : "Connection failed for unknown reasons";
-
-            ESP_LOGW(TAG, "%s, retrying %d more time%s...",
-                reason, retries, (retries > 1) ? "s" : "");
+            ESP_LOGW(TAG, "Retrying %d more time%s...",
+                retries, (retries > 1) ? "s" : "");
 
             if (retries-- > 0) {
                 closeConnection();
@@ -231,8 +213,6 @@ namespace WiC64 {
             method == HTTP_METHOD_GET ? "GET" : "POST",
             m_statusCode,
             content_length);
-
-        ESP_LOGI(TAG, "Keep alive: %s", m_keepAlive ? "true" : "false");
 
         // The client should handle redirects automatically, but this does not always seem to work,
         // see  https://www.esp32.com/viewtopic.php?t=26701 (no answers from Espressif yet)
@@ -317,12 +297,6 @@ namespace WiC64 {
                 ESP_LOGE(TAG, "Error cleaning up: %s", esp_err_to_name(result));
             }
             m_client = NULL;
-        }
-    }
-
-    void HttpClient::closeConnectionUnlessKeptAlive() {
-        if (!m_keepAlive) {
-            closeConnection();
         }
     }
 

@@ -20,7 +20,6 @@ namespace WiC64 {
 
             static const uint16_t MAX_URL_LENGTH = 2000; // see https://stackoverflow.com/a/417184
             static const uint8_t MAX_RETRIES = 10;
-            bool m_keepAlive = false;
             int32_t m_statusCode = -1;
 
             esp_http_client_handle_t handle() { return m_client; }
@@ -29,10 +28,7 @@ namespace WiC64 {
             const char* HEADER = "--WiC64-Binary-Data\nContent-Disposition: form-data; name=\"data\"\n\n";
             const char* FOOTER = "\n--WiC64-Binary-Data--\n";
 
-            void keepAlive(bool keepAlive) { m_keepAlive = keepAlive; }
-
             void closeConnection(void);
-            void closeConnectionUnlessKeptAlive();
             bool isConnectionClosed();
 
             static esp_err_t eventHandler(esp_http_client_event_t *evt);
