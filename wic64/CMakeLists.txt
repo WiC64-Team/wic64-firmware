@@ -41,6 +41,7 @@ idf_component_register(
     EMBED_TXTFILES "../wic64-net.pem"
 
     REQUIRES "wic64"
+    REQUIRES "esp-tls" # needs to be included *before* arduino, else arduino hijacks esp_tls.h
     REQUIRES "arduino"
     REQUIRES "Adafruit-GFX-Library"
     REQUIRES "Adafruit_BusIO"

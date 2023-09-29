@@ -7,6 +7,8 @@
 #include "nvs_flash.h"
 #include "esp_event.h"
 #include "esp_netif.h"
+#include "esp_tls.h"
+#include "esp_crt_bundle.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -135,6 +137,7 @@ namespace WiC64 {
             .max_redirection_count = 10,
             .event_handler = eventHandler,
             .buffer_size_tx = MAX_URL_LENGTH,
+            .crt_bundle_attach = esp_crt_bundle_attach,
         };
 
         #pragma GCC diagnostic pop
