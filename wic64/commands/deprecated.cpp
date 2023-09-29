@@ -105,7 +105,7 @@ namespace WiC64 {
 
     void Deprecated::execute(void) {
         ESP_LOGE(TAG, "%s", reason());
-        response()->copy(reason());
+        response()->copyString(reason());
         responseReady();
     }
 }

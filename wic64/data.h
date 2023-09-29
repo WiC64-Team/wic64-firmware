@@ -20,15 +20,15 @@ namespace WiC64 {
         public:
             Data();
             Data(uint8_t* data, uint16_t size);
-            Data(const char* c_str);
 
             uint8_t* data() { return m_data; }
             char* c_str();
 
-            void wrap(Data* data);
-            void wrap(uint8_t* data, uint16_t size);
-            void wrap(const char* c_str);
-            void copy(const char* c_str);
+            void set(Data* data);
+            void set(uint8_t* data, uint16_t size);
+            void set(const char* c_str);
+            void copyString(const char* c_str);
+            void copyData(const char* c_str);
 
             void appendField(const String& string);
             const char* field(uint8_t index, char *dst);

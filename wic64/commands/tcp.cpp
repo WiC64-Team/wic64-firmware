@@ -37,7 +37,7 @@ namespace WiC64 {
                 ? "WiFi not connected "
                 : "no IP address assigned by DHCP server");
 
-            response()->copy("!0");
+            response()->copyData("!0");
             responseReady();
             return;
         }
@@ -47,7 +47,7 @@ namespace WiC64 {
             request()->argument()->field(1, ':', portAsString);
             port = atoi(portAsString);
 
-            response()->copy(tcpClient->open(host, port) ? "0" : "!E");
+            response()->copyData(tcpClient->open(host, port) ? "0" : "!E");
         }
 
         else if (id() == WIC64_CMD_TCP_READ) {
@@ -58,7 +58,7 @@ namespace WiC64 {
 
         else if (id() == WIC64_CMD_TCP_WRITE) {
             size = tcpClient->write(request()->argument()->zeroTerminated());
-            response()->copy(size == request()->argument()->size() ? "0" : "!E");
+            response()->copyData(size == request()->argument()->size() ? "0" : "!E");
         }
         responseReady();
     }

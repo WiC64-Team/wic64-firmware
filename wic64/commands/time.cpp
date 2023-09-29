@@ -16,10 +16,10 @@ namespace WiC64 {
         const char* localTime = clock->localTime();
 
         if(localTime != NULL) {
-            response()->wrap(localTime);
+            response()->copyString(localTime);
         }
         else {
-            response()->copy("Could not get local time");
+            response()->copyString("Could not get local time");
         }
         responseReady();
     }

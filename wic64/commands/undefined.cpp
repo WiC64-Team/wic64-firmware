@@ -12,7 +12,7 @@ namespace WiC64 {
         static char message[32];
         snprintf(message, sizeof(message), "Undefined command id 0x%02x", id());
         ESP_LOGE(TAG, "%s", message);
-        response()->copy(message);
+        response()->copyString(message);
         responseReady();
     }
 }

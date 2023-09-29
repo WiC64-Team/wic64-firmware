@@ -9,11 +9,7 @@ namespace WiC64 {
      }
 
     Data::Data(uint8_t *data, uint16_t size) {
-        this->wrap(data, size);
-    }
-
-    Data::Data(const char* c_str) {
-        this->wrap(c_str);
+        this->set(data, size);
     }
 
     char* Data::c_str() {
@@ -21,23 +17,31 @@ namespace WiC64 {
         return (char*) m_data;
     }
 
-    void Data::wrap(uint8_t *data, uint16_t size) {
+    void Data::set(uint8_t *data, uint16_t size) {
         m_data = data;
         m_size = size;
         m_data[m_size] = '\0';
     }
 
-    void Data::wrap(const char *c_str) {
+    void Data::set(const char *c_str) {
         m_data = (uint8_t*) c_str;
         m_size = strlen(c_str);
         m_data[m_size] = '\0';
     }
 
-    void Data::wrap(Data *data) {
-        wrap(data->data(), data->size());
+    void Data::set(Data *data) {
+        set(data->data(), data->size());
     }
 
-    void Data::copy(const char *c_str) {
+    // copies string content and adds a terminating nullbyte
+    void Data::copyString(const char *c_str) {
+        m_data = transferBuffer;
+        m_size = strlen(c_str)+1;
+        strncpy((char*) transferBuffer, c_str, m_size+1);
+    }
+
+    // copies string content without adding terminating nullbyte
+    void Data::copyData(const char *c_str) {
         m_data = transferBuffer;
         m_size = strlen(c_str);
         strncpy((char*) transferBuffer, c_str, m_size+1);

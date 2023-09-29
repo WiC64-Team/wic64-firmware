@@ -27,9 +27,9 @@ namespace WiC64 {
         ESP_LOGW(TAG, "Installing firmware %s", url);
 
         if (esp_https_ota(&config) == ESP_OK) {
-            response()->copy("0 OK");
+            response()->copyString("0 OK");
         } else {
-            response()->copy("1 Firmware update failed");
+            response()->copyString("1 Firmware update failed");
         }
         responseReady();
     }

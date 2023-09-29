@@ -11,7 +11,7 @@ namespace WiC64 {
     }
 
     void RSSI::execute(void) {
-        response()->wrap(connection->RSSI());
+        response()->copyString(connection->RSSI());
         responseReady();
     }
 }

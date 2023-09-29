@@ -10,7 +10,7 @@ namespace WiC64 {
     }
 
     void IP::execute(void) {
-        response()->wrap(connection->ipAddress());
+        response()->copyString(connection->ipAddress());
         responseReady();
     }
 }

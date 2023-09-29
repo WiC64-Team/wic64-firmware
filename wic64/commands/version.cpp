@@ -18,11 +18,11 @@ namespace WiC64 {
         };
 
         if (id() == WIC64_CMD_VERSION_STRING) {
-            response()->copy(WIC64_VERSION_STRING);
+            response()->copyString(WIC64_VERSION_STRING);
         }
 
         if (id() == WIC64_CMD_VERSION_NUMBERS) {
-            response()->wrap((uint8_t*) version, 4);
+            response()->set((uint8_t*) version, 4);
         }
 
         responseReady();

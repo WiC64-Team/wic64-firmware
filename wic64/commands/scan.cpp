@@ -34,7 +34,7 @@ namespace WiC64 {
             else {
                 ESP_LOGW(TAG, "Scan successful, still 0 networks found");
             }
-            response()->copy("no networks found");
+            response()->copyString("no networks found");
         }
         else {
             ESP_LOGI(TAG, "Scan successful, %d networks found", num_networks);

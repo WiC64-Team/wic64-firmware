@@ -100,11 +100,6 @@ namespace WiC64 {
         static int32_t content_length;
 
         int32_t result;
-
-        // REDESIGN: This is the legacy error response. We need to send
-        // qualified error information in the future.
-        static char error[] = "!0";
-
         uint8_t retries = MAX_RETRIES;
 
         // The Arduino HTTPClient sends "ESP32HTTPClient" as the user-agent
@@ -267,7 +262,7 @@ namespace WiC64 {
             }
             ESP_LOGI(TAG, "Read %d bytes", size);
 
-            command->response()->wrap(transferBuffer, size);
+            command->response()->set(transferBuffer, size);
         }
 
     DONE:
@@ -278,8 +273,10 @@ namespace WiC64 {
         return;
 
     ERROR:
+        // REDESIGN: This is the legacy error response. We need to send
+        // qualified error information in the future.
         ESP_LOGW(TAG, "Sending error response");
-        command->response()->wrap(error);
+        command->response()->copyData("!0");
         closeConnection();
         goto DONE;
     }

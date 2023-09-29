@@ -11,7 +11,7 @@ namespace WiC64 {
     }
 
     void MAC::execute(void) {
-        response()->wrap(connection->macAddress());
+        response()->copyString(connection->macAddress());
         responseReady();
     }
 }

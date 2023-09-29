@@ -21,7 +21,7 @@ namespace WiC64 {
         }
 
         if (id() == WIC64_CMD_GET_SERVER) {
-            response()->copy(settings->server().c_str());
+            response()->copyString(settings->server().c_str());
         }
 
         responseReady();

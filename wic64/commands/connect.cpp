@@ -78,15 +78,15 @@ namespace WiC64 {
 
         if (passphrase == NULL) {
             ESP_LOGE(TAG, "Failed to decode passphrase");
-            response()->copy("wifi config not changed: passphrase decode failed");
+            response()->copyString("wifi config not changed: passphrase decode failed");
         }
         else if (strlen(ssid) == 0) {
             ESP_LOGE(TAG, "SSID is empty");
-            response()->copy("wifi config not changed: ssid empty");
+            response()->copyString("wifi config not changed: ssid empty");
         }
         else {
             connection->connect(ssid, passphrase);
-            response()->copy("wifi config changed");
+            response()->copyString("wifi config changed");
 
             // After receiving the response, the portal's wifi.prg
             // (and probably launcher.prg) immediately try to determine

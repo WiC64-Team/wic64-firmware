@@ -35,14 +35,15 @@ namespace WiC64 {
 
         static char timezone[7];
         snprintf(timezone, 7, "%d", clock->timezone());
-        response()->wrap(timezone);
+        response()->copyString(timezone);
     }
 
     void Timezone::set(void) {
         // The index into the array of gmt offsets is received
         // in two bytes, where the first byte contains the low
         // digit and the second byte contains the high digit.
-        // Yes, seriously. I refuse to even validate this input.
+        // So this is little-endian ascii-coded decimal... nice,
+        // never seen that one before :)
 
         uint8_t low_digit = request()->argument()->data()[0];
         uint8_t high_digit = request()->argument()->data()[1];

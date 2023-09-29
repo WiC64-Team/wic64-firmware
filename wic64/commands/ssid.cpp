@@ -11,7 +11,7 @@ namespace WiC64 {
     }
 
     void SSID::execute(void) {
-        response()->wrap(connection->SSID());
+        response()->copyString(connection->SSID());
         responseReady();
     }
 }

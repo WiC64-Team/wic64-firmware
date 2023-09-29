@@ -20,7 +20,7 @@ namespace WiC64 {
                 ? "WiFi not connected "
                 : "No IP address assigned by DHCP server");
 
-            response()->copy("!0");
+            response()->copyData("!0");
             responseReady();
             return;
         }
@@ -189,10 +189,10 @@ namespace WiC64 {
             }
             else {
                 ESP_LOGE(TAG, "Unknown setting: [%s]", key);
-                response()->copy("!0");
+                response()->copyData("!0");
                 return;
             }
-            response()->copy(reply);
+            response()->copyData(reply);
         }
     }
 
