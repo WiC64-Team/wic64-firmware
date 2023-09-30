@@ -146,8 +146,9 @@ namespace WiC64 {
             m_display->setCursor(0, 18);
 
             m_display->println();
-            m_display->println("Press ESP BOOT button");
-            m_display->println("to activate WiC64");
+            m_display->println("Hold ESP BOOT button");
+            m_display->println("for one second to");
+            m_display->println("activate WiC64");
         }
 
         m_display->display();
