@@ -25,9 +25,6 @@
 
 #include "esp_log.h"
 
-// TODO: Http, Tcp: Check connection instead of blindly trying
-// TODO: Implement command to wait for connection established (?)
-
 using namespace WiC64;
 
 namespace WiC64 {
