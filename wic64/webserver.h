@@ -13,10 +13,14 @@ namespace WiC64 {
 
             void serve(void);
             void reply(const String& response);
+            void reloadAndClearQueryString(void);
 
-            const String& header(const String& title);
+            const String& header();
             const String& footer(void);
 
-            static void log(void);
+            static void request(void);
+            static void wifi(void);
+
+            static void disconnectTask(void*);
     };
 }
