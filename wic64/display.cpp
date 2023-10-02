@@ -135,9 +135,10 @@ namespace WiC64 {
             m_display->println(abbreviated(m_ssid));
 
             printStatusAndRSSI();
+            printFreeMemory();
+            m_display->println();
 
             m_display->println(abbreviated("Firmware v" WIC64_VERSION_SHORT_STRING));
-            printFreeMemory();
         }
         else {
             m_display->println("DEACTIVATED");
