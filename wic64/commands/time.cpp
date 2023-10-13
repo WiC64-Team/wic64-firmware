@@ -19,7 +19,7 @@ namespace WiC64 {
             response()->copyString(localTime);
         }
         else {
-            response()->copyString("Could not get local time");
+            error(INTERNAL_ERROR, "Could not get local time");
         }
         responseReady();
     }

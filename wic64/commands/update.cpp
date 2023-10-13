@@ -1,5 +1,6 @@
 
 #include "update.h"
+#include "utilities.h"
 
 #include "esp_http_client.h"
 #include "esp_https_ota.h"
@@ -18,6 +19,9 @@ namespace WiC64 {
 
     void Update::execute(void) {
         const char* url = request()->argument()->c_str();
+        static char buffer[256];
+        char* message = buffer;
+        esp_err_t result;
 
         const esp_http_client_config_t config = {
             .url = url,
@@ -26,10 +30,13 @@ namespace WiC64 {
 
         ESP_LOGW(TAG, "Installing firmware %s", url);
 
-        if (esp_https_ota(&config) == ESP_OK) {
-            response()->copyString("0 OK");
+        if ((result = esp_https_ota(&config)) == ESP_OK) {
+            success("OK");
         } else {
-            response()->copyString("1 Firmware update failed");
+            ESP_LOGE(TAG, "Firmware update failed: %s", esp_err_to_name(result));
+            esp_err_to_name_r(result, message, 256);
+            replace(message, '_', '-');
+            error(INTERNAL_ERROR, message);
         }
         responseReady();
     }

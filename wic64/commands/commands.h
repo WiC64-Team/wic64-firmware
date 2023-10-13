@@ -35,6 +35,7 @@
 #define WIC64_CMD_UPDATE_FIRMWARE 0x27
 
 #define WIC64_CMD_REBOOT 0x29
+#define WIC64_CMD_STATUS 0x2a
 
 // Deprecated commands
 

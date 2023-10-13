@@ -7,8 +7,6 @@ namespace WiC64 {
 
     extern Clock *clock;
 
-    // Why is this a fixed array of gmt offsets for just a few select timezones?
-    // REDESIGN: Use official posix timezones and allow the user to choose from a *complete* list
     const int32_t Timezone::timezones[32] = {
         0, 0, 3600, 7200, 7200, 10800, 12600, 14400,
         18000, 19800, 21600, 25200, 28800, 32400, 34200, 36000,

@@ -30,11 +30,12 @@ namespace WiC64 {
         if (num_networks <= 0 ) {
             if (num_networks < 0) {
                 ESP_LOGE(TAG, "Scan failed with error code %d", num_networks);
+                error(INTERNAL_ERROR, "Scan failed");
             }
             else {
                 ESP_LOGW(TAG, "Scan successful, still 0 networks found");
+                error(NETWORK_ERROR, "No networks found");
             }
-            response()->copyString("no networks found");
         }
         else {
             ESP_LOGI(TAG, "Scan successful, %d networks found", num_networks);

@@ -16,11 +16,14 @@ namespace WiC64 {
 
     void Http::execute(void) {
         if (!connection->ready()) {
-            ESP_LOGE(TAG, "Can't send HTTP request: %s", !connection->connected()
-                ? "WiFi not connected "
-                : "No IP address assigned by DHCP server");
 
-            response()->copyData("!0");
+            const char* message = !connection->connected()
+                ? "WiFi not connected "
+                : "No IP address assigned";
+
+            ESP_LOGE(TAG, "Can't send HTTP request: %s", message);
+
+            error(CONNECTION_ERROR, message, "!0");
             responseReady();
             return;
         }

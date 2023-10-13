@@ -21,7 +21,7 @@ namespace WiC64 {
             static const uint16_t MAX_URL_LENGTH = 2000; // see https://stackoverflow.com/a/417184
             static const uint8_t MAX_RETRIES = 10;
             int32_t m_statusCode = -1;
-
+            const char* statusToString(int32_t code);
             esp_http_client_handle_t handle() { return m_client; }
             QueueHandle_t queue() { return m_queue; }
 

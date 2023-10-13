@@ -155,31 +155,46 @@ namespace WiC64 {
     }
 
     void Service::sendResponse() {
-        sendResponseHeader();
+        command->isLegacyRequest()
+            ? sendLegacyResponseHeader()
+            : sendResponseHeader();
     }
 
     void Service::sendResponseHeader() {
         response = command->response();
 
-        static uint8_t responseSizeBuffer[2];
+        static uint8_t header[3];
+        header[0] = command->status();
+        header[1] = LOWBYTE(response->sizeToReport());
+        header[2] = HIGHBYTE(response->sizeToReport());
 
-        if(command->isLegacyRequest()) {
-            responseSizeBuffer[0] = HIGHBYTE(response->sizeToReport());
-            responseSizeBuffer[1] = LOWBYTE(response->sizeToReport());
-        } else {
-            responseSizeBuffer[0] = LOWBYTE(response->sizeToReport());
-            responseSizeBuffer[1] = HIGHBYTE(response->sizeToReport());
-        }
-
-        ESP_LOGI(TAG, "Sending response size %d [0x%02x, 0x%02x] (%s-endian)",
+        ESP_LOGI(TAG, "Sending response header (status %d, size: %d): [0x%02x, 0x%02x, 0x%02x]",
+            command->status(),
             response->sizeToReport(),
-            responseSizeBuffer[0],
-            responseSizeBuffer[1],
-            command->isLegacyRequest() ? "big" : "little");
+            header[0],
+            header[1],
+            header[2]);
 
         response->isPresent()
-            ? userport->sendPartial(responseSizeBuffer, 2, onResponseHeaderSent, onResponseHeaderAborted)
-            : userport->send(responseSizeBuffer, 2, onResponseHeaderSent, onResponseHeaderAborted);
+            ? userport->sendPartial(header, 3, onResponseHeaderSent, onResponseHeaderAborted)
+            : userport->send(header, 3, onResponseHeaderSent, onResponseHeaderAborted);
+    }
+
+    void Service::sendLegacyResponseHeader() {
+        response = command->response();
+
+        static uint8_t header[2];
+        header[0] = HIGHBYTE(response->sizeToReport());
+        header[1] = LOWBYTE(response->sizeToReport());
+
+        ESP_LOGI(TAG, "Sending response size %d [0x%02x, 0x%02x] (big-endian)",
+            response->sizeToReport(),
+            header[0],
+            header[1]);
+
+        response->isPresent()
+            ? userport->sendPartial(header, 2, onResponseHeaderSent, onResponseHeaderAborted)
+            : userport->send(header, 2, onResponseHeaderSent, onResponseHeaderAborted);
     }
 
     void Service::onResponseHeaderAborted(uint8_t *data, uint16_t bytes_sent) {

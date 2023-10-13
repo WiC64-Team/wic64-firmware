@@ -128,6 +128,7 @@ namespace WiC64 {
         if (url.length() > MAX_URL_LENGTH) {
             ESP_LOGE(TAG, "URL length is limited to 2000 bytes");
             ESP_LOGE(TAG, "Please use HTTP POST to transfer large amounts of data");
+            command->error(Command::CLIENT_ERROR, "URL too long (max 2000 bytes)");
             goto ERROR;
         }
 
@@ -138,13 +139,15 @@ namespace WiC64 {
 
             if (m_client == NULL) {
                 ESP_LOGE(TAG, "Failed to create esp_http_client");
+                command->error(Command::INTERNAL_ERROR, "Failed to create HTTP client");
                 goto ERROR;
             }
         } else {
             esp_http_client_set_method(m_client, method);
 
             if (esp_http_client_set_url(m_client, url.c_str()) == ESP_FAIL) {
-                ESP_LOGE(TAG, "Failed to set URL");
+                ESP_LOGE(TAG, "Failed to parse URL");
+                command->error(Command::CLIENT_ERROR, "Malformed URL", "!0");
                 goto ERROR;
             };
         }
@@ -163,6 +166,7 @@ namespace WiC64 {
                 closeConnection();
                 goto RETRY;
             } else {
+                command->error(Command::NETWORK_ERROR, "Failed to open connection", "!0");
                 goto ERROR;
             }
         }
@@ -182,6 +186,7 @@ namespace WiC64 {
                     closeConnection();
                     goto RETRY;
                 } else {
+                    command->error(Command::NETWORK_ERROR, "Failed to send POST data", "!0");
                     goto ERROR;
                 }
             }
@@ -197,6 +202,7 @@ namespace WiC64 {
                 closeConnection();
                 goto RETRY;
             } else {
+                command->error(Command::SERVER_ERROR, "Failed to fetch response headers", "!0");
                 goto ERROR;
             }
         }
@@ -220,6 +226,7 @@ namespace WiC64 {
                 esp_http_client_set_redirection(m_client);
                 goto RETRY;
             } else {
+                command->error(Command::NETWORK_ERROR, "Failed to follow redirect", "!0");
                 goto ERROR;
             }
         }
@@ -227,7 +234,8 @@ namespace WiC64 {
         // The previous firmware sends an error response for any status code != 200 or 201
         // There are more successful status codes, so we only send an error if code is >= 400
         if (m_statusCode >= 400) {
-            ESP_LOGE(TAG, "Received HTTP status code %d >= 400, Sending error response", m_statusCode);
+            ESP_LOGE(TAG, "Received HTTP status code %d >= 400", m_statusCode);
+            command->error(Command::SERVER_ERROR, statusToString(m_statusCode), "!0");
             goto ERROR;
         }
 
@@ -257,7 +265,8 @@ namespace WiC64 {
 
             // Read up to 64kb from the connection into the static transfer buffer
             if ((size = esp_http_client_read(m_client, (char*) transferBuffer, 0xffff)) == -1) {
-                ESP_LOGE(TAG, "Read Error");
+                ESP_LOGE(TAG, "Read error");
+                command->error(Command::NETWORK_ERROR, "Network read error", "!0");
                 goto ERROR;
             }
             ESP_LOGI(TAG, "Read %d bytes", size);
@@ -273,10 +282,6 @@ namespace WiC64 {
         return;
 
     ERROR:
-        // REDESIGN: This is the legacy error response. We need to send
-        // qualified error information in the future.
-        ESP_LOGW(TAG, "Sending error response");
-        command->response()->copyData("!0");
         closeConnection();
         goto DONE;
     }
@@ -328,5 +333,86 @@ namespace WiC64 {
 
         ESP_LOGV(TAG, "Queueing task deleting itself");
         vTaskDelete(NULL);
+    }
+
+    const char* HttpClient::statusToString(int32_t code) {
+        static char unknown[24];
+        switch (code) {
+            //####### 1xx - Informational #######
+            case 100: return "100 Continue";
+            case 101: return "101 Switching Protocols";
+            case 102: return "102 Processing";
+            case 103: return "103 Early Hints";
+
+            //####### 2xx - Successful #######
+            case 200: return "200 OK";
+            case 201: return "20Created";
+            case 202: return "201 Acepted";
+            case 203: return "203 Non-Authoritative Information";
+            case 204: return "204 No Content";
+            case 205: return "205 Reset Content";
+            case 206: return "206 Partial Content";
+            case 207: return "207 Multi-Status";
+            case 208: return "208 Already Reported";
+            case 226: return "226 IM Used";
+
+            //####### 3xx - Redirection #######
+            case 300: return "300 Multiple Choices";
+            case 301: return "301 Moved Permanently";
+            case 302: return "302 Found";
+            case 303: return "303 See Other";
+            case 304: return "304 Not Modified";
+            case 305: return "305 Use Proxy";
+            case 307: return "307 Temporary Redirect";
+            case 308: return "308 Permanent Redirect";
+
+            //####### 4xx - Client Error #######
+            case 400: return "400 Bad Request";
+            case 401: return "401 Unauthorized";
+            case 402: return "402 Payment Required";
+            case 403: return "403 Forbidden";
+            case 404: return "404 Not Found";
+            case 405: return "405 Method Not Allowed";
+            case 406: return "406 Not Acceptable";
+            case 407: return "407 Proxy Authentication Required";
+            case 408: return "408 Request Timeout";
+            case 409: return "409 Conflict";
+            case 410: return "410 Gone";
+            case 411: return "411 Length Required";
+            case 412: return "412 Precondition Failed";
+            case 413: return "413 Content Too Large";
+            case 414: return "414 URI Too Long";
+            case 415: return "415 Unsupported Media Type";
+            case 416: return "416 Range Not Satisfiable";
+            case 417: return "417 Expectation Failed";
+            case 418: return "418 I'm a teapot";
+            case 421: return "421 Misdirected Request";
+            case 422: return "422 Unprocessable Content";
+            case 423: return "423 Locked";
+            case 424: return "424 Failed Dependency";
+            case 425: return "425 Too Early";
+            case 426: return "426 Upgrade Required";
+            case 428: return "428 Precondition Required";
+            case 429: return "429 Too Many Requests";
+            case 431: return "431 Request Header Fields Too Large";
+            case 451: return "451 Unavailable For Legal Reasons";
+
+            //####### 5xx - Server Error #######
+            case 500: return "500 Internal Server Error";
+            case 501: return "501 Not Implemented";
+            case 502: return "502 Bad Gateway";
+            case 503: return "503 Service Unavailable";
+            case 504: return "504 Gateway Timeout";
+            case 505: return "505 HTTP Version Not Supported";
+            case 506: return "506 Variant Also Negotiates";
+            case 507: return "507 Insufficient Storage";
+            case 508: return "508 Loop Detected";
+            case 510: return "510 Not Extended";
+            case 511: return "511 Network Authentication Required";
+
+            default:
+                snprintf(unknown, 24, "Invalid HTTP status %d", code);
+                return unknown;
+        }
     }
 }

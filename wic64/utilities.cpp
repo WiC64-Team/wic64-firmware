@@ -13,6 +13,35 @@
 
 namespace WiC64 {
 
+    char ascii2petscii(char c) {
+        if ((c >= 0x5b) && (c <= 0x7e)) {
+            return c ^ 0x20;
+        } else if ((c >= 'A') && (c <= 'Z')) {
+            return c | 0x80;
+        }
+        return c;
+    }
+
+    void ascii2petscii(char* ascii) {
+        for(uint16_t i=0; i<strlen(ascii); i++) {
+            ascii[i] = ascii2petscii(ascii[i]);
+        }
+    }
+
+    void lowercase(char *string) {
+        for(uint16_t i=0; i<strlen(string); i++) {
+            string[i] = tolower(string[i]);
+        }
+    }
+
+    void replace(char* string, char c, char r) {
+        for(uint16_t i=0; i<strlen(string); i++) {
+            if (string[i] == c) {
+                string[i] = r;
+            }
+        }
+    }
+
     void log_hex(const char* tag, esp_log_level_t level, const char* title, uint8_t *data, uint32_t size) {
         static char hint[64];
         int max = size;

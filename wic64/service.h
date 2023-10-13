@@ -72,6 +72,7 @@ namespace WiC64
         void sendResponse(void);
 
         void sendResponseHeader(void);
+        void sendLegacyResponseHeader(void);
         static void onResponseHeaderAborted(uint8_t *data, uint16_t size);
         static void onResponseHeaderSent(uint8_t *data, uint16_t size);
 

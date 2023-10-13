@@ -31,6 +31,10 @@
 #define WIC64_SEPARATOR "-------------------------------------------------------------------------------"
 
 namespace WiC64 {
+    char ascii2petscii(char c);
+    void ascii2petscii(char *ascii);
+    void lowercase(char* lowercase);
+    void replace(char* string, char c, char r);
     void log_hex(const char* tag, esp_log_level_t level, const char* title, uint8_t *data, uint32_t size);
     void log_free_mem(const char* tag, esp_log_level_t level);
     void log_task_list(const char* tag, esp_log_level_t level);

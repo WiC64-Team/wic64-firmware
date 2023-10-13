@@ -9,9 +9,12 @@ namespace WiC64 {
 
     extern Service *service;
 
+    char Command::m_status_message[256] = "";
+
     Command::Command(Request* request) {
         m_request = request;
         m_response = new Data();
+        m_status_code = SUCCESS;
     }
 
     Command::~Command() {
@@ -35,12 +38,20 @@ namespace WiC64 {
         return WIC64_COMMAND_UNDEFINED.create(request);
     }
 
+    void Command::status(uint8_t code, const char *message, const char* legacy_message) {
+        if (isLegacyRequest()) {
+            response()->copyData(legacy_message);
+        } else {
+            m_status_code = code;
+            strncpy(m_status_message, message, 255);
+        }
+    }
+
     const char *Command::describe() {
         return "Generic command (no description available)";
     }
 
-    void Command::execute(void)
-    {
+    void Command::execute(void) {
         responseReady();
     }
 

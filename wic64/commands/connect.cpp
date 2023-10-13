@@ -78,15 +78,15 @@ namespace WiC64 {
 
         if (passphrase == NULL) {
             ESP_LOGE(TAG, "Failed to decode passphrase");
-            response()->copyString("wifi config not changed: passphrase decode failed");
+            error(CLIENT_ERROR, "wifi config not changed: passphrase decode failed");
         }
         else if (strlen(ssid) == 0) {
             ESP_LOGE(TAG, "SSID is empty");
-            response()->copyString("wifi config not changed: ssid empty");
+            error(CLIENT_ERROR, "wifi config not changed: ssid empty");
         }
         else {
             connection->connect(ssid, passphrase);
-            response()->copyString("wifi config changed");
+            success("wifi config changed");
 
             // After receiving the response, the portal's wifi.prg
             // (and probably launcher.prg) immediately try to determine
@@ -97,7 +97,7 @@ namespace WiC64 {
             // The previous firmware added a delay of 3 seconds so that
             // the client would not start checking the IP right away.
             //
-            // REDESIGN: This is not the firmware's job, add a command
+            // REDESIGN: This is not the firmwares job, add a command
             // to explicitly check connection state with optional timeout.
             vTaskDelay(pdMS_TO_TICKS(3000));
         }

@@ -33,11 +33,13 @@ namespace WiC64 {
         int32_t size;
 
         if (!connection->ready()) {
-            ESP_LOGE(TAG, "Can't execute TCP command: %s", !connection->connected()
+            const char* message = !connection->connected()
                 ? "WiFi not connected "
-                : "no IP address assigned by DHCP server");
+                : "No IP address assigned";
 
-            response()->copyData("!0");
+            ESP_LOGE(TAG, "Can't execute TCP command: %s", message);
+
+            error(CONNECTION_ERROR, message, "!0");
             responseReady();
             return;
         }
@@ -47,7 +49,11 @@ namespace WiC64 {
             request()->argument()->field(1, ':', portAsString);
             port = atoi(portAsString);
 
-            response()->copyData(tcpClient->open(host, port) ? "0" : "!E");
+            if (!tcpClient->open(host, port)) {
+                success("Success", "0");
+            } else {
+                error(NETWORK_ERROR, "Failed to open TCP connection", "!E");
+            }
         }
 
         else if (id() == WIC64_CMD_TCP_READ) {
@@ -58,7 +64,12 @@ namespace WiC64 {
 
         else if (id() == WIC64_CMD_TCP_WRITE) {
             size = tcpClient->write(request()->argument()->zeroTerminated());
-            response()->copyData(size == request()->argument()->size() ? "0" : "!E");
+
+            if (size == request()->argument()->size()) {
+                success("Success", "0");
+            } else {
+                error(NETWORK_ERROR, "Failed to write TCP data", "!E");
+            }
         }
         responseReady();
     }

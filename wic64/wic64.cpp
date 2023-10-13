@@ -22,6 +22,7 @@
 #include "commands/reboot.h"
 #include "commands/deprecated.h"
 #include "commands/undefined.h"
+#include "commands/status.h"
 
 #include "esp_log.h"
 
@@ -99,5 +100,6 @@ namespace WiC64 {
         esp_log_level_set(Reboot::TAG, loglevel);
         esp_log_level_set(Deprecated::TAG, loglevel);
         esp_log_level_set(Undefined::TAG, loglevel);
+        esp_log_level_set(Status::TAG, loglevel);
     }
 }
