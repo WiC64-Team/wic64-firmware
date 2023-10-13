@@ -1,12 +1,15 @@
 
 #include "update.h"
 #include "utilities.h"
+#include "led.h"
 
 #include "esp_http_client.h"
 #include "esp_https_ota.h"
 
 namespace WiC64 {
     const char* Update::TAG = "UPDATE";
+
+    extern Led* led;
 
     const char* Update::describe() {
         return "Update (install new firmware)";
@@ -29,6 +32,7 @@ namespace WiC64 {
         };
 
         ESP_LOGW(TAG, "Installing firmware %s", url);
+        led->on();
 
         if ((result = esp_https_ota(&config)) == ESP_OK) {
             success("OK");
@@ -38,6 +42,8 @@ namespace WiC64 {
             replace(message, '_', '-');
             error(INTERNAL_ERROR, message);
         }
+
+        led->off();
         responseReady();
     }
 
