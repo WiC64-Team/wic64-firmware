@@ -85,9 +85,8 @@ namespace WiC64 {
         m_isProgramFile = url.endsWith(".prg");
     }
 
-    // REDESIGN: Don't accept sloppy input
     void Http::sanitize(String &url) {
-        if (url.indexOf(" ") != -1) {
+        if (isLegacyRequest() && url.indexOf(" ") != -1) {
             ESP_LOGW(TAG, "Removing spaces from URL");
             url.replace(" ", "");
         }
@@ -151,10 +150,6 @@ namespace WiC64 {
         // response data by subtracting 2. This has been done in the original
         // firmware to "simplify" the transfer routine for loading files that
         // contain a specific load address in the first two bytes.
-        //
-        // REDESIGN: Make the client side library responsible for dealing with
-        // such cases, allow the user to specify whether the expected response
-        // contains a load address.
 
         if (isProgramFile() && response()->size() > 2) {
             response()->sizeToReport(response()->size() - 2);
