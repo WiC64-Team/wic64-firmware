@@ -7,8 +7,8 @@
 #include "request.h"
 #include "callback.h"
 
-#define LOWBYTE(UINT16) (uint8_t)((UINT16 >> 0UL) & 0xff)
-#define HIGHBYTE(UINT16) (uint8_t)((UINT16 >> 8UL) & 0xff)
+#define LOWBYTE(UINT32) (uint8_t)((UINT32 >> 0UL) & 0xff)
+#define HIGHBYTE(UINT32) (uint8_t)((UINT32 >> 8UL) & 0xff)
 
 #ifdef ___cplusplus
 extern "C"
@@ -49,7 +49,7 @@ namespace WiC64
         Data *response = NULL;
 
         int32_t bytes_remaining = 0;
-        uint16_t items_remaining = 0;
+        uint32_t items_remaining = 0;
 
     public:
         esp_event_loop_handle_t event_loop_handle;
@@ -61,11 +61,11 @@ namespace WiC64
         callback_t getRequestHeaderCallbackFor(uint8_t api);
         void acceptRequest(uint8_t apiId);
 
-        static void parseRequestHeader(uint8_t *header, uint16_t size);
-        static void parseLegacyRequestHeader(uint8_t *header, uint16_t size);
+        static void parseRequestHeader(uint8_t *header, uint32_t size);
+        static void parseLegacyRequestHeader(uint8_t *header, uint32_t size);
 
-        static void onRequestAborted(uint8_t *data, uint16_t bytes_received);
-        static void onRequestReceived(uint8_t *data, uint16_t size);
+        static void onRequestAborted(uint8_t *data, uint32_t bytes_received);
+        static void onRequestReceived(uint8_t *data, uint32_t size);
         void onRequestReceived(void) { onRequestReceived(NULL, 0); }
 
         static void onResponseReady(void *arg, esp_event_base_t base, int32_t id, void *data);
@@ -73,17 +73,17 @@ namespace WiC64
 
         void sendResponseHeader(void);
         void sendLegacyResponseHeader(void);
-        static void onResponseHeaderAborted(uint8_t *data, uint16_t size);
-        static void onResponseHeaderSent(uint8_t *data, uint16_t size);
+        static void onResponseHeaderAborted(uint8_t *data, uint32_t size);
+        static void onResponseHeaderSent(uint8_t *data, uint32_t size);
 
         void sendQueuedResponse(void);
-        static void sendQueuedResponseData(uint8_t *data, uint16_t size);
+        static void sendQueuedResponseData(uint8_t *data, uint32_t size);
         static void sendQueuedResponseData() { sendQueuedResponseData(NULL, 0); }
 
         void sendStaticResponse(void);
 
-        static void onResponseAborted(uint8_t *data, uint16_t bytes_send);
-        static void onResponseSent(uint8_t *data, uint16_t size);
+        static void onResponseAborted(uint8_t *data, uint32_t bytes_send);
+        static void onResponseSent(uint8_t *data, uint32_t size);
 
         void finalizeRequest(const char *message, bool success);
     };

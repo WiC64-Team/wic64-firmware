@@ -191,7 +191,7 @@ namespace WiC64 {
     void Userport::startTransfer(
             TRANSFER_TYPE type,
             uint8_t *data,
-            uint16_t size,
+            uint32_t size,
             callback_t onSuccess,
             callback_t onFailure) {
 
@@ -343,19 +343,19 @@ namespace WiC64 {
         }
     }
 
-    void Userport::receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess) {
+    void Userport::receivePartial(uint8_t *data, uint32_t size, callback_t onSuccess) {
         startTransfer(TRANSFER_TYPE_RECEIVE_PARTIAL, data, size, onSuccess, NULL);
     }
 
-    void Userport::receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure) {
+    void Userport::receivePartial(uint8_t *data, uint32_t size, callback_t onSuccess, callback_t onFailure) {
         startTransfer(TRANSFER_TYPE_RECEIVE_PARTIAL, data, size, onSuccess, onFailure);
     }
 
-    void Userport::receive(uint8_t *data, uint16_t size, callback_t onSuccess) {
+    void Userport::receive(uint8_t *data, uint32_t size, callback_t onSuccess) {
         startTransfer(TRANSFER_TYPE_RECEIVE_FULL, data, size, onSuccess, NULL);
     }
 
-    void Userport::receive(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure) {
+    void Userport::receive(uint8_t *data, uint32_t size, callback_t onSuccess, callback_t onFailure) {
         startTransfer(TRANSFER_TYPE_RECEIVE_FULL, data, size, onSuccess, onFailure);
     }
 
@@ -375,19 +375,19 @@ namespace WiC64 {
         userport->writeFirstByte();
     }
 
-    void Userport::sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess) {
+    void Userport::sendPartial(uint8_t *data, uint32_t size, callback_t onSuccess) {
         startTransfer(TRANSFER_TYPE_SEND_PARTIAL, data, size, onSuccess, NULL);
     }
 
-    void Userport::sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure) {
+    void Userport::sendPartial(uint8_t *data, uint32_t size, callback_t onSuccess, callback_t onFailure) {
         startTransfer(TRANSFER_TYPE_SEND_PARTIAL, data, size, onSuccess, onFailure);
     }
 
-    void Userport::send(uint8_t *data, uint16_t size, callback_t onSuccess) {
+    void Userport::send(uint8_t *data, uint32_t size, callback_t onSuccess) {
         startTransfer(TRANSFER_TYPE_SEND_FULL, data, size, onSuccess, NULL);
     }
 
-    void Userport::send(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure) {
+    void Userport::send(uint8_t *data, uint32_t size, callback_t onSuccess, callback_t onFailure) {
         startTransfer(TRANSFER_TYPE_SEND_FULL, data, size, onSuccess, onFailure);
     }
 

@@ -49,7 +49,7 @@ namespace WiC64 {
             request()->payload()->field(1, ':', portAsString);
             port = atoi(portAsString);
 
-            if (!tcpClient->open(host, port)) {
+            if (tcpClient->open(host, port)) {
                 success("Success", "0");
             } else {
                 error(NETWORK_ERROR, "Failed to open TCP connection", "!E");

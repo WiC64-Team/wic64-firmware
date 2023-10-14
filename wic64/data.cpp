@@ -8,7 +8,7 @@ namespace WiC64 {
         m_data = transferBuffer;
      }
 
-    Data::Data(uint8_t *data, uint16_t size) {
+    Data::Data(uint8_t *data, uint32_t size) {
         this->set(data, size);
     }
 
@@ -17,7 +17,7 @@ namespace WiC64 {
         return (char*) m_data;
     }
 
-    void Data::set(uint8_t *data, uint16_t size) {
+    void Data::set(uint8_t *data, uint32_t size) {
         m_data = data;
         m_size = size;
         m_data[m_size] = '\0';
@@ -100,12 +100,12 @@ namespace WiC64 {
         return dst;
     }
 
-    void Data::size(uint16_t size) {
+    void Data::size(uint32_t size) {
         m_size = size;
         m_data[size] = '\0';
     }
 
-    void Data::queue(QueueHandle_t queue, uint16_t size) {
+    void Data::queue(QueueHandle_t queue, uint32_t size) {
         m_queue = queue;
         m_size = size;
     }
@@ -123,7 +123,7 @@ namespace WiC64 {
         return m_queue != NULL;
     }
 
-    uint16_t Data::sizeToReport() {
+    int64_t Data::sizeToReport() {
         return (m_sizeToReport > -1) ? m_sizeToReport : m_size;
     }
 

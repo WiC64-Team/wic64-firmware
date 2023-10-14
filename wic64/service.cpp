@@ -59,7 +59,7 @@ namespace WiC64 {
         }
     }
 
-    void Service::parseLegacyRequestHeader(uint8_t *header, uint16_t size) {
+    void Service::parseLegacyRequestHeader(uint8_t *header, uint32_t size) {
         ESP_LOGD(TAG, "Parsing legacy request header...");
         ESP_LOG_HEXV(TAG, "Header", (uint8_t*) header, size);
 
@@ -81,7 +81,7 @@ namespace WiC64 {
 
         if (service->request->hasPayload()) {
             ESP_LOGI(TAG, "Receiving request payload");
-            Data* payload = service->request->payload(new Data(transferBuffer, payload_size));
+            Data* payload = service->request->payload(transferBuffer, payload_size);
             userport->receive(payload->data(), payload->size(), onRequestReceived, onRequestAborted);
         }
         else {
@@ -89,7 +89,7 @@ namespace WiC64 {
         }
     }
 
-    void Service::parseRequestHeader(uint8_t *header, uint16_t size) {
+    void Service::parseRequestHeader(uint8_t *header, uint32_t size) {
         ESP_LOGD(TAG, "Parsing request header...");
         ESP_LOG_HEXV(TAG, "Header", (uint8_t*) header, size);
 
@@ -111,7 +111,7 @@ namespace WiC64 {
 
         if (service->request->hasPayload()) {
             ESP_LOGI(TAG, "Receiving request argument");
-            Data* payload = service->request->payload(new Data(transferBuffer, payload_size));
+            Data* payload = service->request->payload(transferBuffer, payload_size);
             userport->receive(payload->data(), payload->size(), onRequestReceived, onRequestAborted);
         }
         else {
@@ -119,7 +119,7 @@ namespace WiC64 {
         }
     }
 
-    void Service::onRequestAborted(uint8_t *data, uint16_t bytes_received) {
+    void Service::onRequestAborted(uint8_t *data, uint32_t bytes_received) {
         ESP_LOGW(TAG, "Received %d bytes of %d bytes",
             bytes_received, service->request->payload()->size());
 
@@ -130,7 +130,7 @@ namespace WiC64 {
         service->request = NULL;
     }
 
-    void Service::onRequestReceived(uint8_t *ignoredData, uint16_t ignoredSize) {
+    void Service::onRequestReceived(uint8_t *ignoredData, uint32_t ignoredSize) {
         Request* request = service->request;
         Data* payload = request->payload();
 
@@ -165,7 +165,7 @@ namespace WiC64 {
         header[1] = LOWBYTE(response->sizeToReport());
         header[2] = HIGHBYTE(response->sizeToReport());
 
-        ESP_LOGI(TAG, "Sending response header (status %d, size: %d): [0x%02x, 0x%02x, 0x%02x]",
+        ESP_LOGI(TAG, "Sending response header (status %d, size: %lld): [0x%02x, 0x%02x, 0x%02x]",
             command->status(),
             response->sizeToReport(),
             header[0],
@@ -184,7 +184,7 @@ namespace WiC64 {
         header[0] = HIGHBYTE(response->sizeToReport());
         header[1] = LOWBYTE(response->sizeToReport());
 
-        ESP_LOGI(TAG, "Sending response size %d [0x%02x, 0x%02x] (big-endian)",
+        ESP_LOGI(TAG, "Sending response size %lld [0x%02x, 0x%02x] (big-endian)",
             response->sizeToReport(),
             header[0],
             header[1]);
@@ -194,12 +194,12 @@ namespace WiC64 {
             : userport->send(header, 2, onResponseHeaderSent, onResponseHeaderAborted);
     }
 
-    void Service::onResponseHeaderAborted(uint8_t *data, uint16_t bytes_sent) {
+    void Service::onResponseHeaderAborted(uint8_t *data, uint32_t bytes_sent) {
         ESP_LOGW(TAG, "Sent %d of 2 bytes", bytes_sent);
         service->finalizeRequest("Aborted while sending response size", false);
     }
 
-    void Service::onResponseHeaderSent(uint8_t* data, uint16_t size) {
+    void Service::onResponseHeaderSent(uint8_t* data, uint32_t size) {
         Data *response = service->response;
 
         response->isEmpty()
@@ -220,7 +220,7 @@ namespace WiC64 {
         service->sendQueuedResponseData();
     }
 
-    void Service::sendQueuedResponseData(uint8_t *isSubsequentCall, uint16_t ignoreSize) {
+    void Service::sendQueuedResponseData(uint8_t *isSubsequentCall, uint32_t ignoreSize) {
         static uint8_t data[WIC64_QUEUE_ITEM_SIZE];
         Data *response = service->command->response();
 
@@ -236,7 +236,7 @@ namespace WiC64 {
             service->items_remaining,
             (service->items_remaining > 1) ? "s" : "");
 
-        uint16_t size = (service->items_remaining > 1)
+        uint32_t size = (service->items_remaining > 1)
             ? WIC64_QUEUE_ITEM_SIZE
             : service->bytes_remaining;
 
@@ -263,7 +263,7 @@ namespace WiC64 {
         userport->send(response->data(), response->size(), onResponseSent, onResponseAborted);
     }
 
-    void Service::onResponseAborted(uint8_t *data, uint16_t bytes_sent)
+    void Service::onResponseAborted(uint8_t *data, uint32_t bytes_sent)
     {
         Data *response = service->command->response();
         ESP_LOGW(TAG, "Sent only %d of %d bytes", bytes_sent, response->size());
@@ -271,7 +271,7 @@ namespace WiC64 {
         service->finalizeRequest("Aborted while sending response", false);
     }
 
-    void Service::onResponseSent(uint8_t *data, uint16_t size) {
+    void Service::onResponseSent(uint8_t *data, uint32_t size) {
         ESP_LOG_HEXV(TAG, "response", data, size);
         service->finalizeRequest("Request handled successfully", true);
     }

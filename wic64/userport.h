@@ -100,8 +100,8 @@ namespace WiC64 {
             volatile TRANSFER_STATE transferState = TRANSFER_STATE_NONE;
 
             uint8_t *buffer;
-            uint16_t size;
-            uint16_t pos;
+            uint32_t size;
+            uint32_t pos;
 
             callback_t onSuccessCallback = NULL;
             callback_t onFailureCallback = NULL;
@@ -121,7 +121,7 @@ namespace WiC64 {
             void startTransfer(
                 TRANSFER_TYPE type,
                 uint8_t *data,
-                uint16_t size,
+                uint32_t size,
                 callback_t onSuccess,
                 callback_t onFailure
             );
@@ -153,17 +153,17 @@ namespace WiC64 {
 
             static void IRAM_ATTR onRequestInitiated(void* arg, esp_event_base_t base, int32_t id, void* data);
 
-            void receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess);
-            void receivePartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
-            void receive(uint8_t *data, uint16_t size, callback_t onSuccess);
-            void receive(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
+            void receivePartial(uint8_t *data, uint32_t size, callback_t onSuccess);
+            void receivePartial(uint8_t *data, uint32_t size, callback_t onSuccess, callback_t onFailure);
+            void receive(uint8_t *data, uint32_t size, callback_t onSuccess);
+            void receive(uint8_t *data, uint32_t size, callback_t onSuccess, callback_t onFailure);
 
             static void IRAM_ATTR onReadyToSend(void* arg, esp_event_base_t base, int32_t id, void* data);
 
-            void sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess);
-            void sendPartial(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
-            void send(uint8_t *data, uint16_t size, callback_t onSuccess);
-            void send(uint8_t *data, uint16_t size, callback_t onSuccess, callback_t onFailure);
+            void sendPartial(uint8_t *data, uint32_t size, callback_t onSuccess);
+            void sendPartial(uint8_t *data, uint32_t size, callback_t onSuccess, callback_t onFailure);
+            void send(uint8_t *data, uint32_t size, callback_t onSuccess);
+            void send(uint8_t *data, uint32_t size, callback_t onSuccess, callback_t onFailure);
 
             void abortTransfer(const char* reason);
 

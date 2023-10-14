@@ -245,7 +245,7 @@ namespace WiC64 {
             ESP_LOGI(TAG, "Starting queued send of %d bytes", content_length);
 
             // Set the queue and the size of the reponse in the response object
-            command->response()->queue(httpClient->queue(), (uint16_t) content_length);
+            command->response()->queue(httpClient->queue(), (uint32_t) content_length);
 
             // Ask the command to send the SERVICE_RESPONSE_READY event so that
             // Service will start reading and sending data down to the C64 as soon as

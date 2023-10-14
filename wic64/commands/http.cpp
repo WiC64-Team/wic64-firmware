@@ -47,7 +47,7 @@ namespace WiC64 {
 
     void Http::post(void) {
         uint8_t* payload = request()->payload()->data();
-        uint16_t payload_size = request()->payload()->size();
+        uint32_t payload_size = request()->payload()->size();
         size_t url_size = strlen((char*) payload);
 
         String url(payload, url_size);
@@ -123,17 +123,17 @@ namespace WiC64 {
         if (url.indexOf("<$") == -1) return;
 
         const char* src = (char*) request()->payload()->data();
-        const uint16_t len = request()->payload()->size();
+        const uint32_t len = request()->payload()->size();
         String encoded = "";
         char code[3];
 
-        for (uint16_t i=0; i<len; i++) {
+        for (uint32_t i=0; i<len; i++) {
             if (src[i] == '<' && src[i+1] == '$') {
                 i += 2; // skip "<$"
-                uint16_t data_size = (src[i+1]<<8) | src[i];
+                uint32_t data_size = (src[i+1]<<8) | src[i];
 
                 i += 2; // skip size
-                for (uint16_t k=0; k<data_size; k++, i++) {
+                for (uint32_t k=0; k<data_size; k++, i++) {
                     snprintf(code, 3, "%02x", src[i]);
                     encoded.concat(code, 2);
                 }

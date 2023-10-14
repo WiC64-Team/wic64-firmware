@@ -26,8 +26,8 @@ namespace WiC64 {
         return connected;
     }
 
-    int32_t TcpClient::read(uint8_t* data) {
-        int32_t read = -1;
+    int64_t TcpClient::read(uint8_t* data) {
+        int64_t read = -1;
         bool available = false;
         uint32_t started = millis();
 
@@ -46,7 +46,7 @@ namespace WiC64 {
 
         if (available) {
             read = m_client.read(data, MAX_READ_CHUNK_SIZE);
-            ESP_LOGI(TAG, "Read %d bytes", read);
+            ESP_LOGI(TAG, "Read %lld bytes", read);
         }
 
         return read;
@@ -56,7 +56,7 @@ namespace WiC64 {
         return write(data->data(), data->size());
     }
 
-    int32_t TcpClient::write(uint8_t *data, uint16_t size) {
+    int32_t TcpClient::write(uint8_t *data, uint32_t size) {
         ESP_LOGI(TAG, "Writing %d bytes", size);
 
         int32_t written = m_client.write(data, size);
