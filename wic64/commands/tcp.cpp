@@ -45,8 +45,8 @@ namespace WiC64 {
         }
 
         if (id() == WIC64_CMD_TCP_OPEN) {
-            request()->argument()->field(0, ':', host);
-            request()->argument()->field(1, ':', portAsString);
+            request()->payload()->field(0, ':', host);
+            request()->payload()->field(1, ':', portAsString);
             port = atoi(portAsString);
 
             if (!tcpClient->open(host, port)) {
@@ -63,9 +63,9 @@ namespace WiC64 {
         }
 
         else if (id() == WIC64_CMD_TCP_WRITE) {
-            size = tcpClient->write(request()->argument()->zeroTerminated());
+            size = tcpClient->write(request()->payload()->zeroTerminated());
 
-            if (size == request()->argument()->size()) {
+            if (size == request()->payload()->size()) {
                 success("Success", "0");
             } else {
                 error(NETWORK_ERROR, "Failed to write TCP data", "!E");

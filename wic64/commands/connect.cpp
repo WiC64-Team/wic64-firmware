@@ -20,10 +20,10 @@ namespace WiC64 {
         String ssid_string;
 
         if (id() == WIC64_CMD_CONNECT_WITH_SSID_STRING) {
-            request()->argument()->field(0, ssid);
+            request()->payload()->field(0, ssid);
         }
         else if (id() == WIC64_CMD_CONNECT_WITH_SSID_INDEX) {
-            request()->argument()->field(0, indexAsString);
+            request()->payload()->field(0, indexAsString);
             indexInLastScan = atoi(indexAsString);
             ssid_string = WiFi.SSID(indexInLastScan);
             strncpy(ssid, ssid_string.c_str(), ssid_string.length());
@@ -37,7 +37,7 @@ namespace WiC64 {
         static char escaped[MAX_PASSPHRASE_LEN+1];
         static char unescaped[MAX_PASSPHRASE_LEN+1];
 
-        request()->argument()->field(1, escaped);
+        request()->payload()->field(1, escaped);
         memset(unescaped, 0, MAX_PASSPHRASE_LEN+1);
 
         uint8_t len = strlen(escaped);

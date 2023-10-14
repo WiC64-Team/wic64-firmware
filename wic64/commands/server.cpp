@@ -16,8 +16,8 @@ namespace WiC64 {
 
         if (id() == WIC64_CMD_SET_SERVER) {
             settings->server(String(
-                request()->argument()->data(),
-                request()->argument()->size()));
+                request()->payload()->data(),
+                request()->payload()->size()));
         }
 
         if (id() == WIC64_CMD_GET_SERVER) {

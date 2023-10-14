@@ -7,46 +7,4 @@
 
 namespace WiC64 {
     const char* Request::TAG = "REQUEST";
-
-    Request::~Request() {
-        for (uint8_t i=0; i<m_argc; i++) {
-            if (m_argv[i] != NULL) {
-                delete m_argv[i];
-            }
-        }
-    }
-
-    int16_t Request::getNextFreeArgumentIndex() {
-        for (uint8_t i=0; i<m_argc; i++) {
-            if (m_argv[i] == NULL) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    bool Request::hasArguments(void) {
-        return m_argc > 0;
-    }
-
-    Data* Request::addArgument(Data *argument)
-    {
-        int16_t index = getNextFreeArgumentIndex();
-
-        if (index == -1) {
-            ESP_LOGE(TAG, "All %d arguments have already been added", m_argc);
-            return NULL;
-        }
-
-        m_argv[(uint8_t)index] = argument;
-        return argument;
-    }
-
-    Data* Request::argument() {
-        return m_argv[0];
-    }
-
-    Data* Request::argument(uint8_t index) {
-        return m_argv[index];
-    }
 }

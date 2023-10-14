@@ -32,7 +32,7 @@ namespace WiC64 {
     }
 
     void Http::get(void) {
-        String url = String(request()->argument()->c_str());
+        String url = String(request()->payload()->c_str());
 
         ESP_LOGD(TAG, "Received URL [%s]", url.c_str());
 
@@ -46,8 +46,8 @@ namespace WiC64 {
     }
 
     void Http::post(void) {
-        uint8_t* payload = request()->argument()->data();
-        uint16_t payload_size = request()->argument()->size();
+        uint8_t* payload = request()->payload()->data();
+        uint16_t payload_size = request()->payload()->size();
         size_t url_size = strlen((char*) payload);
 
         String url(payload, url_size);
@@ -122,8 +122,8 @@ namespace WiC64 {
         if (id() != WIC64_CMD_HTTP_GET_ENCODED) return;
         if (url.indexOf("<$") == -1) return;
 
-        const char* src = (char*) request()->argument()->data();
-        const uint16_t len = request()->argument()->size();
+        const char* src = (char*) request()->payload()->data();
+        const uint16_t len = request()->payload()->size();
         String encoded = "";
         char code[3];
 

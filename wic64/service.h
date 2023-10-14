@@ -42,7 +42,7 @@ namespace WiC64
         // but rather the size of the entire payload, so we need to
         // subtract 4 to get the actual size of the argument
         // => api byte + lowbyte size + highbyte size + command id = 4
-        static const uint8_t API_LAYER_1_ARGUMENT_SIZE_CORRECTION = 4;
+        static const uint8_t API_LAYER_1_PAYLOAD_SIZE_CORRECTION = 4;
 
         Request *request = NULL;
         Command *command = NULL;

@@ -9,28 +9,21 @@ namespace WiC64 {
         public: static const char* TAG;
 
         private:
-            uint8_t m_api;
-            uint8_t m_id;
-            uint8_t m_argc;
-            Data* m_argv[256];
-
-            int16_t getNextFreeArgumentIndex();
+            uint8_t m_api = 0x00;
+            uint8_t m_id = 0x00;
+            bool m_has_payload = false;
+            Data* m_payload = nullptr;
 
         public:
-            Request(uint8_t api, uint8_t id, uint8_t argc)
-                : m_api(api), m_id(id), m_argc(argc), m_argv() { }
-                // the m_argv() initializes m_argv with nullpointers
-
-            ~Request();
+            Request(uint8_t api, uint8_t id, bool has_payload)
+                : m_api(api), m_id(id), m_has_payload(has_payload) { }
 
             uint8_t api() { return m_api; }
             uint8_t id(void) { return m_id; };
-            uint8_t argc(void) { return m_argc; };
+            bool hasPayload(void) { return m_has_payload; };
 
-            bool hasArguments(void);
-            Data* addArgument(Data* argument);
-            Data* argument(void);
-            Data* argument(uint8_t index);
+            Data* payload(void) { return m_payload; }
+            Data* payload(Data* payload) { m_payload = payload; return m_payload; }
     };
 }
 

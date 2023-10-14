@@ -43,8 +43,8 @@ namespace WiC64 {
         // So this is little-endian ascii-coded decimal... nice,
         // never seen that one before :)
 
-        uint8_t low_digit = request()->argument()->data()[0];
-        uint8_t high_digit = request()->argument()->data()[1];
+        uint8_t low_digit = request()->payload()->data()[0];
+        uint8_t high_digit = request()->payload()->data()[1];
         uint8_t index = high_digit * 10 + low_digit;
         clock->timezone(timezones[index]);
     }

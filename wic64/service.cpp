@@ -66,10 +66,10 @@ namespace WiC64 {
         uint8_t api = WiC64::API_LAYER_1;
         uint8_t id = header[2];
 
-        uint16_t argument_size = (*((uint16_t*) header)) - API_LAYER_1_ARGUMENT_SIZE_CORRECTION;
-        bool has_argument = (argument_size > 0);
+        uint16_t payload_size = (*((uint16_t*) header)) - API_LAYER_1_PAYLOAD_SIZE_CORRECTION;
+        bool has_payload = (payload_size > 0);
 
-        service->request = new Request(api, id, has_argument ? 1 : 0);
+        service->request = new Request(api, id, has_payload);
 
         ESP_LOGI(TAG, "Received legacy request header "
                       WIC64_CYAN("[0x%02x 0x%02x ") WIC64_FORMAT_CMD WIC64_CYAN("] ")
@@ -77,12 +77,12 @@ namespace WiC64 {
             header[0],
             header[1],
             service->request->id(),
-            argument_size);
+            payload_size);
 
-        if (service->request->hasArguments()) {
-            ESP_LOGI(TAG, "Receiving request argument");
-            Data* argument = service->request->addArgument(new Data(transferBuffer, argument_size));
-            userport->receive(argument->data(), argument->size(), onRequestReceived, onRequestAborted);
+        if (service->request->hasPayload()) {
+            ESP_LOGI(TAG, "Receiving request payload");
+            Data* payload = service->request->payload(new Data(transferBuffer, payload_size));
+            userport->receive(payload->data(), payload->size(), onRequestReceived, onRequestAborted);
         }
         else {
             service->onRequestReceived();
@@ -96,10 +96,10 @@ namespace WiC64 {
         uint8_t api = WiC64::API_LAYER_2;
         uint8_t id = header[0];
 
-        uint16_t argument_size = (*((uint16_t*) (header+1))) ;
-        bool has_argument = (argument_size > 0);
+        uint16_t payload_size = (*((uint16_t*) (header+1))) ;
+        bool has_payload = (payload_size > 0);
 
-        service->request = new Request(api, id, has_argument ? 1 : 0);
+        service->request = new Request(api, id, has_payload);
 
         ESP_LOGI(TAG, "Received request header "
                       WIC64_CYAN("[") WIC64_FORMAT_CMD WIC64_CYAN(" 0x%02x 0x%02x] ")
@@ -107,12 +107,12 @@ namespace WiC64 {
             service->request->id(),
             header[1],
             header[2],
-            argument_size);
+            payload_size);
 
-        if (service->request->hasArguments()) {
+        if (service->request->hasPayload()) {
             ESP_LOGI(TAG, "Receiving request argument");
-            Data* argument = service->request->addArgument(new Data(transferBuffer, argument_size));
-            userport->receive(argument->data(), argument->size(), onRequestReceived, onRequestAborted);
+            Data* payload = service->request->payload(new Data(transferBuffer, payload_size));
+            userport->receive(payload->data(), payload->size(), onRequestReceived, onRequestAborted);
         }
         else {
             service->onRequestReceived();
@@ -121,7 +121,7 @@ namespace WiC64 {
 
     void Service::onRequestAborted(uint8_t *data, uint16_t bytes_received) {
         ESP_LOGW(TAG, "Received %d bytes of %d bytes",
-            bytes_received, service->request->argument(0)->size());
+            bytes_received, service->request->payload()->size());
 
         ESP_LOGW(TAG, "Aborted while receiving request");
         ESP_LOGW(TAG, "Freeing allocated memory");
@@ -131,17 +131,14 @@ namespace WiC64 {
     }
 
     void Service::onRequestReceived(uint8_t *ignoredData, uint16_t ignoredSize) {
-        Request *request = service->request;
+        Request* request = service->request;
+        Data* payload = request->payload();
 
         ESP_LOGI(TAG, "Request received successfully");
         ESP_LOGI(TAG, "Handling request [" WIC64_FORMAT_CMD WIC64_GREEN("]"), request->id());
-        ESP_LOGV(TAG, "Request arguments...");
 
-        for (uint8_t i=0; i<request->argc(); i++) {
-            Data* argument = request->argument(i);
-            static char title[12+1];
-            snprintf(title, 12, "argument %hhu", i);
-            ESP_LOG_HEXV(TAG, title, argument->data(), argument->size());
+        if(request->hasPayload()) {
+            ESP_LOG_HEXV(TAG, "Payload", payload->data(), payload->size());
         }
 
         service->command = Command::create(request);

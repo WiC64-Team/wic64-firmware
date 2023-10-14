@@ -6,7 +6,7 @@ namespace WiC64 {
     }
 
     void Echo::execute(void) {
-        response()->set(request()->argument());
+        response()->set(request()->payload());
         responseReady();
     }
 }

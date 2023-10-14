@@ -21,7 +21,7 @@ namespace WiC64 {
     #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
     void Update::execute(void) {
-        const char* url = request()->argument()->c_str();
+        const char* url = request()->payload()->c_str();
         static char buffer[256];
         char* message = buffer;
         esp_err_t result;

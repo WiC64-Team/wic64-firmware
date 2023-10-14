@@ -12,7 +12,7 @@ namespace WiC64 {
     void Status::execute(void) {
         static char buffer[255];
         char* message = (char*) buffer;
-        bool uppercase = request()->argument()->data()[0];
+        bool uppercase = request()->payload()->data()[0];
 
         strcpy(message, Command::statusMessage());
 
