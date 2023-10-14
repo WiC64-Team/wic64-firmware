@@ -40,8 +40,13 @@ namespace WiC64 {
 
     void Command::status(uint8_t code, const char *message, const char* legacy_message) {
         if (isLegacyRequest()) {
+            ESP_LOGD(TAG, "Sending legacy %s message \"%s\" (reason: %s)",
+                code ? "error" : "success",
+                legacy_message,
+                message);
             response()->copyData(legacy_message);
         } else {
+            ESP_LOGD(TAG, "Setting status: code = %d, message = \"%s\"", code, message);
             m_status_code = code;
             strncpy(m_status_message, message, 255);
         }
