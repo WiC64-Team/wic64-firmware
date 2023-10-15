@@ -9,6 +9,7 @@ idf_component_register(
     SRCS "userport.cpp"
     SRCS "service.cpp"
     SRCS "data.cpp"
+    SRCS "url.cpp"
     SRCS "request.cpp"
     SRCS "command.cpp"
     SRCS "commands/commands.cpp"

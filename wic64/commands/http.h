@@ -3,30 +3,26 @@
 
 #include "command.h"
 #include "data.h"
-#include "WString.h"
+#include "url.h"
 
 namespace WiC64 {
     class Http : public Command {
         public: static const char* TAG;
         private:
-            bool m_isProgramFile = false;
+            Url m_url;
 
         public:
             using Command::Command;
             const char* describe(void);
-            bool isProgramFile(void) { return m_isProgramFile; }
 
-            void encode(String& url);
-            void sanitize(String& url);
-            void analyze(const String& url);
-            void expand(String& url);
+            bool isEncoded(void);
 
             void execute(void);
             void get(void);
             void post(void);
 
-            void adjustResponseSizeForProgramFiles(void);
-            void send201Response(void);
+            void lieAboutResponseSizeForProgramFile(void);
+            void sendPositiveResponseOnStatusCode201(void);
 
             void responseReady(void);
     };
