@@ -26,7 +26,6 @@ namespace WiC64 {
             void post(void);
 
             void adjustResponseSizeForProgramFiles(void);
-            void handleSettingChangeRequestFromServer(void);
 
             void responseReady(void);
     };

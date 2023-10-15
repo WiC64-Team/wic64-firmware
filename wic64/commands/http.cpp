@@ -146,58 +146,33 @@ namespace WiC64 {
     }
 
     void Http::adjustResponseSizeForProgramFiles(void) {
-        // If a cbm "program file" is requested, lie about the size of the
-        // response data by subtracting 2. This has been done in the original
-        // firmware to "simplify" the transfer routine for loading files that
-        // contain a specific load address in the first two bytes.
+        // For legacy requests only: If a cbm "program file" is requested, lie
+        // about the size of the response data by subtracting 2. This has been
+        // done in the original firmware to "simplify" the transfer routine for
+        // loading files that contain a specific load address in the first two
+        // bytes.
 
-        if (isProgramFile() && response()->size() > 2) {
+        if (isLegacyRequest() && isProgramFile() && response()->size() > 2) {
             response()->sizeToReport(response()->size() - 2);
         }
     }
 
-    void Http::handleSettingChangeRequestFromServer(void) {
-        // When the server replies with HTTP status 201, the response contains
-        // a request to change a specific setting in the ESP flash. The request
-        // contains the setting key, value and a reply value that is sent to
-        // the client instead of the server response.
-        //
-        // The original firmware allows values to be added and/or changed in the
-        // ESP flash. Here we limit this behaviour to the "security token key" and
-        // the actual "security token".
-        //
-        // REDESIGN: Have the server send custom headers for this purpose
+    void Http::send201Response(void) {
+        // For legacy requests only: The server may send a 201 status code with
+        // a specially crafted response in order to ask the ESP to store certain
+        // configuration values in flash. While this is now handled using
+        // special HTTP headers, the existing client code still expects "00" as
+        // confirmation of success.
 
-        if (httpClient->statusCode() == 201) {
-            static char key[256];
-            static char value[256];
-            static char reply[256];
-
-            response()->field(1, key);
-            response()->field(2, value);
-            response()->field(3, reply);
-
-            ESP_LOGI(TAG, "Change of setting requested by sever: [%s] = [%s] => [%s]", key, value, reply);
-
-            if (strcmp(key, "sectokenname") == 0) {
-                settings->securityTokenKey(value);
-            }
-            else if (strcmp(key, settings->securityTokenKey().c_str()) == 0) {
-                settings->securityToken(value);
-            }
-            else {
-                ESP_LOGE(TAG, "Unknown setting: [%s]", key);
-                response()->copyData("!0");
-                return;
-            }
-            response()->copyData(reply);
+        if (isLegacyRequest() && httpClient->statusCode() == 201 && response()->isEmpty()) {
+            response()->copyData("00");
         }
     }
 
     void Http::responseReady(void) {
         if (isLegacyRequest()) {
             adjustResponseSizeForProgramFiles();
-            handleSettingChangeRequestFromServer();
+            send201Response();
         }
 
         Command::responseReady();
