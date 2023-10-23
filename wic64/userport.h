@@ -88,20 +88,20 @@ namespace WiC64 {
 
             static const uint16_t TIMEOUT_DEFAULT_1000MS = 1000;
             volatile uint16_t timeout = TIMEOUT_DEFAULT_1000MS;
-            volatile uint32_t timeOfLastActivity;
-            volatile uint32_t timeTransferStarted;
+            volatile uint32_t timeOfLastActivity = 0;
+            volatile uint32_t timeTransferStarted = 0;
 
             uint8_t lineNoiseCount = 0;
 
-            TaskHandle_t timeoutTaskHandle;
+            TaskHandle_t timeoutTaskHandle = NULL;
 
             volatile TRANSFER_TYPE transferType = TRANSFER_TYPE_NONE;
             volatile TRANSFER_TYPE previousTransferType = TRANSFER_TYPE_NONE;
             volatile TRANSFER_STATE transferState = TRANSFER_STATE_NONE;
 
-            uint8_t *buffer;
-            uint32_t size;
-            uint32_t pos;
+            uint8_t *buffer = NULL;
+            uint32_t size = 0;
+            uint32_t pos = 0;
 
             callback_t onSuccessCallback = NULL;
             callback_t onFailureCallback = NULL;
@@ -135,7 +135,7 @@ namespace WiC64 {
             static void IRAM_ATTR post(userport_event_t event);
 
         public:
-            esp_event_loop_handle_t event_loop_handle;
+            esp_event_loop_handle_t event_loop_handle = NULL;
 
             Userport();
 
@@ -151,7 +151,7 @@ namespace WiC64 {
             bool isSending(void);
             bool isSending(TRANSFER_TYPE type);
 
-            static void IRAM_ATTR onRequestInitiated(void* arg, esp_event_base_t base, int32_t id, void* data);
+            static void IRAM_ATTR onRequestInitiated(void* arg, esp_event_base_t base, int32_t event_id, void* data);
 
             void receivePartial(uint8_t *data, uint32_t size, callback_t onSuccess);
             void receivePartial(uint8_t *data, uint32_t size, callback_t onSuccess, callback_t onFailure);
@@ -175,7 +175,7 @@ namespace WiC64 {
             void handleLineNoise(void);
 
             void sendHandshakeSignalBeforeReboot();
-            void sendHanshakeSignalAfterReboot(void);
+            void sendHandshakeSignalAfterReboot(void);
             static void sendHandshakeAfterRebootTask(void*);
 
             static void IRAM_ATTR onHandshakeSignalReceived(void);

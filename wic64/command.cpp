@@ -22,10 +22,6 @@ namespace WiC64 {
         delete m_response;
     }
 
-    uint8_t Command::id() {
-        return request()->id();
-    }
-
     Command* Command::create(Request* request) {
         command_map_entry_t command;
 
@@ -36,6 +32,15 @@ namespace WiC64 {
             }
         }
         return WIC64_COMMAND_UNDEFINED.create(request);
+    }
+
+    void Command::execute(Command *command) {
+        xTaskCreatePinnedToCore(commandTask, "COMMAND", 4096, command, 20, NULL, 1);
+    }
+
+    void Command::commandTask(void *command) {
+        ((Command*) command)->execute();
+        vTaskDelete(NULL);
     }
 
     void Command::status(uint8_t code, const char *message, const char* legacy_message) {
@@ -50,6 +55,23 @@ namespace WiC64 {
             m_status_code = code;
             strncpy(m_status_message, message, 255);
         }
+    }
+
+    bool Command::supportsProtocol() {
+        switch (m_request->protocol()->id()) {
+            case Protocol::LEGACY:   return true;  break;
+            case Protocol::STANDARD: return true;  break;
+            case Protocol::EXTENDED: return false; break;
+            default: return false;  break;
+        }
+    }
+
+    bool Command::supportsQueuedRequest() {
+        return false;
+    }
+
+    bool Command::supportsQueuedResponse() {
+        return m_request->protocol()->id() == Protocol::EXTENDED;
     }
 
     const char *Command::describe() {

@@ -13,13 +13,16 @@ namespace WiC64 {
 
         public:
             using Command::Command;
+            bool supportsProtocol();
+            bool supportsQueuedRequest();
             const char* describe(void);
 
             bool isEncoded(void);
 
             void execute(void);
             void get(void);
-            void post(void);
+            void postUrl(void);
+            void postData(void);
 
             void lieAboutResponseSizeForProgramFile(void);
             void sendPositiveResponseOnStatusCode201(void);

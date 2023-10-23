@@ -19,7 +19,8 @@
 
 #define WIC64_CMD_HTTP_GET         0x01
 #define WIC64_CMD_HTTP_GET_ENCODED 0x0f
-#define WIC64_CMD_HTTP_POST        0x28
+#define WIC64_CMD_HTTP_POST_URL    0x28
+#define WIC64_CMD_HTTP_POST_DATA   0x2b
 
 #define WIC64_CMD_TCP_OPEN  0x21
 #define WIC64_CMD_TCP_READ  0x22

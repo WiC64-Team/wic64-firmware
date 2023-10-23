@@ -74,7 +74,7 @@ namespace WiC64 {
         ESP_LOGI(TAG, "Userport connected, accepting requests");
 
         if (settings->rebooting()) {
-            userport->sendHanshakeSignalAfterReboot();
+            userport->sendHandshakeSignalAfterReboot();
             settings->rebooting(false);
         }
     }
@@ -207,7 +207,7 @@ namespace WiC64 {
             ? TRANSFER_STATE_PENDING
             : TRANSFER_STATE_RUNNING;
 
-        ESP_LOGD(TAG, "%s %d bytes...", isSending(type) ? "Sending" : "Receiving", size);
+        ESP_LOGV(TAG, "%s %d bytes...", isSending(type) ? "Sending" : "Receiving", size);
 
         timeTransferStarted = millis();
         createTimeoutTask();
@@ -292,6 +292,8 @@ namespace WiC64 {
     }
 
     void Userport::createTimeoutTask(void) {
+        deleteTimeoutTask();
+
         xTaskCreatePinnedToCore(timeoutTask, "TIMEOUT", 4096, NULL, 5, &timeoutTaskHandle, 0);
 
         if (timeoutTaskHandle == NULL) {
@@ -300,14 +302,14 @@ namespace WiC64 {
     }
 
     void Userport::deleteTimeoutTask(void) {
-        if (timeoutTaskHandle != NULL) {
-            portENTER_CRITICAL(&mutex);
+        portENTER_CRITICAL(&mutex);
 
+        if (timeoutTaskHandle != NULL) {
             vTaskDelete(timeoutTaskHandle);
             timeoutTaskHandle = NULL;
-
-            portEXIT_CRITICAL(&mutex);
         }
+
+        portEXIT_CRITICAL(&mutex);
     }
 
     void Userport::resetTimeout(void) {
@@ -318,9 +320,7 @@ namespace WiC64 {
         return millis() - timeOfLastActivity > timeout;
     }
 
-    void Userport::onRequestInitiated(void* arg, esp_event_base_t base, int32_t id, void* data) {
-        uint8_t api;
-
+    void Userport::onRequestInitiated(void* arg, esp_event_base_t base, int32_t event_id, void* data) {
         ESP_LOGV(TAG, "Received initial handshake");
 
         if (!userport->isReadyToReceive()) {
@@ -329,16 +329,26 @@ namespace WiC64 {
             return;
         }
 
-        userport->readByte(&api);
+        uint8_t id;
+        userport->readByte(&id);
 
-        if (service->supports(api)) {
+        if (Protocol::exists(id)) {
+            Protocol *protocol = Protocol::get(id);
+
             ESP_LOGI(TAG, WIC64_SEPARATOR);
-            ESP_LOGI(TAG, "Received API id " WIC64_FORMAT_API, api);
+
+            ESP_LOGI(TAG, "Received %s protocol id " WIC64_FORMAT_PROTOCOL " (%c)",
+                protocol->name(),
+                protocol->id(),
+                protocol->id());
+
+            ESP_LOGI(TAG, WIC64_SEPARATOR);
+
             userport->resetLineNoiseCount();
-            service->acceptRequest(api);
+            service->acceptRequest(protocol);
 
         } else {
-            ESP_LOGE(TAG, "Received unsupported API id " WIC64_FORMAT_API, api);
+            ESP_LOGE(TAG, "Received unsupported protocol id " WIC64_FORMAT_PROTOCOL, id);
             userport->handleLineNoise();
         }
     }
@@ -444,7 +454,7 @@ namespace WiC64 {
         sendHandshakeSignal();
     }
 
-    void Userport::sendHanshakeSignalAfterReboot(void) {
+    void Userport::sendHandshakeSignalAfterReboot(void) {
         ESP_LOGW(TAG, "Confirming reboot in 2000ms...");
         xTaskCreatePinnedToCore(sendHandshakeAfterRebootTask, "HANDSHAKE", 4096, NULL, 5, NULL, 0);
     }
@@ -474,7 +484,7 @@ namespace WiC64 {
         userport->resetTimeout();
 
         while(true) {
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(250));
 
             if (userport->hasTimedOut()) {
                 userport->abortTransfer("Timed out");

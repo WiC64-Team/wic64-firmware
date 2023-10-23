@@ -21,6 +21,7 @@ namespace WiC64 {
             static const uint16_t MAX_URL_LENGTH = 2000; // see https://stackoverflow.com/a/417184
             static const uint8_t MAX_RETRIES = 10;
             int32_t m_statusCode = -1;
+            char m_postUrl[MAX_URL_LENGTH+1] = { '\0' };
             const char* statusToString(int32_t code);
             esp_http_client_handle_t handle() { return m_client; }
             QueueHandle_t queue() { return m_queue; }
@@ -34,14 +35,16 @@ namespace WiC64 {
             static esp_err_t eventHandler(esp_http_client_event_t *evt);
             static void queueTask(void* content_length_ptr);
 
-            void request(Command *command, esp_http_client_method_t method, String& url, Data* data);
+            void request(Command *command, esp_http_client_method_t method, const char* url, Data* data);
 
         public:
             HttpClient();
             int32_t statusCode() { return m_statusCode; }
 
             void get(Command* command, String& url);
-            void post(Command* command, String& url, Data* data);
+            const char* postUrl(void) { return m_postUrl; }
+            void postUrl(String& url);
+            void postData(Command* command, Data* data);
     };
 }
 

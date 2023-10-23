@@ -5,7 +5,7 @@
 #include "../generated-version.h"
 #include "esp_log.h"
 
-#define WIC64_QUEUE_ITEM_SIZE 1024
+#define WIC64_QUEUE_ITEM_SIZE 0x1000
 #define WIC64_QUEUE_SIZE (0x8000 / WIC64_QUEUE_ITEM_SIZE)
 
 #define WIC64_QUEUE_ITEMS_REQUIRED(size) \
@@ -44,12 +44,7 @@ namespace WiC64 {
     class WiC64 {
         public:
             static const char* TAG;
-
-            static const uint8_t API_LAYER_1 = 'W';
-            static const uint8_t API_LAYER_2 = 'R';
-
             static void loglevel(esp_log_level_t level);
-
             WiC64();
     };
 }

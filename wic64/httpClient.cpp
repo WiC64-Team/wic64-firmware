@@ -12,6 +12,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
 #include "esp_system.h"
 
 #include "esp_http_client.h"
@@ -36,21 +37,21 @@ namespace WiC64 {
         switch(event->event_id) {
             case HTTP_EVENT_ERROR:
                 if(event->data != NULL && event->data_len > 0) {
-                    ESP_LOG_HEXD(TAG, "Error event data", (uint8_t*) event->data, event->data_len);
+                    ESP_LOG_HEXV(TAG, "Error event data", (uint8_t*) event->data, event->data_len);
                 }
                 ESP_LOGD(TAG, "HTTP_EVENT_ERROR");
                 break;
 
             case HTTP_EVENT_ON_CONNECTED:
-                ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
+                ESP_LOGV(TAG, "HTTP_EVENT_ON_CONNECTED");
                 break;
 
             case HTTP_EVENT_HEADER_SENT:
-                ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
+                ESP_LOGV(TAG, "HTTP_EVENT_HEADER_SENT");
                 break;
 
             case HTTP_EVENT_ON_HEADER:
-                ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER: %s: %s", event->header_key, event->header_value);
+                ESP_LOGV(TAG, "HTTP_EVENT_ON_HEADER: %s: %s", event->header_key, event->header_value);
 
                 // WiC64-Security-Token-Key: <key>
                 if (strcmp(event->header_key, "WiC64-Security-Token-Key") == 0) {
@@ -64,43 +65,46 @@ namespace WiC64 {
                 break;
 
             case HTTP_EVENT_ON_DATA:
-                ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, size=%d", event->data_len);
+                ESP_LOGV(TAG, "HTTP_EVENT_ON_DATA, size=%d", event->data_len);
                 break;
 
             case HTTP_EVENT_ON_FINISH:
-                ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
+                ESP_LOGV(TAG, "HTTP_EVENT_ON_FINISH");
                 break;
 
             case HTTP_EVENT_DISCONNECTED:
-                ESP_LOGD(TAG, "HTTP_EVENT_DISCONNECTED");
+                ESP_LOGV(TAG, "HTTP_EVENT_DISCONNECTED");
                 break;
         }
         return ESP_OK;
     }
 
     void HttpClient::get(Command *command, String& url) {
-        request(command, HTTP_METHOD_GET, url, NULL);
+        request(command, HTTP_METHOD_GET, url.c_str(), NULL);
     }
 
-    void HttpClient::post(Command *command, String &url, Data *data) {
-        request(command, HTTP_METHOD_POST, url, data);
+    void HttpClient::postUrl(String& url) {
+        strncpy(m_postUrl, url.c_str(), MAX_URL_LENGTH);
     }
 
-    void HttpClient::request(Command *command, esp_http_client_method_t method, String& url, Data* data) {
-        int32_t size = 0;
+    void HttpClient::postData(Command *command, Data *data) {
+        request(command, HTTP_METHOD_POST, m_postUrl, data);
+    }
 
-        int32_t request_content_length = method == HTTP_METHOD_POST
-            ? strlen(HEADER) + data->size() + strlen(FOOTER)
-            : 0;
-
-        m_statusCode = -1;
-
+    void HttpClient::request(Command *command, esp_http_client_method_t method, const char* url, Data* data) {
         // content_length needs to be static because it is eventually
         // passed by reference to the queue transfer task later on
         static int32_t content_length;
 
+        int32_t size = 0;
         int32_t result;
         uint8_t retries = MAX_RETRIES;
+
+        int64_t request_content_length = method == HTTP_METHOD_POST
+            ? strlen(HEADER) + data->size() + strlen(FOOTER)
+            : 0;
+
+        m_statusCode = -1;
 
         // The Arduino HTTPClient sends "ESP32HTTPClient" as the user-agent Some
         // existing programs test for this value, so for legacy requests, we
@@ -111,7 +115,7 @@ namespace WiC64 {
         #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
         esp_http_client_config_t config = {
-            .url = url.c_str(),
+            .url = url,
             .user_agent = command->isLegacyRequest() // TODO: Document
                 ? "ESP32HTTPClient"
                 : "WiC64/" WIC64_VERSION_SHORT_STRING,
@@ -126,7 +130,16 @@ namespace WiC64 {
 
         #pragma GCC diagnostic pop
 
-        if (url.length() > MAX_URL_LENGTH) {
+        if (strlen(url) == 0) {
+            ESP_LOGE(TAG, "URL not specified");
+            if (method == HTTP_METHOD_POST) {
+                ESP_LOGE(TAG, "Set the URL beforehand using command 0x28 for POST requests");
+            }
+            command->error(Command::CLIENT_ERROR, "URL not specified");
+            goto ERROR;
+        }
+
+        if (strlen(url) > MAX_URL_LENGTH) {
             ESP_LOGE(TAG, "URL length is limited to 2000 bytes");
             ESP_LOGE(TAG, "Please use HTTP POST to transfer large amounts of data");
             command->error(Command::CLIENT_ERROR, "URL too long (max 2000 bytes)");
@@ -146,7 +159,7 @@ namespace WiC64 {
         } else {
             esp_http_client_set_method(m_client, method);
 
-            if (esp_http_client_set_url(m_client, url.c_str()) == ESP_FAIL) {
+            if (esp_http_client_set_url(m_client, url) == ESP_FAIL) {
                 ESP_LOGE(TAG, "Failed to parse URL");
                 command->error(Command::CLIENT_ERROR, "Malformed URL", "!0");
                 goto ERROR;
@@ -173,17 +186,72 @@ namespace WiC64 {
         }
 
         if (method == HTTP_METHOD_POST) {
-            ESP_LOGI(TAG, "Sending POST request body (%d bytes)", request_content_length);
-            bool success =
-                (esp_http_client_write(m_client, HEADER, strlen(HEADER)) == strlen(HEADER)) &&
-                (esp_http_client_write(m_client, (const char*) data->data(), data->size()) == data->size()) &&
-                (esp_http_client_write(m_client, FOOTER, strlen(FOOTER)) == strlen(FOOTER));
+            bool success = true;
 
+            if (data->isQueued()) {
+                ESP_LOGI(TAG, "Sending queued POST request body (%lld bytes)", request_content_length);
+
+                static uint8_t buffer[WIC64_QUEUE_ITEM_SIZE];
+                uint32_t bytes_remaining = data->size();
+                uint32_t items_remaining = WIC64_QUEUE_ITEMS_REQUIRED(bytes_remaining);
+                uint16_t size = 0;
+
+                const uint16_t timeout_ms = 5000;
+
+                // If sending the header fails, we can still retry
+                if (!(success = esp_http_client_write(m_client, HEADER, strlen(HEADER))) == strlen(HEADER)) {
+                    goto RETRY_POST;
+                }
+
+                // Once we've started to receive from the queue, we can't retry any more...
+                while (items_remaining) {
+                    size = items_remaining > 1
+                        ? WIC64_QUEUE_ITEM_SIZE
+                        : bytes_remaining;
+
+                    if (command->aborted() || xQueueReceive(data->queue(), buffer, pdMS_TO_TICKS(timeout_ms)) == pdTRUE) {
+
+                        if (esp_http_client_write(m_client, (const char*) buffer, size) != size) {
+                            ESP_LOGE(TAG, "Failed to send POST data to server");
+                            command->error(Command::SERVER_ERROR,
+                                "Failed to send POST data to server", "!0");
+                            goto ERROR;
+                        }
+
+                        bytes_remaining -= size;
+                        items_remaining -= 1;
+                    }
+                    else {
+                        ESP_LOGE(TAG, "Failed to receive POST data from client, aborting POST request");
+                        // The client has already stopped sending data and the
+                        // request has been finalized by the queueing task in
+                        // Service, so it makes no sense to send an error
+                        // response anymore
+                        closeConnection();
+                        return;
+                    }
+                }
+
+                if (esp_http_client_write(m_client, FOOTER, strlen(FOOTER)) != strlen(FOOTER)) {
+                    command->error(Command::SERVER_ERROR,
+                        "Failed to send POST body footer to server", "!0");
+                    goto ERROR;
+                }
+
+            } else {
+                ESP_LOGI(TAG, "Sending static POST request body (%lld bytes)", request_content_length);
+                success =
+                    (esp_http_client_write(m_client, HEADER, strlen(HEADER)) == strlen(HEADER)) &&
+                    (esp_http_client_write(m_client, (const char*) data->data(), data->size()) == data->size()) &&
+                    (esp_http_client_write(m_client, FOOTER, strlen(FOOTER)) == strlen(FOOTER));
+            }
+
+        RETRY_POST:
             if (!success) {
                 ESP_LOGW(TAG, "Failed to send POST request body, retrying %d more time%s...",
                     retries, (retries > 1) ? "s" : "");
 
-                if (retries-- > 0) {
+                if (retries-- > 0 && !command->aborted()) {
                     closeConnection();
                     goto RETRY;
                 } else {
@@ -196,10 +264,11 @@ namespace WiC64 {
         ESP_LOGI(TAG, "Request sent, fetching response headers");
 
         if ((result = esp_http_client_fetch_headers(m_client)) == ESP_FAIL) {
-            ESP_LOGW(TAG, "Failed to fetch headers, retrying %d more time%s...",
-                retries, (retries > 1) ? "s" : "");
 
-            if (retries-- > 0) {
+            if (retries-- > 0 && !command->request()->payload()->isQueued() && !command->aborted()) {
+                ESP_LOGW(TAG, "Failed to fetch headers, retrying %d more time%s...",
+                    retries, (retries > 1) ? "s" : "");
+
                 closeConnection();
                 goto RETRY;
             } else {
@@ -220,7 +289,7 @@ namespace WiC64 {
         // see  https://www.esp32.com/viewtopic.php?t=26701 (no answers from Espressif yet)
         // If we end up with a redirection code here, try again manually up to MAX_RETRIES
         if (m_statusCode == 301 || m_statusCode == 302 || m_statusCode == 307 || m_statusCode == 308) {
-            if (retries-- > 0) {
+            if (retries-- > 0 && !command->aborted()) {
                 ESP_LOGW(TAG, "Failed autoredirect (HTTP status %d), retrying manually %d more time%s...",
                     m_statusCode, retries, (retries > 1) ? "s" : "");
 
@@ -240,7 +309,7 @@ namespace WiC64 {
             goto ERROR;
         }
 
-        if (content_length > 0xffff) {
+        if (content_length >= 0x10000) {
             // Start queued transfer if content length is known and exceeds transferBuffer
             ESP_LOGI(TAG, "Starting queued send of %d bytes", content_length);
 
@@ -313,7 +382,7 @@ namespace WiC64 {
 
         int32_t bytes_read = 0;
         int32_t total_bytes_read = 0;
-        int16_t timeout_ms = 5000;
+        int16_t timeout_ms = 1000;
         ESP_LOGD(TAG, "Client queue task queueing %d bytes...", content_length);
 
         do {

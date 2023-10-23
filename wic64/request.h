@@ -2,27 +2,32 @@
 #define WIC64_REQUEST_H
 
 #include <cstdint>
+
+#include "protocol.h"
 #include "data.h"
 
 namespace WiC64 {
+    class Protocol;
+
     class Request {
         public: static const char* TAG;
 
         private:
-            uint8_t m_api = 0x00;
+            Protocol* m_protocol = nullptr;
             uint8_t m_id = 0x00;
-            bool m_has_payload = false;
             Data* m_payload = new Data();
 
         public:
-            Request(uint8_t api, uint8_t id, bool has_payload)
-                : m_api(api), m_id(id), m_has_payload(has_payload) { }
+            Request(Protocol *protocol, uint8_t id, uint32_t payload_size)
+                : m_protocol(protocol), m_id(id) {
+                    m_payload->size(payload_size);
+            }
 
             ~Request();
 
-            uint8_t api() { return m_api; }
+            Protocol* protocol() { return m_protocol; }
             uint8_t id(void) { return m_id; };
-            bool hasPayload(void) { return m_has_payload; };
+            bool hasPayload(void) { return m_payload->size() > 0; };
 
             Data* payload(void) { return m_payload; }
             Data* payload(uint8_t *data, uint32_t size);

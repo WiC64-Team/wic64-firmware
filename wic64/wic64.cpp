@@ -12,6 +12,11 @@
 #include "led.h"
 #include "buttons.h"
 #include "utilities.h"
+#include "protocol.h"
+#include "protocols/legacy.h"
+#include "protocols/standard.h"
+#include "protocols/extended.h"
+#include "command.h"
 #include "commands/http.h"
 #include "commands/scan.h"
 #include "commands/connect.h"
@@ -89,6 +94,9 @@ namespace WiC64 {
         esp_log_level_set(Webserver::TAG, loglevel);
         esp_log_level_set(Request::TAG, loglevel);
         esp_log_level_set(Clock::TAG, loglevel);
+        esp_log_level_set(Legacy::TAG, loglevel);
+        esp_log_level_set(Standard::TAG, loglevel);
+        esp_log_level_set(Extended::TAG, loglevel);
         esp_log_level_set(Command::TAG, loglevel);
         esp_log_level_set(Http::TAG, loglevel);
         esp_log_level_set(Scan::TAG, loglevel);

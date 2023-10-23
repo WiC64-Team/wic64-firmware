@@ -27,7 +27,25 @@ namespace WiC64 {
             return;
         }
 
-        (id() == WIC64_CMD_HTTP_POST) ? post() : get();
+        switch (id()) {
+            case WIC64_CMD_HTTP_GET:
+            case WIC64_CMD_HTTP_GET_ENCODED:
+                get();
+                break;
+
+            case WIC64_CMD_HTTP_POST_URL:
+                postUrl();
+                break;
+
+            case WIC64_CMD_HTTP_POST_DATA:
+                postData();
+                break;
+
+            default:
+                error(INTERNAL_ERROR, "Unknown command ID for Command Http", "!0");
+                responseReady();
+                break;
+        }
     }
 
     void Http::get(void) {
@@ -45,27 +63,37 @@ namespace WiC64 {
         httpClient->get(this, m_url); // client will call responseReady()
     }
 
-    void Http::post(void) {
-        uint8_t* payload = request()->payload()->data();
-        uint32_t payload_size = request()->payload()->size();
+    void Http::postUrl() {
+        Data* payload = request()->payload();
+        m_url = String(payload->data(), payload->size());
 
-        m_url = String((char*) payload);
-        Data *data = new Data(payload + m_url.length() + 1, payload_size - m_url.length() - 1);
-
-        ESP_LOGD(TAG, "Received URL [%s]", m_url.c_str());
+        ESP_LOGD(TAG, "Received POST URL [%s]", m_url.c_str());
 
         m_url.sanitize();
         m_url.expand();
 
-        ESP_LOGI(TAG, "POSTing %d bytes to URL [%s]", data->size(), m_url.c_str());
-        ESP_LOG_HEXV(TAG, "POST data", data->data(), data->size());
+        ESP_LOGI(TAG, "Setting POST URL [%s]", m_url.c_str());
 
-        httpClient->post(this, m_url, data); // client will call responseReady()
-
-        delete data;
+        httpClient->postUrl(m_url);
+        responseReady();
     }
 
-    const char *Http::describe(void) {
+    void Http::postData(void) {
+        ESP_LOGI(TAG, "Posting to URL [%s]", httpClient->postUrl());
+        httpClient->postData(this, request()->payload()); // client will call responseReady()
+    }
+
+    bool Http::supportsProtocol(void) {
+        if (request()->protocol()->id() == Protocol::EXTENDED) return true;
+        return Command::supportsProtocol();
+    }
+
+    bool Http::supportsQueuedRequest(void) {
+        return id() == WIC64_CMD_HTTP_POST_DATA;
+    }
+
+    const char *Http::describe(void)
+    {
         switch (id()) {
             case WIC64_CMD_HTTP_GET:
                 return "HTTP GET (fetch URL)";
@@ -73,8 +101,11 @@ namespace WiC64 {
             case WIC64_CMD_HTTP_GET_ENCODED:
                 return "HTTP GET (fetch encoded URL)";
 
-            case WIC64_CMD_HTTP_POST:
-                return "HTTP POST (post data to URL)";
+            case WIC64_CMD_HTTP_POST_URL:
+                return "HTTP POST URL (preset URL to POST to)";
+
+            case WIC64_CMD_HTTP_POST_DATA:
+                return "HTTP POST data (post data to preset URL)";
 
             default: return "HTTP Request";
         }

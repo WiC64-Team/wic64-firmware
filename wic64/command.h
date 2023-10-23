@@ -5,6 +5,7 @@
 
 #include "wic64.h"
 #include "service.h"
+#include "protocol.h"
 
 namespace WiC64 {
     class Command {
@@ -15,6 +16,7 @@ namespace WiC64 {
             Request* m_request = NULL;
             Data* m_response = NULL;
             bool m_response_ready = false;
+            bool m_aborted = false;
 
         public:
             const static char* TAG;
@@ -27,28 +29,37 @@ namespace WiC64 {
             const static uint8_t SERVER_ERROR     = 5;
 
             static Command* create(Request* request);
+            static void execute(Command* command);
+            static void commandTask(void* command);
             static const char* statusMessage(void) { return m_status_message; }
 
             Command(Request* request);
             virtual ~Command();
 
-            uint8_t id(void);
+            uint8_t id(void) { return request()->id(); }
 
-            bool isLegacyRequest() { return m_request->api() == WiC64::API_LAYER_1; }
+            bool isLegacyRequest() { return m_request->protocol()->id() == Protocol::LEGACY; }
 
             Request* request(void) { return m_request; }
             Data* response(void) { return m_response; }
             bool isResponseReady() { return m_response_ready; }
 
-            void success(const char* message) { status(SUCCESS, message); };
-            void success(const char* message, const char* legacy_message) { status(SUCCESS, message, legacy_message); };
+            void abort(void) { m_aborted = true; }
+            bool aborted(void) { return m_aborted; }
 
-            void error(uint8_t code, const char* message) { status(code, message, message); };
-            void error(uint8_t code, const char* message, const char* legacy_message) { status(code, message, legacy_message); };
+            void success(const char* message) { status(SUCCESS, message); }
+            void success(const char* message, const char* legacy_message) { status(SUCCESS, message, legacy_message); }
+
+            void error(uint8_t code, const char* message) { status(code, message, message); }
+            void error(uint8_t code, const char* message, const char* legacy_message) { status(code, message, legacy_message); }
 
             uint8_t status(void) { return m_status_code; };
-            void status(uint8_t code, const char* message) { status(code, message, message); };
+            void status(uint8_t code, const char* message) { status(code, message, message); }
             void status(uint8_t code, const char* message, const char* legacy_message);
+
+            virtual bool supportsProtocol();
+            virtual bool supportsQueuedRequest();
+            virtual bool supportsQueuedResponse();
 
             virtual const char* describe();
             virtual void execute(void);

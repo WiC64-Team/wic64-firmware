@@ -13,6 +13,11 @@
 #define IS_HIGH(PIN) (((GPIO.in >> PIN) & 1) == 1)
 #define IS_LOW(PIN)  (((GPIO.in >> PIN) & 1) == 0)
 
+#define LOWBYTE(UINT32) (uint8_t)((UINT32 >> 0UL) & 0xff)
+#define HIGHBYTE(UINT32) (uint8_t)((UINT32 >> 8UL) & 0xff)
+#define HIGHLOWBYTE(UINT32) (uint8_t)((UINT32 >> 16UL) & 0xff)
+#define HIGHHIGHBYTE(UINT32) (uint8_t)((UINT32 >> 24UL) & 0xff)
+
 #define WIC64_MAX_HEXDUMP_SIZE 256
 #define ESP_LOG_HEXE(tag, title, data, size) log_hex(tag, ESP_LOG_ERROR, title, data, size)
 #define ESP_LOG_HEXW(tag, title, data, size) log_hex(tag, ESP_LOG_WARN, title, data, size)
@@ -27,7 +32,7 @@
 #define WIC64_WHITE(str) WIC64_ANSI(37) str
 #define WIC64_YELLOW(str) WIC64_ANSI(33) str
 #define WIC64_FORMAT_CMD WIC64_YELLOW("0x%02x")
-#define WIC64_FORMAT_API WIC64_CYAN("0x%02x")
+#define WIC64_FORMAT_PROTOCOL WIC64_CYAN("0x%02x")
 #define WIC64_SEPARATOR "-------------------------------------------------------------------------------"
 
 namespace WiC64 {
