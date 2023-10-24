@@ -2,11 +2,16 @@
 #define WIC64_H
 
 #include <cstdint>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+
 #include "../generated-version.h"
 #include "esp_log.h"
 
-#define WIC64_QUEUE_ITEM_SIZE 0x1000
-#define WIC64_QUEUE_SIZE (0x8000 / WIC64_QUEUE_ITEM_SIZE)
+#define WIC64_QUEUE_ITEM_SIZE 0x2000
+#define WIC64_QUEUE_SIZE (0x10000 / WIC64_QUEUE_ITEM_SIZE)
 
 #define WIC64_QUEUE_ITEMS_REQUIRED(size) \
     (size / WIC64_QUEUE_ITEM_SIZE) + \
@@ -40,8 +45,13 @@ namespace WiC64 {
      * not contribute to any heap fragmentation.
      */
     extern uint8_t *transferBuffer;
+    extern QueueHandle_t transferQueue;
+    extern uint8_t transferQueueBuffer[WIC64_QUEUE_ITEM_SIZE];
 
     class WiC64 {
+        private:
+            StaticQueue_t m_staticQueue;
+
         public:
             static const char* TAG;
             static void loglevel(esp_log_level_t level);

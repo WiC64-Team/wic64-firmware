@@ -25,11 +25,6 @@ namespace WiC64 {
     extern Settings *settings;
 
     HttpClient::HttpClient() {
-        m_queue = xQueueCreate(WIC64_QUEUE_SIZE, WIC64_QUEUE_ITEM_SIZE);
-
-        if (m_queue == NULL) {
-            ESP_LOGE(TAG, "Failed to create queue");
-        }
         ESP_LOGI(TAG, "HTTP client initialized");
     }
 
@@ -191,7 +186,6 @@ namespace WiC64 {
             if (data->isQueued()) {
                 ESP_LOGI(TAG, "Sending queued POST request body (%lld bytes)", request_content_length);
 
-                static uint8_t buffer[WIC64_QUEUE_ITEM_SIZE];
                 uint32_t bytes_remaining = data->size();
                 uint32_t items_remaining = WIC64_QUEUE_ITEMS_REQUIRED(bytes_remaining);
                 uint16_t size = 0;
@@ -209,9 +203,9 @@ namespace WiC64 {
                         ? WIC64_QUEUE_ITEM_SIZE
                         : bytes_remaining;
 
-                    if (command->aborted() || xQueueReceive(data->queue(), buffer, pdMS_TO_TICKS(timeout_ms)) == pdTRUE) {
+                    if (command->aborted() || xQueueReceive(data->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout_ms)) == pdTRUE) {
 
-                        if (esp_http_client_write(m_client, (const char*) buffer, size) != size) {
+                        if (esp_http_client_write(m_client, (const char*) transferQueueBuffer, size) != size) {
                             ESP_LOGE(TAG, "Failed to send POST data to server");
                             command->error(Command::SERVER_ERROR,
                                 "Failed to send POST data to server", "!0");
@@ -314,7 +308,7 @@ namespace WiC64 {
             ESP_LOGI(TAG, "Starting queued send of %d bytes", content_length);
 
             // Set the queue and the size of the reponse in the response object
-            command->response()->queue(httpClient->queue(), (uint32_t) content_length);
+            command->response()->queue(transferQueue, (uint32_t) content_length);
 
             // Ask the command to send the SERVICE_RESPONSE_READY event so that
             // Service will start reading and sending data down to the C64 as soon as
@@ -378,7 +372,6 @@ namespace WiC64 {
 
     void HttpClient::queueTask(void *content_length_ptr) {
         int32_t content_length = *((int32_t *) content_length_ptr);
-        static uint8_t data[WIC64_QUEUE_ITEM_SIZE];
 
         int32_t bytes_read = 0;
         int32_t total_bytes_read = 0;
@@ -386,14 +379,14 @@ namespace WiC64 {
         ESP_LOGD(TAG, "Client queue task queueing %d bytes...", content_length);
 
         do {
-            bytes_read = esp_http_client_read(httpClient->handle(), (char*) data, WIC64_QUEUE_ITEM_SIZE);
+            bytes_read = esp_http_client_read(httpClient->handle(), (char*) transferQueueBuffer, WIC64_QUEUE_ITEM_SIZE);
 
             if (bytes_read == -1) {
                 ESP_LOGE(TAG, "Read Error");
                 break;
             }
             ESP_LOGV(TAG, "Queueing %d bytes", WIC64_QUEUE_ITEM_SIZE);
-            if (xQueueSend(httpClient->queue(), data, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
+            if (xQueueSend(transferQueue, transferQueueBuffer, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
                 ESP_LOGW(TAG, "Could not send to queue for more than %dms", timeout_ms);
                 break;
             }

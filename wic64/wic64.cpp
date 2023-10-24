@@ -49,12 +49,30 @@ namespace WiC64 {
     const char* WiC64::TAG = "WIC64";
 
     uint8_t *transferBuffer;
+    QueueHandle_t transferQueue;
+    uint8_t transferQueueBuffer[WIC64_QUEUE_ITEM_SIZE];
 
     WiC64::WiC64() {
-        transferBuffer = (uint8_t*) calloc(0x10000+1, sizeof(uint8_t));
-
         loglevel(ESP_LOG_INFO);
         ESP_LOGW(TAG, "Booting Firmware version %s", WIC64_VERSION_STRING);
+
+        transferBuffer = (uint8_t*) calloc(0x10000+1, sizeof(uint8_t));
+
+        if (transferBuffer == NULL) {
+            ESP_LOGE(TAG, "Fatal: could not allocate transfer buffer");
+            return;
+        }
+
+        transferQueue = xQueueCreateStatic(
+            WIC64_QUEUE_SIZE,
+            WIC64_QUEUE_ITEM_SIZE,
+            transferBuffer,
+            &m_staticQueue);
+
+        if (transferQueue == NULL) {
+            ESP_LOGE(TAG, "Fatal: could not allocate transfer buffer");
+            return;
+        }
 
         userport   = new Userport();
         service    = new Service();
@@ -78,6 +96,7 @@ namespace WiC64 {
 
         connection->connect();
 
+        ESP_LOGI(TAG, "WiC64 initialized");
         log_free_mem(TAG, ESP_LOG_WARN);
         loglevel(ESP_LOG_WARN);
     }

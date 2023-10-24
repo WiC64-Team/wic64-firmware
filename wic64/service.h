@@ -33,7 +33,6 @@ namespace WiC64 {
 
         private:
             Protocol* protocol;
-            QueueHandle_t m_queue = NULL;
 
             // => protocol byte + lowbyte size + highbyte size + command id = 4
             static const uint8_t LEGACY_PROTOCOL_PAYLOAD_SIZE_CORRECTION = 4;
@@ -51,8 +50,6 @@ namespace WiC64 {
             Service();
 
             esp_event_loop_handle_t eventLoop() { return event_loop_handle; }
-
-            QueueHandle_t queue() { return m_queue; }
 
             void acceptRequest(Protocol* protocol);
             static void parseRequestHeader(uint8_t *header, uint32_t size);

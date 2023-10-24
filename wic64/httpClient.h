@@ -16,7 +16,6 @@ namespace WiC64 {
 
         private:
             esp_http_client_handle_t m_client = NULL;
-            QueueHandle_t m_queue = NULL;
 
             static const uint16_t MAX_URL_LENGTH = 2000; // see https://stackoverflow.com/a/417184
             static const uint8_t MAX_RETRIES = 10;
@@ -24,7 +23,6 @@ namespace WiC64 {
             char m_postUrl[MAX_URL_LENGTH+1] = { '\0' };
             const char* statusToString(int32_t code);
             esp_http_client_handle_t handle() { return m_client; }
-            QueueHandle_t queue() { return m_queue; }
 
             const char* HEADER = "--WiC64-Binary-Data\nContent-Disposition: form-data; name=\"data\"\n\n";
             const char* FOOTER = "\n--WiC64-Binary-Data--\n";

@@ -1,6 +1,5 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/queue.h"
 
 #include "esp32-hal.h"
 #include "esp_event.h"
@@ -40,12 +39,6 @@ namespace WiC64 {
             SERVICE_RESPONSE_READY,
             onResponseReady,
             NULL);
-
-        m_queue = xQueueCreate(WIC64_QUEUE_SIZE, WIC64_QUEUE_ITEM_SIZE);
-
-        if (m_queue == NULL) {
-            ESP_LOGE(TAG, "Failed to create queue");
-        }
 
         ESP_LOGI(TAG, "Command service initialized");
     }
@@ -96,7 +89,7 @@ namespace WiC64 {
             }
             ESP_LOGI(TAG, "Starting queued receive of %d bytes", payload->size());
 
-            payload->queue(service->queue(), payload->size());
+            payload->queue(transferQueue, payload->size());
 
             static uint32_t payload_size = payload->size();
             xTaskCreatePinnedToCore(queueTask, "RECEIVER", 4096, &payload_size, 30, NULL, 1);
@@ -122,8 +115,6 @@ namespace WiC64 {
     }
 
     void Service::receiveQueuedRequestData(uint8_t *data, uint32_t bytes_received) {
-        static uint8_t buffer[WIC64_QUEUE_ITEM_SIZE];
-
         ESP_LOGV(TAG, "%s call of receiveQueuedRequestData(), %d bytes in %d item%s remaining",
             (data == NULL) ? "First" : "Subsequent",
             service->bytes_remaining,
@@ -131,7 +122,7 @@ namespace WiC64 {
             (service->items_remaining > 1) ? "s" : "");
 
         if (data != NULL) {
-            xQueueSend(service->queue(), data, pdMS_TO_TICKS(5000));
+            xQueueSend(transferQueue, data, pdMS_TO_TICKS(5000));
             service->bytes_remaining -= bytes_received;
             service->items_remaining--;
         }
@@ -141,8 +132,8 @@ namespace WiC64 {
             : service->bytes_remaining;
 
         (service->items_remaining > 1)
-            ? userport->receivePartial(buffer, size, receiveQueuedRequestData, onRequestAborted)
-            : userport->receive(buffer, size, receiveQueuedRequestData, onRequestAborted);
+            ? userport->receivePartial(transferQueueBuffer, size, receiveQueuedRequestData, onRequestAborted)
+            : userport->receive(transferQueueBuffer, size, receiveQueuedRequestData, onRequestAborted);
     }
 
     void Service::onRequestAborted(uint8_t *data, uint32_t bytes_received) {
@@ -233,7 +224,6 @@ namespace WiC64 {
     }
 
     void Service::sendQueuedResponseData(uint8_t *isSubsequentCall, uint32_t ignoreSize) {
-        static uint8_t data[WIC64_QUEUE_ITEM_SIZE];
         Data *response = service->command->response();
 
         vTaskDelay(10);
@@ -255,7 +245,7 @@ namespace WiC64 {
         const uint16_t timeout_ms = 1000;
         uint8_t attempts = 8;
 
-        while (xQueueReceive(response->queue(), data, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
+        while (xQueueReceive(response->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
             ESP_LOGW(TAG, "Could not read next item from queue in %dms, attempting %d more times",
                 timeout_ms, attempts-1);
 
@@ -267,8 +257,8 @@ namespace WiC64 {
         service->bytes_remaining -= size;
 
         (service->items_remaining > 1)
-            ? userport->sendPartial((uint8_t*) data, size, sendQueuedResponseData, onResponseAborted)
-            : userport->send((uint8_t*) data, size, onResponseSent, onResponseAborted);
+            ? userport->sendPartial((uint8_t*) transferQueueBuffer, size, sendQueuedResponseData, onResponseAborted)
+            : userport->send((uint8_t*) transferQueueBuffer, size, onResponseSent, onResponseAborted);
     }
 
     void Service::sendStaticResponse(void) {
