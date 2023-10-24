@@ -26,7 +26,7 @@ namespace WiC64 {
             request()->payload()->field(0, indexAsString);
             indexInLastScan = atoi(indexAsString);
             ssid_string = WiFi.SSID(indexInLastScan);
-            strncpy(ssid, ssid_string.c_str(), ssid_string.length());
+            strncpy(ssid, ssid_string.c_str(), ssid_string.length()+1);
         }
         return ssid;
     }
