@@ -203,7 +203,7 @@ namespace WiC64 {
                         ? WIC64_QUEUE_ITEM_SIZE
                         : bytes_remaining;
 
-                    if (command->aborted() || xQueueReceive(data->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout_ms)) == pdTRUE) {
+                    if (!command->aborted() && xQueueReceive(data->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout_ms)) == pdTRUE) {
 
                         if (esp_http_client_write(m_client, (const char*) transferQueueBuffer, size) != size) {
                             ESP_LOGE(TAG, "Failed to send POST data to server");
@@ -245,7 +245,7 @@ namespace WiC64 {
                 ESP_LOGW(TAG, "Failed to send POST request body, retrying %d more time%s...",
                     retries, (retries > 1) ? "s" : "");
 
-                if (retries-- > 0 && !command->aborted()) {
+                if ((retries-- > 0) && !command->aborted() && !command->request()->payload()->isQueued()) {
                     closeConnection();
                     goto RETRY;
                 } else {
@@ -259,7 +259,7 @@ namespace WiC64 {
 
         if ((result = esp_http_client_fetch_headers(m_client)) == ESP_FAIL) {
 
-            if (retries-- > 0 && !command->request()->payload()->isQueued() && !command->aborted()) {
+            if ((retries-- > 0) && !command->aborted() && !command->request()->payload()->isQueued()) {
                 ESP_LOGW(TAG, "Failed to fetch headers, retrying %d more time%s...",
                     retries, (retries > 1) ? "s" : "");
 
@@ -383,11 +383,13 @@ namespace WiC64 {
 
             if (bytes_read == -1) {
                 ESP_LOGE(TAG, "Read Error");
+                httpClient->closeConnection();
                 break;
             }
             ESP_LOGV(TAG, "Queueing %d bytes", WIC64_QUEUE_ITEM_SIZE);
             if (xQueueSend(transferQueue, transferQueueBuffer, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
                 ESP_LOGW(TAG, "Could not send to queue for more than %dms", timeout_ms);
+                httpClient->closeConnection();
                 break;
             }
             total_bytes_read += bytes_read;
