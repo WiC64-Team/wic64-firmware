@@ -90,7 +90,6 @@ namespace WiC64 {
             ESP_LOGI(TAG, "Starting queued receive of %d bytes", payload->size());
 
             payload->queue(transferQueue, payload->size());
-
             service->receiveQueuedRequest();
             service->onRequestReceived();
         }
