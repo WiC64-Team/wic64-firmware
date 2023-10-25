@@ -190,7 +190,7 @@ namespace WiC64 {
                 uint32_t items_remaining = WIC64_QUEUE_ITEMS_REQUIRED(bytes_remaining);
                 uint16_t size = 0;
 
-                const uint16_t timeout_ms = 5000;
+                const uint16_t timeout_ms = 1000;
 
                 // If sending the header fails, we can still retry
                 if (!(success = esp_http_client_write(m_client, HEADER, strlen(HEADER))) == strlen(HEADER)) {
