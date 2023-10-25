@@ -91,9 +91,7 @@ namespace WiC64 {
 
             payload->queue(transferQueue, payload->size());
 
-            static uint32_t payload_size = payload->size();
-            xTaskCreatePinnedToCore(queueTask, "RECEIVER", 4096, &payload_size, 30, NULL, 1);
-
+            service->receiveQueuedRequest();
             service->onRequestReceived();
         }
     }
