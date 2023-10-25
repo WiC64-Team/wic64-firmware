@@ -35,7 +35,11 @@ namespace WiC64 {
     }
 
     void Command::execute(Command *command) {
-        xTaskCreatePinnedToCore(commandTask, "COMMAND", 4096, command, 20, NULL, 1);
+        if (command->request()->payload()->isQueued()) {
+            xTaskCreatePinnedToCore(commandTask, "COMMAND", 4096, command, 20, NULL, 1);
+        } else {
+            command->execute();
+        }
     }
 
     void Command::commandTask(void *command) {
