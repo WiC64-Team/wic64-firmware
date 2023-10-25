@@ -5,6 +5,7 @@
 #include "server.h"
 #include "scan.h"
 #include "connect.h"
+#include "connected.h"
 #include "ssid.h"
 #include "rssi.h"
 #include "mac.h"
@@ -28,6 +29,7 @@ namespace WiC64 {
         WIC64_COMMAND(WIC64_CMD_SCAN_WIFI_NETWORKS, Scan),
         WIC64_COMMAND(WIC64_CMD_CONNECT_WITH_SSID_STRING, Connect),
         WIC64_COMMAND(WIC64_CMD_CONNECT_WITH_SSID_INDEX,  Connect),
+        WIC64_COMMAND(WIC64_CMD_CONNECTED, Connected),
 
         WIC64_COMMAND(WIC64_CMD_GET_MAC,  MAC),
         WIC64_COMMAND(WIC64_CMD_GET_SSID, SSID),
