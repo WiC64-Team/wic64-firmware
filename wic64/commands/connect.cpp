@@ -78,11 +78,11 @@ namespace WiC64 {
 
         if (passphrase == NULL) {
             ESP_LOGE(TAG, "Failed to decode passphrase");
-            error(CLIENT_ERROR, "wifi config not changed: passphrase decode failed");
+            error(CLIENT_ERROR, "passphrase decode failed");
         }
         else if (strlen(ssid) == 0) {
             ESP_LOGE(TAG, "SSID is empty");
-            error(CLIENT_ERROR, "wifi config not changed: ssid empty");
+            error(CLIENT_ERROR, "ssid empty");
         }
         else {
             connection->connect(ssid, passphrase);
