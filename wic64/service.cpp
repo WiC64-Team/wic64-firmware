@@ -22,6 +22,9 @@ namespace WiC64 {
     extern Userport *userport;
     extern Display *display;
 
+    extern uint32_t timeout;
+    extern bool resetTimeoutAfterTransfer;
+
     Service::Service() {
         esp_event_loop_args_t event_loop_args = {
             .queue_size = 16,
@@ -46,6 +49,7 @@ namespace WiC64 {
     void Service::acceptRequest(Protocol *protocol) {
         static uint8_t header[Protocol::MAX_REQUEST_HEADER_SIZE];
         this->protocol = protocol;
+        resetTimeoutAfterTransfer = true;
 
         userport->receivePartial(header, protocol->requestHeaderSize(), parseRequestHeader);
     }
@@ -119,7 +123,7 @@ namespace WiC64 {
             (service->items_remaining > 1) ? "s" : "");
 
         if (data != NULL) {
-            xQueueSend(transferQueue, data, pdMS_TO_TICKS(5000));
+            xQueueSend(transferQueue, data, pdMS_TO_TICKS(timeout));
             service->bytes_remaining -= bytes_received;
             service->items_remaining--;
         }
@@ -239,17 +243,10 @@ namespace WiC64 {
             ? WIC64_QUEUE_ITEM_SIZE
             : service->bytes_remaining;
 
-        const uint16_t timeout_ms = 1000;
-        uint8_t attempts = 8;
-
-        while (xQueueReceive(response->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
-            ESP_LOGW(TAG, "Could not read next item from queue in %dms, attempting %d more times",
-                timeout_ms, attempts-1);
-
-            if(--attempts == 0) {
-                onResponseAborted(NULL, service->bytes_remaining);
-                return;
-            }
+        if (xQueueReceive(response->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout)) != pdTRUE) {
+            ESP_LOGW(TAG, "Could not read next item from queue in %dms", timeout);
+            onResponseAborted(NULL, service->bytes_remaining);
+            return;
         }
         service->bytes_remaining -= size;
 
@@ -292,6 +289,10 @@ namespace WiC64 {
             if (command->response()->isQueued()) {
                 ESP_LOG_LEVEL(ESP_LOG_DEBUG, TAG, "Resetting response queue");
                 xQueueReset(command->response()->queue());
+            }
+
+            if (resetTimeoutAfterTransfer) {
+                timeout = WIC64_DEFAULT_TIMEOUT;
             }
 
             level = success ? ESP_LOG_DEBUG : ESP_LOG_WARN;

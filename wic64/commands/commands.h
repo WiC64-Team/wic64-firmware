@@ -38,6 +38,7 @@
 
 #define WIC64_CMD_REBOOT 0x29
 #define WIC64_CMD_STATUS 0x2a
+#define WIC64_CMD_TIMEOUT 0x2d
 
 // Deprecated commands
 

@@ -29,6 +29,7 @@
 #include "commands/deprecated.h"
 #include "commands/undefined.h"
 #include "commands/status.h"
+#include "commands/timeout.h"
 
 #include "esp_log.h"
 
@@ -52,6 +53,9 @@ namespace WiC64 {
     uint8_t *transferBuffer;
     QueueHandle_t transferQueue;
     uint8_t transferQueueBuffer[WIC64_QUEUE_ITEM_SIZE];
+
+    uint32_t timeout = WIC64_DEFAULT_TIMEOUT;
+    bool resetTimeoutAfterTransfer = true;
 
     WiC64::WiC64() {
         loglevel(ESP_LOG_INFO);
@@ -130,5 +134,6 @@ namespace WiC64 {
         esp_log_level_set(Deprecated::TAG, loglevel);
         esp_log_level_set(Undefined::TAG, loglevel);
         esp_log_level_set(Status::TAG, loglevel);
+        esp_log_level_set(Timeout::TAG, loglevel);
     }
 }

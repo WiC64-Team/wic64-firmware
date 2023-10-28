@@ -20,6 +20,9 @@ namespace WiC64 {
     extern Settings *settings;
     extern Led *led;
 
+    extern uint32_t timeout;
+    extern bool resetTimeoutAfterTransfer;
+
     Userport::Userport() {
         gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
 
@@ -282,6 +285,10 @@ namespace WiC64 {
         transferType = TRANSFER_TYPE_NONE;
         previousTransferType = TRANSFER_TYPE_NONE;
         transferState = TRANSFER_STATE_NONE;
+
+        if (resetTimeoutAfterTransfer) {
+            timeout = WIC64_DEFAULT_TIMEOUT;
+        }
 
         if (onFailureCallback != NULL) {
             onFailureCallback(buffer, pos ? pos-1 : 0);

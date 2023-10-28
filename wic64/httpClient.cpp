@@ -23,6 +23,7 @@ namespace WiC64 {
 
     extern HttpClient* httpClient;
     extern Settings *settings;
+    extern uint32_t timeout;
 
     HttpClient::HttpClient() {
         ESP_LOGI(TAG, "HTTP client initialized");
@@ -190,8 +191,6 @@ namespace WiC64 {
                 uint32_t items_remaining = WIC64_QUEUE_ITEMS_REQUIRED(bytes_remaining);
                 uint16_t size = 0;
 
-                const uint16_t timeout_ms = 1000;
-
                 // If sending the header fails, we can still retry
                 if (!(success = esp_http_client_write(m_client, HEADER, strlen(HEADER))) == strlen(HEADER)) {
                     goto RETRY_POST;
@@ -203,7 +202,7 @@ namespace WiC64 {
                         ? WIC64_QUEUE_ITEM_SIZE
                         : bytes_remaining;
 
-                    if (!command->aborted() && xQueueReceive(data->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout_ms)) == pdTRUE) {
+                    if (!command->aborted() && xQueueReceive(data->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout)) == pdTRUE) {
 
                         if (esp_http_client_write(m_client, (const char*) transferQueueBuffer, size) != size) {
                             ESP_LOGE(TAG, "Failed to send POST data to server");
@@ -375,7 +374,6 @@ namespace WiC64 {
 
         int32_t bytes_read = 0;
         int32_t total_bytes_read = 0;
-        int16_t timeout_ms = 1000;
         ESP_LOGD(TAG, "Client queue task queueing %d bytes...", content_length);
 
         do {
@@ -387,8 +385,8 @@ namespace WiC64 {
                 break;
             }
             ESP_LOGV(TAG, "Queueing %d bytes", WIC64_QUEUE_ITEM_SIZE);
-            if (xQueueSend(transferQueue, transferQueueBuffer, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
-                ESP_LOGW(TAG, "Could not send to queue for more than %dms", timeout_ms);
+            if (xQueueSend(transferQueue, transferQueueBuffer, pdMS_TO_TICKS(timeout)) != pdTRUE) {
+                ESP_LOGW(TAG, "Could not send to queue for more than %dms", timeout);
                 httpClient->closeConnection();
                 break;
             }

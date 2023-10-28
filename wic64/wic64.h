@@ -10,6 +10,8 @@
 #include "../generated-version.h"
 #include "esp_log.h"
 
+#define WIC64_DEFAULT_TIMEOUT 1000
+
 #define WIC64_QUEUE_ITEM_SIZE 0x2000
 #define WIC64_QUEUE_SIZE (0x10000 / WIC64_QUEUE_ITEM_SIZE)
 
@@ -45,8 +47,12 @@ namespace WiC64 {
      * not contribute to any heap fragmentation.
      */
     extern uint8_t *transferBuffer;
+
     extern QueueHandle_t transferQueue;
     extern uint8_t transferQueueBuffer[WIC64_QUEUE_ITEM_SIZE];
+
+    extern uint32_t timeout;
+    extern bool resetTimeoutAfterTransfer;
 
     class WiC64 {
         private:

@@ -86,8 +86,6 @@ namespace WiC64 {
             bool connected = false;
             static portMUX_TYPE mutex;
 
-            static const uint16_t TIMEOUT_DEFAULT_1000MS = 1000;
-            volatile uint16_t timeout = TIMEOUT_DEFAULT_1000MS;
             volatile uint32_t timeOfLastActivity = 0;
             volatile uint32_t timeTransferStarted = 0;
 
