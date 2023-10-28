@@ -22,6 +22,10 @@ namespace WiC64 {
                 return "TCP (write)";
                 break;
 
+            case WIC64_CMD_TCP_CLOSE:
+                return "TCP (close)";
+                break;
+
             default: return "TCP (unknown)";
         }
     }
@@ -54,6 +58,11 @@ namespace WiC64 {
             } else {
                 error(NETWORK_ERROR, "Failed to open TCP connection", "!E");
             }
+        }
+
+        else if (id() == WIC64_CMD_TCP_CLOSE) {
+            tcpClient->close();
+            success("Success", "0");
         }
 
         else if (id() == WIC64_CMD_TCP_READ) {

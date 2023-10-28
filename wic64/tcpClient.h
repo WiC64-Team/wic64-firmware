@@ -11,7 +11,7 @@ namespace WiC64 {
 
         private:
             WiFiClient m_client;
-            static const uint16_t MAX_READ_CHUNK_SIZE = 4096;
+            static const uint16_t MAX_READ_CHUNK_SIZE = 8192;
 
         public:
             TcpClient();
@@ -19,6 +19,7 @@ namespace WiC64 {
             int64_t read(uint8_t* data);
             int32_t write(Data* data);
             int32_t write(uint8_t* data, uint32_t size);
+            void close(void);
     };
 }
 

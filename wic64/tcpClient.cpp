@@ -12,7 +12,7 @@ namespace WiC64 {
         bool connected = false;
         if (m_client.connected()) {
             ESP_LOGW(TAG, "Closing previously opened connection");
-            m_client.stop();
+            close();
         }
 
         connected = m_client.connect(host, port, 3000);
@@ -28,27 +28,11 @@ namespace WiC64 {
 
     int64_t TcpClient::read(uint8_t* data) {
         int64_t read = -1;
-        bool available = false;
-        uint32_t started = millis();
 
-        ESP_LOGI(TAG, "Waiting at most 500ms for data to become available");
-
-        while ((millis() - started < 500)) {
-            vTaskDelay(pdMS_TO_TICKS(10));
-            if ((available = m_client.available())) {
-                break;
-            }
-        }
-
-        ESP_LOGI(TAG, "%s available after %ldms",
-            available ? "Data" : "No data",
-            available ? millis() - started : 500);
-
-        if (available) {
+        if (m_client.available()) {
             read = m_client.read(data, MAX_READ_CHUNK_SIZE);
             ESP_LOGI(TAG, "Read %lld bytes", read);
         }
-
         return read;
     }
 
@@ -74,5 +58,10 @@ namespace WiC64 {
         }
 
         return written;
+    }
+
+    void TcpClient::close(void) {
+        ESP_LOGI(TAG, "Closing connection");
+        m_client.stop();
     }
 }
