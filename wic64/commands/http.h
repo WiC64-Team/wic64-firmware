@@ -25,7 +25,7 @@ namespace WiC64 {
             void postData(void);
 
             void lieAboutResponseSizeForProgramFile(void);
-            void sendPositiveResponseOnStatusCode201(void);
+            void sendRequestedResponseOnStatusCode201(void);
 
             void responseReady(void);
     };

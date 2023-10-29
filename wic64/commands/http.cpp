@@ -127,22 +127,25 @@ namespace WiC64 {
         }
     }
 
-    void Http::sendPositiveResponseOnStatusCode201(void) {
+    void Http::sendRequestedResponseOnStatusCode201(void) {
         // For legacy requests only: The server may send a 201 status code with
         // a specially crafted response in order to ask the ESP to store certain
         // configuration values in flash. While this is now handled using
-        // special HTTP headers, the existing client code still expects "00" as
-        // confirmation of success.
+        // special HTTP headers, the existing client code still expects the last field
+        // of the server response to be send as the command response (this is called the
+        // "prefanswer" in the method "setprefsphp()" in the legacy firmware)
 
         if (isLegacyRequest() && m_url.isHostWic64Net() && httpClient->statusCode() == 201) {
-            response()->copyData("00");
+            static char requestedResponse[64];
+            response()->field(3, requestedResponse);
+            response()->copyData(requestedResponse);
         }
     }
 
     void Http::responseReady(void) {
         if (isLegacyRequest()) {
             lieAboutResponseSizeForProgramFile();
-            sendPositiveResponseOnStatusCode201();
+            sendRequestedResponseOnStatusCode201();
         }
 
         Command::responseReady();
