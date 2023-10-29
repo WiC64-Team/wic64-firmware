@@ -44,11 +44,15 @@ namespace WiC64 {
             ESP_LOGE(TAG, "Can't execute TCP command: %s", message);
 
             error(CONNECTION_ERROR, message, "!0");
-            responseReady();
-            return;
+            goto DONE;
         }
 
         if (id() == WIC64_CMD_TCP_OPEN) {
+            if (request()->payload()->size() == 0) {
+                error(CLIENT_ERROR, "No URL specified", "!0");
+                goto DONE;
+            }
+
             request()->payload()->field(0, ':', host);
             request()->payload()->field(1, ':', portAsString);
             port = atoi(portAsString);
@@ -80,6 +84,7 @@ namespace WiC64 {
                 error(NETWORK_ERROR, "Failed to write TCP data", "!E");
             }
         }
+    DONE:
         responseReady();
     }
 }
