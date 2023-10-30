@@ -60,7 +60,7 @@ namespace WiC64 {
             if (tcpClient->open(host, port)) {
                 success("Success", "0");
             } else {
-                error(NETWORK_ERROR, "Failed to open TCP connection", "!E");
+                error(NETWORK_ERROR, "Could not open connection", "!E");
             }
         }
 
@@ -76,7 +76,7 @@ namespace WiC64 {
         }
 
         else if (id() == WIC64_CMD_TCP_WRITE) {
-            size = tcpClient->write(request()->payload()->zeroTerminated());
+            size = tcpClient->write(request()->payload());
 
             if (size == request()->payload()->size()) {
                 success("Success", "0");
