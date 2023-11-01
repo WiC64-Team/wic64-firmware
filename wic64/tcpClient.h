@@ -15,6 +15,7 @@ namespace WiC64 {
 
         public:
             TcpClient();
+            bool connected(void);
             int open(const char* host, const uint16_t port);
             int64_t read(uint8_t* data);
             int32_t write(Data* data);

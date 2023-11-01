@@ -8,6 +8,10 @@ namespace WiC64 {
         ESP_LOGI(TAG, "TCP client initialized");
     }
 
+    bool TcpClient::connected(void) {
+        return m_client.connected();
+    }
+
     int TcpClient::open(const char* host, const uint16_t port) {
         bool connected = false;
         if (m_client.connected()) {

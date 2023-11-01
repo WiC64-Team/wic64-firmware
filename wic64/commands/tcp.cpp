@@ -70,18 +70,26 @@ namespace WiC64 {
         }
 
         else if (id() == WIC64_CMD_TCP_READ) {
-            if ((size = tcpClient->read(response()->data())) > -1) {
-                response()->size(size);
+            if (tcpClient->connected()) {
+                if ((size = tcpClient->read(response()->data())) > -1) {
+                    response()->size(size);
+                }
+            } else {
+                error(NETWORK_ERROR, "TCP connection closed", "!E");
             }
         }
 
         else if (id() == WIC64_CMD_TCP_WRITE) {
             size = tcpClient->write(request()->payload());
 
-            if (size == request()->payload()->size()) {
-                success("Success", "0");
+            if (tcpClient->connected()) {
+                if (size == request()->payload()->size()) {
+                    success("Success", "0");
+                } else {
+                    error(NETWORK_ERROR, "Failed to write TCP data", "!E");
+                }
             } else {
-                error(NETWORK_ERROR, "Failed to write TCP data", "!E");
+                error(NETWORK_ERROR, "TCP connection closed", "!E");
             }
         }
     DONE:
