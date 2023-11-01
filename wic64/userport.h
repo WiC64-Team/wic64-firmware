@@ -80,7 +80,6 @@ namespace WiC64 {
                 TRANSFER_STATE_NONE,
                 TRANSFER_STATE_PENDING,
                 TRANSFER_STATE_RUNNING,
-                TRANSFER_STATE_TERMINATING,
             };
 
             bool connected = false;
@@ -124,7 +123,7 @@ namespace WiC64 {
                 callback_t onFailure
             );
 
-            inline void continueTransfer(void);
+            inline IRAM_ATTR void continueTransfer(void);
             static void IRAM_ATTR onTransferCompleted(void* arg, esp_event_base_t base, int32_t id, void* data);
 
             void createTimeoutTask(void);
@@ -177,7 +176,6 @@ namespace WiC64 {
             static void sendHandshakeAfterRebootTask(void*);
 
             static void IRAM_ATTR onHandshakeSignalReceived(void);
-            static void IRAM_ATTR onDataDirectionChanged(void);
     };
 
 }

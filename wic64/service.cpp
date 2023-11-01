@@ -306,9 +306,7 @@ namespace WiC64 {
                 "firmware bug or protocol violation");
         }
 
-        vTaskDelay(pdMS_TO_TICKS(10));
-
+        vTaskDelay(pdMS_TO_TICKS(5));
         log_free_mem(TAG, ESP_LOG_VERBOSE);
-        display->update();
     }
 }

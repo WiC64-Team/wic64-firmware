@@ -52,7 +52,6 @@ namespace WiC64 {
             char* abbreviated(const String& string, uint8_t width);
             void printCenteredLine(const String& string);
             void printStatusAndRSSI(void);
-            void printFreeMemory(void);
 
             static void notificationTask(void*);
 

@@ -109,14 +109,6 @@ namespace WiC64 {
         m_display->println(m_rssi_buffer);
     }
 
-    void Display::printFreeMemory(void) {
-        uint8_t free_heap_size = esp_get_free_heap_size() / 1024;
-        uint8_t minimum_free_heap_size = esp_get_minimum_free_heap_size() / 1024;
-        snprintf(m_line_buffer, MAX_CHARS_PER_LINE, "%dkb free %dkb min",
-            free_heap_size, minimum_free_heap_size);
-        m_display->println(String(m_line_buffer));
-    }
-
     void Display::update() {
         if (m_display == NULL) return;
         if (m_notifying) return;
@@ -135,7 +127,7 @@ namespace WiC64 {
             m_display->println(abbreviated(m_ssid));
 
             printStatusAndRSSI();
-            printFreeMemory();
+            m_display->println();
             m_display->println();
 
             m_display->println(abbreviated("Firmware v" WIC64_VERSION_SHORT_STRING));
