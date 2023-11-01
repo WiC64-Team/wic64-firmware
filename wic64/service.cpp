@@ -188,7 +188,7 @@ namespace WiC64 {
 
     void Service::onResponseHeaderAborted(uint8_t *data, uint32_t bytes_sent) {
         ESP_LOGW(TAG, "Sent %d of %d bytes", bytes_sent, service->protocol->responseHeaderSize());
-        service->finalizeRequest("Aborted while sending response size", false);
+        service->finalizeRequest("Aborted while sending response header", false);
     }
 
     void Service::onResponseHeaderSent(uint8_t* data, uint32_t size) {
