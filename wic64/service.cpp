@@ -51,6 +51,14 @@ namespace WiC64 {
         this->protocol = protocol;
         resetTimeoutAfterTransfer = true;
 
+        if(command != NULL) {
+            ESP_LOGE(TAG, "Not accepting request: previous request is still being serviced");
+            ESP_LOGE(TAG, "Are you retrying this request immediatetely after a timeout?");
+            ESP_LOGE(TAG, "In this case, you may need to increase your client-side timeout");
+            ESP_LOGE(TAG, "Errors beyond this line may no longer be relevant");
+            return;
+        }
+
         userport->receivePartial(header, protocol->requestHeaderSize(), parseRequestHeader);
     }
 
