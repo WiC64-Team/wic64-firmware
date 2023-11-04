@@ -116,7 +116,7 @@ namespace WiC64 {
                 ? "ESP32HTTPClient"
                 : "WiC64/" WIC64_VERSION_SHORT_STRING,
             .method = method,
-            .timeout_ms = 5 * 1000,
+            .timeout_ms = (int32_t) timeout,
             .disable_auto_redirect = false,
             .max_redirection_count = 10,
             .event_handler = eventHandler,
