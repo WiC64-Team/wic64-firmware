@@ -32,32 +32,32 @@ namespace WiC64 {
             static const char *TAG;
 
         private:
-            Protocol* protocol;
+            esp_event_loop_handle_t event_loop_handle;
+            int32_t bytes_remaining = 0;
+            uint32_t items_remaining = 0;
 
-            // => protocol byte + lowbyte size + highbyte size + command id = 4
-            static const uint8_t LEGACY_PROTOCOL_PAYLOAD_SIZE_CORRECTION = 4;
-
+            Protocol* protocol = NULL;
             Request *request = NULL;
             Command *command = NULL;
             Data *response = NULL;
 
-            int32_t bytes_remaining = 0;
-            uint32_t items_remaining = 0;
-
         public:
-            esp_event_loop_handle_t event_loop_handle;
-
             Service();
 
             esp_event_loop_handle_t eventLoop() { return event_loop_handle; }
-
-            void acceptRequest(Protocol* protocol);
-            static void parseRequestHeader(uint8_t *header, uint32_t size);
-
             static void queueTask(void* payload_size_ptr);
+
+            void receiveRequest(Protocol* protocol);
+            void receiveRequestHeader(Protocol* protocol);
+
+            static void onRequestHeaderAborted(uint8_t *header, uint32_t size);
+            static void onRequestHeaderReceived(uint8_t *header, uint32_t size);
+
             void receiveQueuedRequest(void);
             static void receiveQueuedRequestData(uint8_t *data, uint32_t size);
             static void receiveQueuedRequestData() { receiveQueuedRequestData(NULL, 0); }
+
+            void receiveStaticRequest(void);
 
             static void onRequestAborted(uint8_t *data, uint32_t bytes_received);
             static void onRequestReceived(uint8_t *data, uint32_t size);

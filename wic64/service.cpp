@@ -45,7 +45,12 @@ namespace WiC64 {
         ESP_LOGI(TAG, "Command service initialized");
     }
 
-    void Service::acceptRequest(Protocol *protocol) {
+    void Service::receiveRequest(Protocol *protocol) {
+        receiveRequestHeader(protocol);
+    }
+
+    void Service::receiveRequestHeader(Protocol *protocol)
+    {
         static uint8_t header[Protocol::MAX_REQUEST_HEADER_SIZE];
         this->protocol = protocol;
 
@@ -57,10 +62,17 @@ namespace WiC64 {
             return;
         }
 
-        userport->receivePartial(header, protocol->requestHeaderSize(), parseRequestHeader);
+        userport->receivePartial(header, protocol->requestHeaderSize(), onRequestHeaderReceived, onRequestHeaderAborted);
     }
 
-    void Service::parseRequestHeader(uint8_t *header, uint32_t size) {
+    void Service::onRequestHeaderAborted(uint8_t *header, uint32_t bytes_received) {
+        ESP_LOGE(TAG, "Failed to receive request header");
+        ESP_LOGW(TAG, "Received %d of %d bytes",
+            bytes_received, service->protocol->requestHeaderSize());
+    }
+
+    void Service::onRequestHeaderReceived(uint8_t *header, uint32_t size)
+    {
         ESP_LOGD(TAG, "Parsing %s request header...", service->protocol->name());
 
         service->request = service->protocol->createRequest(header);
@@ -95,7 +107,7 @@ namespace WiC64 {
         Data* payload = service->request->payload();
 
         if (payload->size() < 0x10000) {
-            userport->receive(payload->data(), payload->size(), onRequestReceived, onRequestAborted);
+            service->receiveStaticRequest();
         }
         else {
             if(!service->command->supportsQueuedRequest()) {
@@ -155,7 +167,13 @@ namespace WiC64 {
             : userport->receive(transferQueueBuffer, size, receiveQueuedRequestData, onRequestAborted);
     }
 
-    void Service::onRequestAborted(uint8_t *data, uint32_t bytes_received) {
+    void Service::receiveStaticRequest(void) {
+        Data* payload = service->request->payload();
+        userport->receive(payload->data(), payload->size(), onRequestReceived, onRequestAborted);
+    }
+
+    void Service::onRequestAborted(uint8_t *data, uint32_t bytes_received)
+    {
         Data* payload = service->request->payload();
 
         ESP_LOGW(TAG, "Received %d of %d bytes",

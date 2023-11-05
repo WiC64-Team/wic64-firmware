@@ -347,7 +347,7 @@ namespace WiC64 {
             ESP_LOGI(TAG, WIC64_SEPARATOR);
 
             userport->resetLineNoiseCount();
-            service->acceptRequest(protocol);
+            service->receiveRequest(protocol);
 
         } else {
             ESP_LOGW(TAG, "Received unsupported protocol id " WIC64_FORMAT_PROTOCOL, id);
