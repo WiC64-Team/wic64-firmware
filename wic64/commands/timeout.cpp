@@ -4,9 +4,6 @@
 namespace WiC64 {
     const char* Timeout::TAG = "TIMEOUT";
 
-    extern uint32_t timeout;
-    extern bool resetTimeoutAfterTransfer;
-
     const char* Timeout::describe() {
         return "Timeout (set ESP transfer timeout)";
     }
@@ -29,8 +26,7 @@ namespace WiC64 {
             goto DONE;
         }
 
-        timeout = seconds * 1000;
-        resetTimeoutAfterTransfer = false;
+        customTimeout = seconds * 1000;
 
         ESP_LOGI(TAG, "ESP timeout set to %dms", timeout);
 

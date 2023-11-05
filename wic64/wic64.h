@@ -52,7 +52,7 @@ namespace WiC64 {
     extern uint8_t transferQueueBuffer[WIC64_QUEUE_ITEM_SIZE];
 
     extern uint32_t timeout;
-    extern bool resetTimeoutAfterTransfer;
+    extern uint32_t customTimeout;
 
     class WiC64 {
         private:

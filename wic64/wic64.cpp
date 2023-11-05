@@ -55,7 +55,7 @@ namespace WiC64 {
     uint8_t transferQueueBuffer[WIC64_QUEUE_ITEM_SIZE];
 
     uint32_t timeout = WIC64_DEFAULT_TIMEOUT;
-    bool resetTimeoutAfterTransfer = true;
+    uint32_t customTimeout = 0;
 
     WiC64::WiC64() {
         loglevel(ESP_LOG_INFO);

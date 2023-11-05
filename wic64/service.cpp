@@ -23,7 +23,6 @@ namespace WiC64 {
     extern Display *display;
 
     extern uint32_t timeout;
-    extern bool resetTimeoutAfterTransfer;
 
     Service::Service() {
         esp_event_loop_args_t event_loop_args = {
@@ -49,7 +48,6 @@ namespace WiC64 {
     void Service::acceptRequest(Protocol *protocol) {
         static uint8_t header[Protocol::MAX_REQUEST_HEADER_SIZE];
         this->protocol = protocol;
-        resetTimeoutAfterTransfer = true;
 
         if(command != NULL) {
             ESP_LOGE(TAG, "Not accepting request: previous request is still being serviced");
@@ -67,6 +65,15 @@ namespace WiC64 {
 
         service->request = service->protocol->createRequest(header);
         service->command = Command::create(service->request);
+
+        if (customTimeout) {
+            timeout = customTimeout;
+            customTimeout = 0;
+            ESP_LOGV(TAG, "Using previously requested timeout of %dms for this request", timeout);
+        } else {
+            timeout = WIC64_DEFAULT_TIMEOUT;
+            ESP_LOGV(TAG, "Using default timeout of %dms", timeout);
+        }
 
         if (!service->command->supportsProtocol()) {
             ESP_LOGE(TAG, "Command 0x%02x (%s) not supported by %s protocol ('%c')",
@@ -299,10 +306,6 @@ namespace WiC64 {
             if (command->response()->isQueued()) {
                 ESP_LOG_LEVEL(ESP_LOG_DEBUG, TAG, "Resetting response queue");
                 xQueueReset(command->response()->queue());
-            }
-
-            if (resetTimeoutAfterTransfer) {
-                timeout = WIC64_DEFAULT_TIMEOUT;
             }
 
             level = success ? ESP_LOG_DEBUG : ESP_LOG_WARN;
