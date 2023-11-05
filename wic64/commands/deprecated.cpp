@@ -25,7 +25,7 @@ namespace WiC64 {
             case WIC64_CMD_DEPRECATED_FIRMWARE_UPDATE_REQUIRED_18:
                 snprintf(cursor, remaining, "%s",
                     "Firmware updates are now handled by the new update command $27. "
-                    "The old update prorgram(s) may still appear to be working, but will "
+                    "The old update program(s) may still appear to be working, but will "
                     "actually no longer install any updates.");
                 break;
 
