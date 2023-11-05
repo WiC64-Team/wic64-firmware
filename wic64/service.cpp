@@ -131,7 +131,10 @@ namespace WiC64 {
             (service->items_remaining > 1) ? "s" : "");
 
         if (data != NULL) {
-            xQueueSend(transferQueue, data, pdMS_TO_TICKS(timeout));
+            if (xQueueSend(transferQueue, data, pdMS_TO_TICKS(timeout)) != pdTRUE) {
+                ESP_LOGW(TAG, "Could not send next item to receive queue in %dms", timeout);
+                onRequestAborted(NULL, service->bytes_remaining);
+            };
             service->bytes_remaining -= bytes_received;
             service->items_remaining--;
         }
@@ -153,9 +156,8 @@ namespace WiC64 {
 
         if (payload->isQueued()) {
             service->command->abort();
-        } else {
-            service->finalizeRequest("Transfer aborted while receiving request", false);
         }
+        service->finalizeRequest("Transfer aborted while receiving request", false);
     }
 
     void Service::onRequestReceived(uint8_t *ignoredData, uint32_t ignoredSize) {
@@ -252,7 +254,7 @@ namespace WiC64 {
             : service->bytes_remaining;
 
         if (xQueueReceive(response->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout)) != pdTRUE) {
-            ESP_LOGW(TAG, "Could not read next item from queue in %dms", timeout);
+            ESP_LOGW(TAG, "Could not read next item from response queue in %dms", timeout);
             onResponseAborted(NULL, service->bytes_remaining);
             return;
         }
