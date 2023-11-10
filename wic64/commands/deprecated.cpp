@@ -78,7 +78,8 @@ namespace WiC64 {
                 snprintf(cursor, remaining, "%s",
                     "The previous implementation of HTTP POST was broken and the "
                     "payload structure was unnecessarily complex. Please use the "
-                    "new HTTP POST command $28 instead.");
+                    "new commands WIC64_HTTP_POST_SET_URL and WIC64_HTTP_POST_DATA"
+                    "instead.");
                 break;
 
             case WIC64_CMD_DEPRECATED_BIG_LOADER_25:
@@ -86,14 +87,15 @@ namespace WiC64 {
                     "This command was called \"big loader\" and was intended as a"
                     "HTTP GET request implementation for transfer sizes above 64kb. "
                     "It has never worked properly and has never been officially "
-                    "documented. General support for payloads larger than 64kb will "
-                    "be added in the future.");
+                    "documented. General support for payloads larger than 64kb has been "
+                    "added with the extended command protocol.");
                 break;
 
             case WIC64_CMD_DEPRECATED_FACTORY_RESET_63:
                 snprintf(cursor, remaining, "%s",
-                    "The factory reset command has been deprecated. The web interface "
-                    "will allow clearing all preferences instead.");
+                    "The factory reset command has been deprecated. If this turns out"
+                    "to be required at all, it will be implemented from the web "
+                    "interface instead.");
                 break;
 
             default:
