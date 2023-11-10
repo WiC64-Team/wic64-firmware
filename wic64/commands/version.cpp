@@ -17,11 +17,11 @@ namespace WiC64 {
             WIC64_VERSION_DEVEL,
         };
 
-        if (id() == WIC64_CMD_VERSION_STRING) {
+        if (id() == WIC64_CMD_GET_VERSION_STRING) {
             response()->copyString(WIC64_VERSION_STRING);
         }
 
-        if (id() == WIC64_CMD_VERSION_NUMBERS) {
+        if (id() == WIC64_CMD_GET_VERSION_NUMBERS) {
             response()->set((uint8_t*) version, 4);
         }
 

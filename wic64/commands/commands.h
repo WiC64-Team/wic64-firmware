@@ -3,15 +3,13 @@
 
 // ADD NEW COMMAND IDS HERE -------------------------------------------
 
-#define WIC64_CMD_ECHO 0xfe
-
-#define WIC64_CMD_VERSION_STRING  0x00
-#define WIC64_CMD_VERSION_NUMBERS 0x26
+#define WIC64_CMD_GET_VERSION_STRING  0x00
+#define WIC64_CMD_GET_VERSION_NUMBERS 0x26
 
 #define WIC64_CMD_SCAN_WIFI_NETWORKS       0x0c
 #define WIC64_CMD_CONNECT_WITH_SSID_STRING 0x02
 #define WIC64_CMD_CONNECT_WITH_SSID_INDEX  0x0d
-#define WIC64_CMD_CONNECTED                0x2c
+#define WIC64_CMD_IS_CONNECTED             0x2c
 
 #define WIC64_CMD_GET_MAC  0x14
 #define WIC64_CMD_GET_SSID 0x10
@@ -38,8 +36,10 @@
 #define WIC64_CMD_UPDATE_FIRMWARE 0x27
 
 #define WIC64_CMD_REBOOT 0x29
-#define WIC64_CMD_STATUS 0x2a
-#define WIC64_CMD_TIMEOUT 0x2d
+#define WIC64_CMD_GET_STATUS_MESSAGE 0x2a
+#define WIC64_CMD_SET_TIMEOUT 0x2d
+
+#define WIC64_CMD_ECHO 0xfe
 
 // Deprecated commands
 
