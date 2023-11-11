@@ -20,7 +20,7 @@ namespace WiC64 {
             int32_t int32(const char* key);
             void int32(const char* key, const int32_t value);
 
-            const char* DEFAULT_SERVER = "http://www.wic64.net/prg/";
+            const char* DEFAULT_SERVER = "http://x.wic64.net/prg/";
 
             const char* SECURITY_TOKEN_KEY = "sectokenname";
             const char* SERVER_KEY = "server";
