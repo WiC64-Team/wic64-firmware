@@ -19,7 +19,7 @@ namespace WiC64 {
             close();
         }
 
-        connected = m_client.connect(host, port, timeout);
+        connected = m_client.connect(host, port, 5000);
 
         ESP_LOG_LEVEL((connected ? ESP_LOG_INFO : ESP_LOG_ERROR), TAG,
             "%s connection to %s on port %d",
