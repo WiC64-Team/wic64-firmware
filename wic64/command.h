@@ -11,7 +11,7 @@ namespace WiC64 {
     class Command {
         private:
             uint8_t m_status_code = SUCCESS;
-            static char m_status_message[256];
+            static char m_status_message[40];
 
             Request* m_request = NULL;
             Data* m_response = NULL;

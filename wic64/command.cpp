@@ -9,7 +9,7 @@ namespace WiC64 {
 
     extern Service *service;
 
-    char Command::m_status_message[256] = "";
+    char Command::m_status_message[40] = "";
 
     Command::Command(Request* request) {
         m_request = request;
@@ -57,7 +57,7 @@ namespace WiC64 {
         } else {
             ESP_LOGD(TAG, "Setting status: code = %d, message = \"%s\"", code, message);
             m_status_code = code;
-            strncpy(m_status_message, message, 255);
+            strncpy(m_status_message, message, 39);
         }
     }
 
