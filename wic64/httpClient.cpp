@@ -112,7 +112,7 @@ namespace WiC64 {
 
         esp_http_client_config_t config = {
             .url = url,
-            .user_agent = command->isLegacyRequest() // TODO: Document
+            .user_agent = command->isLegacyRequest()
                 ? "ESP32HTTPClient"
                 : "WiC64/" WIC64_VERSION_SHORT_STRING,
             .method = method,
