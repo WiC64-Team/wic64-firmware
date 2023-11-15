@@ -77,7 +77,12 @@ namespace WiC64 {
         WiFi.disconnect();
     }
 
-    bool Connection::connected(void) {
+    bool Connection::configured(void) {
+        return !getStoredSSID().isEmpty();
+    }
+
+    bool Connection::connected(void)
+    {
         return WiFi.isConnected();
     }
 

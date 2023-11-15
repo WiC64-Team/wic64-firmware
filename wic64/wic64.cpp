@@ -99,7 +99,11 @@ namespace WiC64 {
             display->userportConnected(false);
         }
 
-        connection->connect();
+        if (connection->configured()) {
+            connection->connect();
+        }
+
+        display->connectionConfigured(connection->configured());
 
         ESP_LOGI(TAG, "WiC64 initialized");
         log_free_mem(TAG, ESP_LOG_WARN);

@@ -74,6 +74,11 @@ namespace WiC64 {
         update();
     }
 
+    void Display::connectionConfigured(bool connectionConfigured) {
+        m_connectionConfigured = connectionConfigured;
+        update();
+    }
+
     char *Display::abbreviated(const String& string) {
         return abbreviated(string, MAX_CHARS_PER_LINE);
     }
@@ -116,10 +121,37 @@ namespace WiC64 {
         m_display->setRotation(m_rotated ? 2 : 0);
         m_display->clearDisplay();
 
-        m_display->setFont(FONT_BIG);
-        m_display->setCursor(0, 12);
+        if (!m_userportConnected) {
+            m_display->setFont(FONT_BIG);
+            m_display->setCursor(0, 12);
 
-        if (m_userportConnected) {
+            m_display->println("DEACTIVATED");
+
+            m_display->setFont(FONT_BUILTIN);
+            m_display->setCursor(0, 18);
+
+            m_display->println();
+            m_display->println("Hold ESP BOOT button");
+            m_display->println("for one second to");
+            m_display->println("activate WiC64");
+        }
+        else if(!m_connectionConfigured) {
+            m_display->setFont(FONT_BUILTIN);
+
+            m_display->println("Welcome to the WiC64!");
+            m_display->println();
+
+            m_display->println("WiFi not configured");
+            m_display->println();
+
+            m_display->println("Get wic64-launcher");
+            m_display->println("from www.wic64.com");
+            m_display->println("to configure WiFi");
+        }
+        else {
+            m_display->setFont(FONT_BIG);
+            m_display->setCursor(0, 12);
+
             m_display->println(m_ip);
 
             m_display->setFont(FONT_BUILTIN);
@@ -131,17 +163,6 @@ namespace WiC64 {
             m_display->println();
 
             m_display->println(abbreviated("Firmware v" WIC64_VERSION_SHORT_STRING));
-        }
-        else {
-            m_display->println("DEACTIVATED");
-
-            m_display->setFont(FONT_BUILTIN);
-            m_display->setCursor(0, 18);
-
-            m_display->println();
-            m_display->println("Hold ESP BOOT button");
-            m_display->println("for one second to");
-            m_display->println("activate WiC64");
         }
 
         m_display->display();

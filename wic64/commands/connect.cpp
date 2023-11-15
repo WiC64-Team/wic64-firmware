@@ -1,6 +1,7 @@
-#include "connection.h"
 #include "connect.h"
 #include "commands.h"
+#include "connection.h"
+#include "display.h"
 
 #include "WiFi.h"
 
@@ -8,6 +9,7 @@ namespace WiC64 {
     const char* Connect::TAG = "CONNECT";
 
     extern Connection *connection;
+    extern Display *display;
 
     const char *Connect::describe() {
         return "Connect (connect to WiFi with specified credentials)";
@@ -86,6 +88,7 @@ namespace WiC64 {
         }
         else {
             connection->connect(ssid, passphrase);
+            display->connectionConfigured(true);
             success("wifi config changed");
 
             // After receiving the response, the portal's wifi.prg

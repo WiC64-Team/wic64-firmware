@@ -31,6 +31,7 @@ namespace WiC64 {
             void connect(const char* ssid, const char* passphrase);
             void disconnect(void);
 
+            bool configured(void);
             bool connected(void);
             bool ipAddressAssigned(void);
             bool ready(void);
