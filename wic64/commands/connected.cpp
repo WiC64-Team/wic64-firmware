@@ -15,6 +15,11 @@ namespace WiC64 {
         uint8_t s = request()->payload()->data()[0];
         int32_t ms = s * 1000;
 
+        if (!strlen(connection->SSID())) {
+            error(CLIENT_ERROR, "WiFi not configured");
+            goto DONE;
+        }
+
         while (ms > 0) {
             if (connection->ready()) break;
             vTaskDelay(pdMS_TO_TICKS(100));
@@ -29,6 +34,7 @@ namespace WiC64 {
                 error(CONNECTION_ERROR, "WiFi not connected");
             }
         }
+    DONE:
         responseReady();
     }
 }
