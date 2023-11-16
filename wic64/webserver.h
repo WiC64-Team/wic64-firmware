@@ -1,5 +1,11 @@
+#ifndef WIC64_WEBSERVER_H
+#define WIC64_WEBSERVER_H
+
 #include "wic64.h"
-#include "WebServer.h"
+
+// Relative path required to build on windows, which does not support
+// case-sensitive filenames
+#include "../components/arduino/libraries/WebServer/src/WebServer.h"
 
 namespace WiC64 {
     class Webserver {
@@ -24,3 +30,5 @@ namespace WiC64 {
             static void disconnectTask(void*);
     };
 }
+
+#endif // WIC64_WEBSERVER_H
