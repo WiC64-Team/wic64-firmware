@@ -20,6 +20,7 @@
 #include "commands/http.h"
 #include "commands/scan.h"
 #include "commands/connect.h"
+#include "commands/configured.h"
 #include "commands/connected.h"
 #include "commands/time.h"
 #include "commands/timezone.h"
@@ -129,6 +130,7 @@ namespace WiC64 {
         esp_log_level_set(Http::TAG, loglevel);
         esp_log_level_set(Scan::TAG, loglevel);
         esp_log_level_set(Connect::TAG, loglevel);
+        esp_log_level_set(Configured::TAG, loglevel);
         esp_log_level_set(Connected::TAG, loglevel);
         esp_log_level_set(Time::TAG, loglevel);
         esp_log_level_set(Timezone::TAG, loglevel);

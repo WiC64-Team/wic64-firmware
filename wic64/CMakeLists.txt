@@ -23,6 +23,7 @@ idf_component_register(
     SRCS "commands/server.cpp"
     SRCS "commands/scan.cpp"
     SRCS "commands/connect.cpp"
+    SRCS "commands/configured.cpp"
     SRCS "commands/connected.cpp"
     SRCS "commands/time.cpp"
     SRCS "commands/timezone.cpp"
