@@ -14,7 +14,7 @@ namespace WiC64 {
 
         if (payload->size() < 1) {
             ESP_LOGE(TAG, "No ESP timeout specified in payload");
-            error(CLIENT_ERROR, "No ESP timeout in payload");
+            error(CLIENT_ERROR, "ESP timeout not specified");
             goto DONE;
         }
 

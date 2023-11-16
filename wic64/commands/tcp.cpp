@@ -38,7 +38,7 @@ namespace WiC64 {
 
         if (!connection->ready()) {
             const char* message = !connection->connected()
-                ? "WiFi not connected "
+                ? "WiFi not connected"
                 : "No IP address assigned";
 
             ESP_LOGE(TAG, "Can't execute TCP command: %s", message);

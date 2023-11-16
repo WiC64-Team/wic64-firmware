@@ -206,7 +206,7 @@ namespace WiC64 {
 
                         if (esp_http_client_write(m_client, (const char*) transferQueueBuffer, size) != size) {
                             ESP_LOGE(TAG, "Failed to send POST data to server");
-                            command->error(Command::SERVER_ERROR,
+                            command->error(Command::NETWORK_ERROR,
                                 "Failed to send POST data to server", "!0");
                             goto ERROR;
                         }
@@ -226,7 +226,7 @@ namespace WiC64 {
                 }
 
                 if (esp_http_client_write(m_client, FOOTER, strlen(FOOTER)) != strlen(FOOTER)) {
-                    command->error(Command::SERVER_ERROR,
+                    command->error(Command::NETWORK_ERROR,
                         "Failed to send POST body footer to server", "!0");
                     goto ERROR;
                 }
@@ -329,7 +329,7 @@ namespace WiC64 {
             // Read up to 64kb from the connection into the static transfer buffer
             if ((size = esp_http_client_read(m_client, (char*) transferBuffer, 0xffff)) == -1) {
                 ESP_LOGE(TAG, "Read error");
-                command->error(Command::NETWORK_ERROR, "Network read error", "!0");
+                command->error(Command::NETWORK_ERROR, "Failed to read HTTP response", "!0");
                 goto ERROR;
             }
             ESP_LOGI(TAG, "Read %d bytes", size);
