@@ -120,6 +120,7 @@ namespace WiC64 {
 
         m_display->setRotation(m_rotated ? 2 : 0);
         m_display->clearDisplay();
+        m_display->setCursor(0, 0);
 
         if (!m_userportConnected) {
             m_display->setFont(FONT_BIG);
