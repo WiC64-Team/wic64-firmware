@@ -12,7 +12,15 @@ namespace WiC64 {
     extern Display *display;
 
     const char *Connect::describe() {
-        return "Connect (connect to WiFi with specified credentials)";
+        switch (id()) {
+            case WIC64_CMD_CONNECT_WITH_SSID_STRING:
+                return "Connect (connect with SSID and pass))";
+
+            case WIC64_CMD_CONNECT_WITH_SSID_INDEX:
+                return "Connect (connect witth SSID scan index and pass)";
+
+            default: return "Unknown Connect command";
+        }
     }
 
     const char* Connect::ssid() {
@@ -91,17 +99,11 @@ namespace WiC64 {
             display->connectionConfigured(true);
             success("wifi config changed");
 
-            // After receiving the response, the portal's wifi.prg
-            // (and probably launcher.prg) immediately try to determine
-            // whether a connection has been established by requesting
-            // the ip nine times in quick succession before returning to
-            // password entry, printing "Not connected. Wrong password?".
-            //
-            // The previous firmware added a delay of 3 seconds so that
-            // the client would not start checking the IP right away.
-            //
-            // REDESIGN: This is not the firmwares job, add a command
-            // to explicitly check connection state with optional timeout.
+            // A 3000ms delay is required since WiFi.begin() uses interrupts and
+            // blocks other tasks for a short time. If a new request comes in
+            // during this time, the irq watchdog times out. This delay forces
+            // the client to wait at least three seconds before sending the next
+            // request.
             vTaskDelay(pdMS_TO_TICKS(3000));
         }
         responseReady();
