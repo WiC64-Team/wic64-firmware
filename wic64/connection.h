@@ -35,6 +35,8 @@ namespace WiC64 {
             bool connected(void);
             bool ipAddressAssigned(void);
             bool ready(void);
+
+            void remove(void);
     };
 
 }

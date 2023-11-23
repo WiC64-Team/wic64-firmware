@@ -95,6 +95,14 @@ namespace WiC64 {
         boolean(REBOOTING_KEY, rebooted);
     }
 
+    void Settings::reset(void) {
+        if (m_preferences.clear()) {
+            ESP_LOGI(TAG, "Erased all settings from flash memory");
+        } else {
+            ESP_LOGE(TAG, "Failed to erase settings from flash memory");
+        }
+    }
+
     String Settings::string(const char* key) {
         return m_preferences.getString(key);
     }

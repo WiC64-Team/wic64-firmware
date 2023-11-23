@@ -135,4 +135,12 @@ namespace WiC64 {
 
         return num_networks;
     }
+
+    void Connection::remove(void) {
+        wifi_config_t config;
+        esp_wifi_get_config((wifi_interface_t)ESP_IF_WIFI_STA, &config);
+        memset(config.sta.ssid, 0, sizeof(config.sta.ssid));
+        memset(config.sta.password, 0, sizeof(config.sta.password));
+        esp_wifi_set_config((wifi_interface_t)ESP_IF_WIFI_STA, &config);
+    }
 }

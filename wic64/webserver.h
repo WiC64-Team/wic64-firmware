@@ -28,6 +28,7 @@ namespace WiC64 {
             static void wifi(void);
 
             static void disconnectTask(void*);
+            static void factoryResetTask(void*);
     };
 }
 

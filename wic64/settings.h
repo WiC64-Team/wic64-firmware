@@ -56,6 +56,8 @@ namespace WiC64 {
 
             bool rebooting(void);
             void rebooting(bool rebooted);
+
+            void reset(void);
     };
 }
 

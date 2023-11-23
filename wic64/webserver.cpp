@@ -1,5 +1,6 @@
 #include "webserver.h"
 #include "connection.h"
+#include "settings.h"
 #include "utilities.h"
 
 namespace WiC64 {
@@ -7,6 +8,7 @@ namespace WiC64 {
 
     extern Webserver *webserver;
     extern Connection *connection;
+    extern Settings *settings;
 
     Webserver::Webserver() {
         m_arduinoWebServer = new WebServer(80);
@@ -56,6 +58,12 @@ namespace WiC64 {
             return;
         }
 
+        if (server->hasArg("factory_reset")) {
+            webserver->reloadAndClearQueryString();
+            xTaskCreatePinnedToCore(factoryResetTask, "FACTORYRESET", 4096, NULL, 5, NULL, 0);
+            return;
+        }
+
         webserver->reply(
             webserver->header() +
 
@@ -73,7 +81,7 @@ namespace WiC64 {
             "</ul>"
 
             "<p><a href='/?disconnect=1'>Disconnect WiFi</a><br/><small>(reset ESP to reconnect)</small></p>"
-
+            "<p><a href='/?factory_reset=1'>Factory Reset</a><br/><small>(erase all settings from flash and reset)</small></p>"
             + webserver->footer()
         );
         return;
@@ -90,6 +98,14 @@ namespace WiC64 {
     void Webserver::disconnectTask(void*) {
         vTaskDelay(pdMS_TO_TICKS(1000));
         connection->disconnect();
+        vTaskDelete(NULL);
+    }
+
+    void Webserver::factoryResetTask(void*) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        settings->reset();
+        connection->remove();
+        esp_restart();
         vTaskDelete(NULL);
     }
 }
