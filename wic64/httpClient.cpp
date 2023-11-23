@@ -102,19 +102,11 @@ namespace WiC64 {
 
         m_statusCode = -1;
 
-        // The Arduino HTTPClient sends "ESP32HTTPClient" as the user-agent Some
-        // existing programs test for this value, so for legacy requests, we
-        // will mimic this behaviour for compatibility. For standard requests,
-        // "WiC64/<version>" will be used.
-
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
         esp_http_client_config_t config = {
             .url = url,
-            .user_agent = command->isLegacyRequest()
-                ? "ESP32HTTPClient"
-                : "WiC64/" WIC64_VERSION_SHORT_STRING,
             .method = method,
             .timeout_ms = 5000,
             .disable_auto_redirect = false,
@@ -161,6 +153,16 @@ namespace WiC64 {
                 goto ERROR;
             };
         }
+
+        // The Arduino HTTPClient sends "ESP32HTTPClient" as the user-agent Some
+        // existing programs test for this value, so for legacy requests, we
+        // will mimic this behaviour for compatibility. For standard requests,
+        // "WiC64/<version>" will be used.
+
+        esp_http_client_set_header(m_client, "User-Agent",
+            command->isLegacyRequest()
+                ? "ESP32HTTPClient"
+                : "WiC64/" WIC64_VERSION_SHORT_STRING);
 
         if (method == HTTP_METHOD_POST) {
             esp_http_client_set_header(m_client, "Content-Type", "multipart/form-data;boundary=\"WiC64-Binary-Data\"");
