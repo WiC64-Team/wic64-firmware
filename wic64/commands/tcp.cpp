@@ -3,6 +3,7 @@
 #include "commands.h"
 #include "connection.h"
 #include "tcpClient.h"
+#include "utilities.h"
 
 namespace WiC64 {
     const char* Tcp::TAG = "TCP";
@@ -14,6 +15,9 @@ namespace WiC64 {
         switch (id()) {
             case WIC64_CMD_TCP_OPEN:
                 return "TCP (open)";
+
+            case WIC64_CMD_TCP_AVAILABLE:
+                return "TCP (available)";
 
             case WIC64_CMD_TCP_READ:
                 return "TCP (read)";
@@ -67,6 +71,12 @@ namespace WiC64 {
         else if (id() == WIC64_CMD_TCP_CLOSE) {
             tcpClient->close();
             success("Success", "0");
+        }
+
+        else if (id() == WIC64_CMD_TCP_AVAILABLE) {
+            uint16_t available = tcpClient->available();
+            response()->appendByte(LOWBYTE(available));
+            response()->appendByte(HIGHBYTE(available));
         }
 
         else if (id() == WIC64_CMD_TCP_READ) {

@@ -30,6 +30,10 @@ namespace WiC64 {
         return connected;
     }
 
+    int32_t TcpClient::available(void) {
+        return m_client.available();
+    }
+
     int64_t TcpClient::read(uint8_t* data) {
         int64_t read = -1;
 
