@@ -47,12 +47,23 @@ namespace WiC64 {
         strncpy((char*) transferBuffer, c_str, m_size+1);
     }
 
-    void Data::appendField(const String& string) {
+    void Data::appendByte(const uint8_t byte) {
+        m_data[m_size] = byte;
+        m_size++;
+        m_data[m_size] = '\0';
+    }
+
+    void Data::appendField(const String &string)
+    {
+        appendField(string, '\1');
+    }
+
+    void Data::appendField(const String &string, const char separator) {
         size_t len = string.length();
         memcpy(m_data + m_index, string.c_str(), len);
 
         m_index += len;
-        m_data[m_index] = '\1';
+        m_data[m_index] = separator;
         m_index++;
         m_size += len + 1;
     }

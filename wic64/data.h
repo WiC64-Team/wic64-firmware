@@ -30,7 +30,9 @@ namespace WiC64 {
             void copyString(const char* c_str);
             void copyData(const char* c_str);
 
+            void appendByte(const uint8_t byte);
             void appendField(const String& string);
+            void appendField(const String& string, const char separator);
             const char* field(uint8_t index, char *dst);
             const char* field(uint8_t index, char separator, char *dst);
 
