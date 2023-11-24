@@ -31,7 +31,7 @@ idf_component_register(
     SRCS "commands/rssi.cpp"
     SRCS "commands/mac.cpp"
     SRCS "commands/tcp.cpp"
-    SRCS "commands/echo.cpp"
+    SRCS "commands/test.cpp"
     SRCS "commands/update.cpp"
     SRCS "commands/reboot.cpp"
     SRCS "commands/deprecated.cpp"

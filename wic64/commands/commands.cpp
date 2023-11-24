@@ -13,7 +13,7 @@
 #include "time.h"
 #include "timezone.h"
 #include "tcp.h"
-#include "echo.h"
+#include "test.h"
 #include "update.h"
 #include "reboot.h"
 #include "deprecated.h"
@@ -61,7 +61,9 @@ namespace WiC64 {
         WIC64_COMMAND(WIC64_CMD_GET_STATUS_MESSAGE, Status),
         WIC64_COMMAND(WIC64_CMD_SET_TIMEOUT, Timeout),
 
-        WIC64_COMMAND(WIC64_CMD_ECHO, Echo),
+        WIC64_COMMAND(WIC64_CMD_FORCE_TIMEOUT, Test),
+        WIC64_COMMAND(WIC64_CMD_FORCE_ERROR, Test),
+        WIC64_COMMAND(WIC64_CMD_ECHO, Test),
 
         WIC64_COMMAND(WIC64_CMD_DEPRECATED_UPDATE_FIRMWARE_03,          Deprecated),
         WIC64_COMMAND(WIC64_CMD_DEPRECATED_UPDATE_FIRMWARE_04,          Deprecated),

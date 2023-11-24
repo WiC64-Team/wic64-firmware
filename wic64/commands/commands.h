@@ -41,6 +41,8 @@
 #define WIC64_CMD_GET_STATUS_MESSAGE 0x2a
 #define WIC64_CMD_SET_TIMEOUT 0x2d
 
+#define WIC64_CMD_FORCE_TIMEOUT 0xfc
+#define WIC64_CMD_FORCE_ERROR 0xfd
 #define WIC64_CMD_ECHO 0xfe
 
 // Deprecated commands

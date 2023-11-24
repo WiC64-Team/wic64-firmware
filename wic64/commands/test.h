@@ -5,7 +5,7 @@
 #include "data.h"
 
 namespace WiC64 {
-    class Echo : public Command {
+    class Test : public Command {
         public:
             using Command::Command;
             const char* describe();
