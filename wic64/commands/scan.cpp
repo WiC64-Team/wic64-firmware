@@ -19,7 +19,7 @@ namespace WiC64 {
         ESP_LOGI(TAG, "Scanning for WiFi networks...");
 
         num_networks = connection->scanNetworks();
-        num_networks = MIN(num_networks, 15);
+        num_networks = MIN(num_networks, 10);
 
         // The previous firmware only checked for num_networks == 0
         // and returned "no networks found". We also test <= 0
@@ -40,14 +40,19 @@ namespace WiC64 {
         else {
             ESP_LOGI(TAG, "Scan successful, %d networks found", num_networks);
 
-            for(uint8_t i=0; i<num_networks; i++) {
+            const char separator = isLegacyRequest() ? '\1' : '\0';
 
+            for(uint8_t i=0; i<num_networks; i++) {
                 ESP_LOGD(TAG, "Network %d: [%s] %ddbm",
                     i, WiFi.SSID(i).c_str(), WiFi.RSSI(i));
 
-                response()->appendField(String(i));
-                response()->appendField(WiFi.SSID(i));
-                response()->appendField(String(WiFi.RSSI(i)));
+                response()->appendField(String(i), separator);
+                response()->appendField(WiFi.SSID(i), separator);
+                response()->appendField(String(WiFi.RSSI(i)), separator);
+            }
+
+            if (!isLegacyRequest()) {
+                response()->appendByte(0xff);
             }
         }
         responseReady();
