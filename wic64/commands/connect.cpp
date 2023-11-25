@@ -1,6 +1,7 @@
 #include "connect.h"
 #include "commands.h"
 #include "connection.h"
+#include "settings.h"
 #include "display.h"
 
 #include "WiFi.h"
@@ -9,6 +10,7 @@ namespace WiC64 {
     const char* Connect::TAG = "CONNECT";
 
     extern Connection *connection;
+    extern Settings *settings;
     extern Display *display;
 
     const char *Connect::describe() {
@@ -28,6 +30,8 @@ namespace WiC64 {
         static char indexAsString[3];
         uint8_t indexInLastScan;
         String ssid_string;
+
+        // TODO: check payload size != 0
 
         if (id() == WIC64_CMD_CONNECT_WITH_SSID_STRING) {
             request()->payload()->field(0, ssid);
@@ -95,6 +99,7 @@ namespace WiC64 {
             error(CLIENT_ERROR, "ssid empty");
         }
         else {
+            settings->passphraseLength((uint8_t) strlen(passphrase));
             connection->connect(ssid, passphrase);
             display->connectionConfigured(true);
             success("wifi config changed");
