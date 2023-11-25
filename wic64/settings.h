@@ -17,6 +17,9 @@ namespace WiC64 {
             bool boolean(const char* key);
             void boolean(const char* key, const bool value);
 
+            uint8_t uint8(const char* key);
+            void uint8(const char* key, const uint8_t value);
+
             int32_t int32(const char* key);
             void int32(const char* key, const int32_t value);
 
@@ -29,6 +32,7 @@ namespace WiC64 {
             const char* DISPLAY_ROTATED_KEY = "displayrotate";
             const char* USERPORT_DISCONNECTED_KEY = "killswitch";
             const char* REBOOTING_KEY = "rebooting";
+            const char* PASSPHRASE_LENGTH_KEY = "passlen";
 
         public:
             Settings();
@@ -44,6 +48,9 @@ namespace WiC64 {
 
             int32_t gmtOffsetSeconds(void);
             void gmtOffsetSeconds(int32_t value);
+
+            uint8_t passphraseLength(void);
+            void passphraseLength(uint8_t passphraseLength);
 
             bool ledEnabled(void);
             void ledEnabled(bool ledEnabled);

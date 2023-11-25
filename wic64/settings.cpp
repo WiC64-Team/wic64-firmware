@@ -55,6 +55,16 @@ namespace WiC64 {
         int32(GMT_OFFSET_SECONDS_KEY, value);
     }
 
+    uint8_t Settings::passphraseLength(void) {
+        return m_preferences.isKey(PASSPHRASE_LENGTH_KEY)
+            ? uint8(PASSPHRASE_LENGTH_KEY)
+            : 0;
+    }
+
+    void Settings::passphraseLength(uint8_t passphraseLength) {
+        uint8(PASSPHRASE_LENGTH_KEY, passphraseLength);
+    }
+
     bool Settings::ledEnabled(void) {
         return m_preferences.isKey(LED_ENABLED_KEY)
             ? boolean(LED_ENABLED_KEY)
@@ -122,6 +132,17 @@ namespace WiC64 {
         ESP_LOGI(TAG, "Setting %s = %s", key, value ? "true" : "false");
         if (m_preferences.getBool(key) != value) {
             m_preferences.putBool(key, value);
+        }
+    }
+
+    uint8_t Settings::uint8(const char *key) {
+        return m_preferences.getUChar(key);
+    }
+
+    void Settings::uint8(const char* key, const uint8_t value) {
+        ESP_LOGI(TAG, "Setting %s = %d", key, value);
+        if (m_preferences.getUChar(key) != value) {
+            m_preferences.putUChar(key, value);
         }
     }
 
