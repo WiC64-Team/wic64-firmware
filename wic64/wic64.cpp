@@ -107,7 +107,10 @@ namespace WiC64 {
         display->connectionConfigured(connection->configured());
 
         ESP_LOGI(TAG, "WiC64 initialized");
-        log_free_mem(TAG, ESP_LOG_WARN);
+        log_free_mem(TAG, ESP_LOG_INFO);
+
+        ESP_LOGW(TAG, "Switching to loglevel WARN");
+        ESP_LOGW(TAG, "Visit http://<ip-address> to change loglevel");
         loglevel(ESP_LOG_WARN);
     }
 
