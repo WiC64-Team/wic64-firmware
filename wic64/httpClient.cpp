@@ -123,14 +123,14 @@ namespace WiC64 {
             if (method == HTTP_METHOD_POST) {
                 ESP_LOGE(TAG, "Set the URL beforehand using command 0x28 for POST requests");
             }
-            command->error(Command::CLIENT_ERROR, "URL not specified");
+            command->error(Command::CLIENT_ERROR, "URL not specified", "!0");
             goto ERROR;
         }
 
         if (strlen(url) > MAX_URL_LENGTH) {
             ESP_LOGE(TAG, "URL length is limited to 2000 bytes");
             ESP_LOGE(TAG, "Please use HTTP POST to transfer large amounts of data");
-            command->error(Command::CLIENT_ERROR, "URL too long (max 2000 bytes)");
+            command->error(Command::CLIENT_ERROR, "URL too long (max 2000 bytes)", "!0");
             goto ERROR;
         }
 
@@ -141,7 +141,7 @@ namespace WiC64 {
 
             if (m_client == NULL) {
                 ESP_LOGE(TAG, "Failed to create esp_http_client");
-                command->error(Command::INTERNAL_ERROR, "Failed to create HTTP client");
+                command->error(Command::INTERNAL_ERROR, "Failed to create HTTP client", "!0");
                 goto ERROR;
             }
         } else {
