@@ -74,9 +74,13 @@ namespace WiC64 {
         }
 
         else if (id() == WIC64_CMD_TCP_AVAILABLE) {
-            uint16_t available = tcpClient->available();
-            response()->appendByte(LOWBYTE(available));
-            response()->appendByte(HIGHBYTE(available));
+            if (tcpClient->connected()) {
+                uint16_t available = tcpClient->available();
+                response()->appendByte(LOWBYTE(available));
+                response()->appendByte(HIGHBYTE(available));
+            } else {
+                error(NETWORK_ERROR, "TCP connection closed", "!E");
+            }
         }
 
         else if (id() == WIC64_CMD_TCP_READ) {
