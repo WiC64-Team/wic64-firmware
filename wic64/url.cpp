@@ -69,15 +69,7 @@ namespace WiC64 {
 
             String mac(connection->macAddress());
             mac.replace(":", "");
-
-            // REDESIGN: The whole session handling scheme is inherently insecure
-
-            if (isHostWic64Net()) {
-                // Append the security token (session id) to the mac address
-                replace("%mac", mac + settings->securityToken());
-            } else {
-                replace("%mac", mac);
-            }
+            replace("%mac", mac + settings->securityToken());
         }
     }
 }
