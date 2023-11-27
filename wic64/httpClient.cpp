@@ -162,7 +162,7 @@ namespace WiC64 {
         esp_http_client_set_header(m_client, "User-Agent",
             command->isLegacyRequest()
                 ? "ESP32HTTPClient"
-                : "WiC64/" WIC64_VERSION_SHORT_STRING);
+                : "WiC64/" WIC64_VERSION_SHORT_STRING " (ESP32)");
 
         if (method == HTTP_METHOD_POST) {
             esp_http_client_set_header(m_client, "Content-Type", "multipart/form-data;boundary=\"WiC64-Binary-Data\"");
