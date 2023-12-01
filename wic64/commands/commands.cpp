@@ -20,6 +20,7 @@
 #include "undefined.h"
 #include "status.h"
 #include "timeout.h"
+#include "hardware.h"
 
 namespace WiC64 {
     WIC64_COMMANDS = {
@@ -60,6 +61,7 @@ namespace WiC64 {
         WIC64_COMMAND(WIC64_CMD_REBOOT, Reboot),
         WIC64_COMMAND(WIC64_CMD_GET_STATUS_MESSAGE, Status),
         WIC64_COMMAND(WIC64_CMD_SET_TIMEOUT, Timeout),
+        WIC64_COMMAND(WIC64_CMD_IS_HARDWARE, Hardware),
 
         WIC64_COMMAND(WIC64_CMD_FORCE_TIMEOUT, Test),
         WIC64_COMMAND(WIC64_CMD_FORCE_ERROR, Test),

@@ -38,6 +38,7 @@ idf_component_register(
     SRCS "commands/undefined.cpp"
     SRCS "commands/status.cpp"
     SRCS "commands/timeout.cpp"
+    SRCS "commands/hardware.cpp"
     SRCS "display.cpp"
     SRCS "webserver.cpp"
     SRCS "clock.cpp"
