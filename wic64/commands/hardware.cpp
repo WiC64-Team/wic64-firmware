@@ -9,7 +9,6 @@ namespace WiC64 {
     }
 
     void Hardware::execute(void) {
-        //error(INTERNAL_ERROR, "WiC64 is emulated");
         responseReady();
     }
 }
