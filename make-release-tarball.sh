@@ -3,6 +3,8 @@ VERSION="$(git describe --tags --dirty)"
 DIR="../wic64-firmware-binaries-${VERSION}"
 TAR="${DIR}-${VERSION}"
 
+idf.py reconfigure build
+
 mkdir -p "${DIR}"
 cp -v build/bootloader/bootloader.bin "${DIR}"
 cp -v build/partition_table/partition-table.bin "${DIR}"
@@ -34,4 +36,4 @@ EOF
 
 echo "${README}" > "${DIR}/README.txt"
 
-tar vczf "${DIR}.tar.gz" "${DIR}" # && rm -rf "${DIR}"
+tar vczf "${DIR}.tar.gz" "${DIR}" && rm -rf "${DIR}"
