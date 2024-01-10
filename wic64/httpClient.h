@@ -17,7 +17,7 @@ namespace WiC64 {
         private:
             esp_http_client_handle_t m_client = NULL;
 
-            static const uint16_t MAX_URL_LENGTH = 2000; // see https://stackoverflow.com/a/417184
+            static const uint16_t MAX_URL_LENGTH = 0x4000;
             static const uint8_t MAX_RETRIES = 10;
             int32_t m_statusCode = -1;
             char m_postUrl[MAX_URL_LENGTH+1] = { '\0' };
