@@ -49,12 +49,11 @@ namespace WiC64 {
         receiveRequestHeader(protocol);
     }
 
-    void Service::receiveRequestHeader(Protocol *protocol)
-    {
+    void Service::receiveRequestHeader(Protocol *protocol) {
         static uint8_t header[Protocol::MAX_REQUEST_HEADER_SIZE];
         this->protocol = protocol;
 
-        if(command != NULL) {
+        if (command != NULL) {
             ESP_LOGE(TAG, "Not accepting request: previous request is still being serviced");
             ESP_LOGE(TAG, "Are you retrying this request immediatetely after a timeout?");
             ESP_LOGE(TAG, "In this case, you may need to increase your client-side timeout");
@@ -71,8 +70,7 @@ namespace WiC64 {
             bytes_received, service->protocol->requestHeaderSize());
     }
 
-    void Service::onRequestHeaderReceived(uint8_t *header, uint32_t size)
-    {
+    void Service::onRequestHeaderReceived(uint8_t *header, uint32_t size) {
         ESP_LOGD(TAG, "Parsing %s request header...", service->protocol->name());
 
         service->request = service->protocol->createRequest(header);
@@ -82,7 +80,8 @@ namespace WiC64 {
             timeout = customTimeout;
             customTimeout = 0;
             ESP_LOGV(TAG, "Using previously requested timeout of %dms for this request", timeout);
-        } else {
+        }
+        else {
             timeout = WIC64_DEFAULT_TIMEOUT;
             ESP_LOGV(TAG, "Using default timeout of %dms", timeout);
         }
@@ -126,7 +125,7 @@ namespace WiC64 {
         }
     }
 
-     void Service::queueTask(void *payload_size_ptr) {
+    void Service::queueTask(void *payload_size_ptr) {
         service->receiveQueuedRequest();
         vTaskDelete(NULL);
     }
@@ -172,8 +171,7 @@ namespace WiC64 {
         userport->receive(payload->data(), payload->size(), onRequestReceived, onRequestAborted);
     }
 
-    void Service::onRequestAborted(uint8_t *data, uint32_t bytes_received)
-    {
+    void Service::onRequestAborted(uint8_t *data, uint32_t bytes_received) {
         Data* payload = service->request->payload();
 
         ESP_LOGW(TAG, "Received %d of %d bytes",
@@ -294,8 +292,7 @@ namespace WiC64 {
         userport->send(response->data(), response->size(), onResponseSent, onResponseAborted);
     }
 
-    void Service::onResponseAborted(uint8_t *data, uint32_t bytes_sent)
-    {
+    void Service::onResponseAborted(uint8_t *data, uint32_t bytes_sent) {
         Data *response = service->command->response();
         ESP_LOGW(TAG, "Sent %d of %d bytes", bytes_sent, response->size());
 
