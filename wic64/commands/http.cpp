@@ -132,7 +132,7 @@ namespace WiC64 {
         // a specially crafted response in order to ask the ESP to store certain
         // configuration values in flash. While this is now handled using
         // special HTTP headers, the existing client code still expects the last field
-        // of the server response to be send as the command response (this is called the
+        // of the server response to be sent as the command response (this is called the
         // "prefanswer" in the method "setprefsphp()" in the legacy firmware)
 
         if (isLegacyRequest() && m_url.isHostWic64Net() && httpClient->statusCode() == 201) {
