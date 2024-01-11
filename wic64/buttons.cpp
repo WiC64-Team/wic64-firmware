@@ -19,7 +19,7 @@ namespace WiC64 {
         // designed userport expanders that do not properly
         // multiplex the userport but instead simply connect all
         // userport modules in parallel, causing conflicts if
-        // more that one module is using the port at the same time
+        // more than one module is using the port at the same time
 
         m_esp_button.attachLongPressStop([] {
             if (userport->isConnected()) {
