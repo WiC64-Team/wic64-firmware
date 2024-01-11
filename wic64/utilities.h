@@ -18,6 +18,8 @@
 #define HIGHLOWBYTE(UINT32) (uint8_t)((UINT32 >> 16UL) & 0xff)
 #define HIGHHIGHBYTE(UINT32) (uint8_t)((UINT32 >> 24UL) & 0xff)
 
+#define CRLF "\x0d\x0a"
+
 #define WIC64_MAX_HEXDUMP_SIZE 256
 #define ESP_LOG_HEXE(tag, title, data, size) log_hex(tag, ESP_LOG_ERROR, title, data, size)
 #define ESP_LOG_HEXW(tag, title, data, size) log_hex(tag, ESP_LOG_WARN, title, data, size)

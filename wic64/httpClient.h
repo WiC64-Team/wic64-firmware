@@ -9,6 +9,7 @@
 
 #include "data.h"
 #include "command.h"
+#include "utilities.h"
 
 namespace WiC64 {
     class HttpClient {
@@ -24,8 +25,8 @@ namespace WiC64 {
             const char* statusToString(int32_t code);
             esp_http_client_handle_t handle() { return m_client; }
 
-            const char* HEADER = "--WiC64-Binary-Data\nContent-Disposition: form-data; name=\"data\"\n\n";
-            const char* FOOTER = "\n--WiC64-Binary-Data--\n";
+            const char* HEADER = "--WiC64-Binary-Data\nContent-Disposition: form-data; name=\"data\"" CRLF CRLF;
+            const char* FOOTER = CRLF "--WiC64-Binary-Data--" CRLF;
 
             void closeConnection(void);
             bool isConnectionClosed();
