@@ -6,7 +6,7 @@
 namespace WiC64 {
     Data::Data() {
         m_data = transferBuffer;
-     }
+    }
 
     Data::Data(uint8_t *data, uint32_t size) {
         this->set(data, size);
@@ -53,8 +53,7 @@ namespace WiC64 {
         m_data[m_size] = '\0';
     }
 
-    void Data::appendField(const String &string)
-    {
+    void Data::appendField(const String &string) {
         appendField(string, '\1');
     }
 
@@ -121,8 +120,7 @@ namespace WiC64 {
         m_size = size;
     }
 
-    bool Data::isPresent(void)
-    {
+    bool Data::isPresent(void) {
         return m_size > 0;
     }
 
