@@ -271,12 +271,14 @@ namespace WiC64 {
                 userport->size, userport->isSending(userport->previousTransferType) ? "sent" : "received");
         }
 
-        if (userport->onSuccessCallback != NULL) {
-            userport->onSuccessCallback(userport->buffer, userport->size);
-        }
+        vTaskDelay(pdMS_TO_TICKS(3));
 
         if (userport->previousTransferType != TRANSFER_TYPE_SEND_PARTIAL) {
             userport->setPortToInput();
+        }
+
+        if (userport->onSuccessCallback != NULL) {
+            userport->onSuccessCallback(userport->buffer, userport->size);
         }
     }
 
