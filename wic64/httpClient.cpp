@@ -172,7 +172,7 @@ namespace WiC64 {
             ESP_LOGE(TAG, "Failed to open connection: %s", esp_err_to_name(result));
 
             ESP_LOGW(TAG, "Retrying %d more time%s...",
-                retries, (retries > 1) ? "s" : "");
+                retries+1, (retries > 1) ? "s" : "");
 
             if (retries-- > 0) {
                 closeConnection();
@@ -244,7 +244,7 @@ namespace WiC64 {
         RETRY_POST:
             if (!success) {
                 ESP_LOGW(TAG, "Failed to send POST request body, retrying %d more time%s...",
-                    retries, (retries > 1) ? "s" : "");
+                    retries+1, (retries > 1) ? "s" : "");
 
                 if ((retries-- > 0) && !command->aborted() && !command->request()->payload()->isQueued()) {
                     closeConnection();
@@ -262,7 +262,7 @@ namespace WiC64 {
 
             if ((retries-- > 0) && !command->aborted() && !command->request()->payload()->isQueued()) {
                 ESP_LOGW(TAG, "Failed to fetch headers, retrying %d more time%s...",
-                    retries, (retries > 1) ? "s" : "");
+                    retries+1, (retries > 1) ? "s" : "");
 
                 closeConnection();
                 goto RETRY;
@@ -286,7 +286,7 @@ namespace WiC64 {
         if (m_statusCode == 301 || m_statusCode == 302 || m_statusCode == 307 || m_statusCode == 308) {
             if (retries-- > 0 && !command->aborted()) {
                 ESP_LOGW(TAG, "Failed autoredirect (HTTP status %d), retrying manually %d more time%s...",
-                    m_statusCode, retries, (retries > 1) ? "s" : "");
+                    m_statusCode, retries+1, (retries > 1) ? "s" : "");
 
                 esp_http_client_set_redirection(m_client);
                 goto RETRY;
