@@ -116,7 +116,8 @@ namespace WiC64 {
 
     const char *Connection::SSID(void) {
         static char ssid[MAX_SSID_LEN+1];
-        stpncpy(ssid, getStoredSSID().c_str(), MAX_SSID_LEN);
+        strncpy(ssid, getStoredSSID().c_str(), MAX_SSID_LEN);
+        ssid[MAX_SSID_LEN] = '\0';
         return ssid;
     }
 
