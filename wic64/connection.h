@@ -8,6 +8,8 @@ namespace WiC64 {
         public: static const char* TAG;
 
         private:
+            static const size_t MAX_IP_STRLEN = 16;
+            static const size_t MAC_STRLEN = 18;
             bool m_reconnecting = false;
 
             static String getStoredSSID(void);

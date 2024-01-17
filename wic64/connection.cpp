@@ -103,14 +103,16 @@ namespace WiC64 {
     }
 
     const char *Connection::macAddress() {
-        static char mac[18+1];
-        stpncpy(mac, WiFi.macAddress().c_str(), 18);
+        static char mac[MAC_STRLEN+1];
+        stpncpy(mac, WiFi.macAddress().c_str(), MAC_STRLEN);
+        mac[MAC_STRLEN] = '\0';
         return mac;
     }
 
     const char* Connection::ipAddress() {
-        static char ip[16+1];
-        stpncpy(ip, WiFi.localIP().toString().c_str(), 16);
+        static char ip[MAX_IP_STRLEN+1];
+        strncpy(ip, WiFi.localIP().toString().c_str(), MAX_IP_STRLEN);
+        ip[MAX_IP_STRLEN] = '\0';
         return ip;
     }
 
