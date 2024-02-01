@@ -58,6 +58,9 @@ namespace WiC64 {
     uint32_t timeout = WIC64_DEFAULT_TIMEOUT;
     uint32_t customTimeout = 0;
 
+    uint32_t httpTimeout = WIC64_DEFAULT_HTTP_TIMEOUT;
+    uint32_t customHttpTimeout = 0;
+
     WiC64::WiC64() {
         loglevel(ESP_LOG_INFO);
         ESP_LOGW(TAG, "Booting Firmware version %s", WIC64_VERSION_STRING);

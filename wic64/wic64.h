@@ -11,6 +11,7 @@
 #include "esp_log.h"
 
 #define WIC64_DEFAULT_TIMEOUT 1000
+#define WIC64_DEFAULT_HTTP_TIMEOUT 5000
 
 #define WIC64_QUEUE_ITEM_SIZE 0x2000
 #define WIC64_QUEUE_SIZE (0x10000 / WIC64_QUEUE_ITEM_SIZE)
@@ -53,6 +54,9 @@ namespace WiC64 {
 
     extern uint32_t timeout;
     extern uint32_t customTimeout;
+
+    extern uint32_t httpTimeout;
+    extern uint32_t customHttpTimeout;
 
     class WiC64 {
         private:

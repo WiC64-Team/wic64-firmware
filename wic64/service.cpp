@@ -23,6 +23,7 @@ namespace WiC64 {
     extern Display *display;
 
     extern uint32_t timeout;
+    extern uint32_t httpTimeout;
 
     Service::Service() {
         esp_event_loop_args_t event_loop_args = {
@@ -79,11 +80,21 @@ namespace WiC64 {
         if (customTimeout) {
             timeout = customTimeout;
             customTimeout = 0;
-            ESP_LOGV(TAG, "Using previously requested timeout of %dms for this request", timeout);
+            ESP_LOGV(TAG, "Using previously requested transfer timeout of %dms for this request", timeout);
         }
         else {
             timeout = WIC64_DEFAULT_TIMEOUT;
-            ESP_LOGV(TAG, "Using default timeout of %dms", timeout);
+            ESP_LOGV(TAG, "Using default transfer timeout of %dms", timeout);
+        }
+
+        if (customHttpTimeout) {
+            httpTimeout = customHttpTimeout;
+            customHttpTimeout = 0;
+            ESP_LOGV(TAG, "Using previously requested HTTP request timeout of %dms for this request", httpTimeout);
+        }
+        else {
+            httpTimeout = WIC64_DEFAULT_HTTP_TIMEOUT;
+            ESP_LOGV(TAG, "Using default HTTP request timeout of %dms", httpTimeout);
         }
 
         if (!service->command->supportsProtocol()) {

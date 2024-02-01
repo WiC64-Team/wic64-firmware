@@ -24,6 +24,7 @@ namespace WiC64 {
     extern HttpClient* httpClient;
     extern Settings *settings;
     extern uint32_t timeout;
+    extern uint32_t httpTimeout;
 
     HttpClient::HttpClient() {
         ESP_LOGI(TAG, "HTTP client initialized");
@@ -108,7 +109,7 @@ namespace WiC64 {
         esp_http_client_config_t config = {
             .url = url,
             .method = method,
-            .timeout_ms = 5000,
+            .timeout_ms = (int) httpTimeout,
             .disable_auto_redirect = false,
             .max_redirection_count = 10,
             .event_handler = eventHandler,
