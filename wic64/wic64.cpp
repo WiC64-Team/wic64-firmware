@@ -55,11 +55,11 @@ namespace WiC64 {
     QueueHandle_t transferQueue;
     uint8_t transferQueueBuffer[WIC64_QUEUE_ITEM_SIZE];
 
-    uint32_t timeout = WIC64_DEFAULT_TIMEOUT;
-    uint32_t customTimeout = 0;
+    uint32_t transferTimeout = WIC64_DEFAULT_TRANSFER_TIMEOUT;
+    uint32_t customTransferTimeout = 0;
 
-    uint32_t httpTimeout = WIC64_DEFAULT_HTTP_TIMEOUT;
-    uint32_t customHttpTimeout = 0;
+    uint32_t httpTimeout = WIC64_DEFAULT_REQUEST_TIMEOUT;
+    uint32_t customRequestTimeout = 0;
 
     WiC64::WiC64() {
         loglevel(ESP_LOG_INFO);

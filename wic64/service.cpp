@@ -22,9 +22,6 @@ namespace WiC64 {
     extern Userport *userport;
     extern Display *display;
 
-    extern uint32_t timeout;
-    extern uint32_t httpTimeout;
-
     Service::Service() {
         esp_event_loop_args_t event_loop_args = {
             .queue_size = 16,
@@ -77,23 +74,23 @@ namespace WiC64 {
         service->request = service->protocol->createRequest(header);
         service->command = Command::create(service->request);
 
-        if (customTimeout) {
-            timeout = customTimeout;
-            customTimeout = 0;
-            ESP_LOGV(TAG, "Using previously requested transfer timeout of %dms for this request", timeout);
+        if (customTransferTimeout) {
+            transferTimeout = customTransferTimeout;
+            customTransferTimeout = 0;
+            ESP_LOGV(TAG, "Using previously requested transfer timeout of %dms for this request", transferTimeout);
         }
         else {
-            timeout = WIC64_DEFAULT_TIMEOUT;
-            ESP_LOGV(TAG, "Using default transfer timeout of %dms", timeout);
+            transferTimeout = WIC64_DEFAULT_TRANSFER_TIMEOUT;
+            ESP_LOGV(TAG, "Using default transfer timeout of %dms", transferTimeout);
         }
 
-        if (customHttpTimeout) {
-            httpTimeout = customHttpTimeout;
-            customHttpTimeout = 0;
+        if (customRequestTimeout) {
+            httpTimeout = customRequestTimeout;
+            customRequestTimeout = 0;
             ESP_LOGV(TAG, "Using previously requested HTTP request timeout of %dms for this request", httpTimeout);
         }
         else {
-            httpTimeout = WIC64_DEFAULT_HTTP_TIMEOUT;
+            httpTimeout = WIC64_DEFAULT_REQUEST_TIMEOUT;
             ESP_LOGV(TAG, "Using default HTTP request timeout of %dms", httpTimeout);
         }
 
@@ -160,8 +157,8 @@ namespace WiC64 {
             (service->items_remaining > 1) ? "s" : "");
 
         if (data != NULL) {
-            if (xQueueSend(transferQueue, data, pdMS_TO_TICKS(timeout)) != pdTRUE) {
-                ESP_LOGW(TAG, "Could not send next item to receive queue in %dms", timeout);
+            if (xQueueSend(transferQueue, data, pdMS_TO_TICKS(transferTimeout)) != pdTRUE) {
+                ESP_LOGW(TAG, "Could not send next item to receive queue in %dms", transferTimeout);
                 onRequestAborted(NULL, service->bytes_remaining);
             };
             service->bytes_remaining -= bytes_received;
@@ -287,8 +284,8 @@ namespace WiC64 {
             ? WIC64_QUEUE_ITEM_SIZE
             : service->bytes_remaining;
 
-        if (xQueueReceive(response->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout)) != pdTRUE) {
-            ESP_LOGW(TAG, "Could not read next item from response queue in %dms", timeout);
+        if (xQueueReceive(response->queue(), transferQueueBuffer, pdMS_TO_TICKS(transferTimeout)) != pdTRUE) {
+            ESP_LOGW(TAG, "Could not read next item from response queue in %dms", transferTimeout);
             onResponseAborted(NULL, service->bytes_remaining);
             return;
         }

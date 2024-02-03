@@ -19,8 +19,6 @@ namespace WiC64 {
     extern Settings *settings;
     extern Led *led;
 
-    extern uint32_t timeout;
-
     Userport::Userport() {
         gpio_install_isr_service(
             ESP_INTR_FLAG_IRAM |
@@ -324,7 +322,7 @@ namespace WiC64 {
     }
 
     bool Userport::hasTimedOut(void) {
-        return millis() - timeOfLastActivity > timeout;
+        return millis() - timeOfLastActivity > transferTimeout;
     }
 
     void Userport::onRequestInitiated(void* arg, esp_event_base_t base, int32_t event_id, void* data) {

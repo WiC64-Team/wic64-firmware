@@ -23,8 +23,6 @@ namespace WiC64 {
 
     extern HttpClient* httpClient;
     extern Settings *settings;
-    extern uint32_t timeout;
-    extern uint32_t httpTimeout;
 
     HttpClient::HttpClient() {
         ESP_LOGI(TAG, "HTTP client initialized");
@@ -205,7 +203,7 @@ namespace WiC64 {
                         ? WIC64_QUEUE_ITEM_SIZE
                         : bytes_remaining;
 
-                    if (!command->aborted() && xQueueReceive(data->queue(), transferQueueBuffer, pdMS_TO_TICKS(timeout)) == pdTRUE) {
+                    if (!command->aborted() && xQueueReceive(data->queue(), transferQueueBuffer, pdMS_TO_TICKS(transferTimeout)) == pdTRUE) {
 
                         if (esp_http_client_write(m_client, (const char*) transferQueueBuffer, size) != size) {
                             ESP_LOGE(TAG, "Failed to send POST data to server");
@@ -388,8 +386,8 @@ namespace WiC64 {
                 break;
             }
             ESP_LOGV(TAG, "Queueing %d bytes", WIC64_QUEUE_ITEM_SIZE);
-            if (xQueueSend(transferQueue, transferQueueBuffer, pdMS_TO_TICKS(timeout)) != pdTRUE) {
-                ESP_LOGW(TAG, "Could not send to queue for more than %dms", timeout);
+            if (xQueueSend(transferQueue, transferQueueBuffer, pdMS_TO_TICKS(transferTimeout)) != pdTRUE) {
+                ESP_LOGW(TAG, "Could not send to queue for more than %dms", transferTimeout);
                 httpClient->closeConnection();
                 break;
             }
