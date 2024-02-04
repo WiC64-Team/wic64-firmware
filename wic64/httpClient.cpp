@@ -93,7 +93,6 @@ namespace WiC64 {
 
         int32_t size = 0;
         int32_t result;
-        uint8_t retries = MAX_RETRIES;
 
         int64_t request_content_length = method == HTTP_METHOD_POST
             ? strlen(HEADER) + data->size() + strlen(FOOTER)
@@ -107,7 +106,7 @@ namespace WiC64 {
         esp_http_client_config_t config = {
             .url = url,
             .method = method,
-            .timeout_ms = (int) httpTimeout,
+            .timeout_ms = (int) requestTimeout,
             .disable_auto_redirect = false,
             .max_redirection_count = 10,
             .event_handler = eventHandler,
@@ -132,6 +131,9 @@ namespace WiC64 {
             command->error(Command::CLIENT_ERROR, "URL too long (max 2000 bytes)", "!0");
             goto ERROR;
         }
+
+        retries = MAX_RETRIES;
+        timeRequestStarted = millis();
 
     RETRY:
         if (isConnectionClosed()) {
@@ -173,7 +175,7 @@ namespace WiC64 {
             ESP_LOGW(TAG, "Retrying %d more time%s...",
                 retries+1, (retries > 1) ? "s" : "");
 
-            if (retries-- > 0) {
+            if (canRetry(command)) {
                 closeConnection();
                 goto RETRY;
             } else {
@@ -245,7 +247,7 @@ namespace WiC64 {
                 ESP_LOGW(TAG, "Failed to send POST request body, retrying %d more time%s...",
                     retries+1, (retries > 1) ? "s" : "");
 
-                if ((retries-- > 0) && !command->aborted() && !command->request()->payload()->isQueued()) {
+                if (canRetry(command) && !command->request()->payload()->isQueued()) {
                     closeConnection();
                     goto RETRY;
                 } else {
@@ -259,7 +261,7 @@ namespace WiC64 {
 
         if ((result = esp_http_client_fetch_headers(m_client)) == ESP_FAIL) {
 
-            if ((retries-- > 0) && !command->aborted() && !command->request()->payload()->isQueued()) {
+            if (canRetry(command) && !command->request()->payload()->isQueued()) {
                 ESP_LOGW(TAG, "Failed to fetch headers, retrying %d more time%s...",
                     retries+1, (retries > 1) ? "s" : "");
 
@@ -370,6 +372,21 @@ namespace WiC64 {
         return m_client == NULL;
     }
 
+    bool HttpClient::canRetry(Command* command) {
+        uint32_t elapsed = millis() - timeRequestStarted;
+
+        if (elapsed > (requestTimeout - 1000)) {
+            return false;
+        }
+
+        if (retries - 1 > 0 && !command->aborted()) {
+            retries -= 1;
+            return true;
+        }
+
+        return false;
+    }
+
     void HttpClient::queueTask(void *content_length_ptr) {
         int32_t content_length = *((int32_t *) content_length_ptr);
 
@@ -399,7 +416,8 @@ namespace WiC64 {
         vTaskDelete(NULL);
     }
 
-    const char* HttpClient::statusToString(int32_t code) {
+    const char *HttpClient::statusToString(int32_t code)
+    {
         static char unknown[24];
         switch (code) {
             //####### 1xx - Informational #######

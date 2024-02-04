@@ -19,9 +19,15 @@ namespace WiC64 {
             esp_http_client_handle_t m_client = NULL;
 
             static const uint16_t MAX_URL_LENGTH = 0x2000;
-            static const uint8_t MAX_RETRIES = 10;
+            static const uint8_t MAX_RETRIES = 3;
+
             int32_t m_statusCode = -1;
             char m_postUrl[MAX_URL_LENGTH+1] = { '\0' };
+
+            uint8_t retries;
+            int32_t timeRequestStarted;
+
+            bool canRetry(Command* command);
             const char* statusToString(int32_t code);
             esp_http_client_handle_t handle() { return m_client; }
 
