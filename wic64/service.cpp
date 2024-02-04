@@ -85,13 +85,13 @@ namespace WiC64 {
         }
 
         if (customRequestTimeout) {
-            httpTimeout = customRequestTimeout;
+            requestTimeout = customRequestTimeout;
             customRequestTimeout = 0;
-            ESP_LOGV(TAG, "Using previously requested HTTP request timeout of %dms for this request", httpTimeout);
+            ESP_LOGV(TAG, "Using previously requested HTTP request timeout of %dms for this request", requestTimeout);
         }
         else {
-            httpTimeout = WIC64_DEFAULT_REQUEST_TIMEOUT;
-            ESP_LOGV(TAG, "Using default HTTP request timeout of %dms", httpTimeout);
+            requestTimeout = WIC64_DEFAULT_REQUEST_TIMEOUT;
+            ESP_LOGV(TAG, "Using default HTTP request timeout of %dms", requestTimeout);
         }
 
         if (!service->command->supportsProtocol()) {

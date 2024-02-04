@@ -58,7 +58,7 @@ namespace WiC64 {
     uint32_t transferTimeout = WIC64_DEFAULT_TRANSFER_TIMEOUT;
     uint32_t customTransferTimeout = 0;
 
-    uint32_t httpTimeout = WIC64_DEFAULT_REQUEST_TIMEOUT;
+    uint32_t requestTimeout = WIC64_DEFAULT_REQUEST_TIMEOUT;
     uint32_t customRequestTimeout = 0;
 
     WiC64::WiC64() {

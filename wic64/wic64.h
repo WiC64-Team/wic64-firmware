@@ -55,7 +55,7 @@ namespace WiC64 {
     extern uint32_t transferTimeout;
     extern uint32_t customTransferTimeout;
 
-    extern uint32_t httpTimeout;
+    extern uint32_t requestTimeout;
     extern uint32_t customRequestTimeout;
 
     class WiC64 {
