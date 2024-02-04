@@ -150,7 +150,7 @@ namespace WiC64 {
 
     inline void Userport::sendHandshakeSignal() {
         SET_LOW(HANDSHAKE_LINE_ESP_TO_C64);
-        esp_rom_delay_us(3);
+        esp_rom_delay_us(5);
         SET_HIGH(HANDSHAKE_LINE_ESP_TO_C64);
     }
 
