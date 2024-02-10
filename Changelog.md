@@ -1,3 +1,32 @@
+## Version 2.1.0
+
+- Protocols: Fixed bug in parsing extended protocol request header
+  - For some reason the payload size was read into a local static variable,
+    causing it to be set only on the first extended protocol request
+
+- Queueing: Use separate send and receive buffers for queued transfers
+  - We previously used a single buffer for both sending and receiving items
+    to/from queue, which caused the sending task to overwritte data that was
+    simultaneously being received. This becomes apparent when more data is
+    initially send to the queue than is being received on the other side.
+
+- Userport: Increased low period of handshake signal to 5us
+  - Increasing the low period prevents sporadic misses of handshakes on the C64
+    side that seem to appear on certain mainboard/cia combinations
+
+- Commands: Added new command WIC64_SET_REMOTE_TIMEOUT
+  - This allows the user to control the time the WiC64 waits for a remote server
+    to serve a request
+
+- HttpClient: Improved retry behaviour
+  - Only retry a remote request if the remote request timeout has not been
+    exceeded
+
+- HttpClient: Fixed log output regarding number of HTTP request retries
+
+- Commands: Properly terminate string responses for SSID, MAC and IP
+  - Reported by Ralf Horstmann (ra1fh)
+
 ## Version 2.0.1
 
 This release fixes problems in WMC (Wic64 Media Center) when uploading certain
