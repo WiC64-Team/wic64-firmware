@@ -205,9 +205,9 @@ namespace WiC64 {
                         ? WIC64_QUEUE_ITEM_SIZE
                         : bytes_remaining;
 
-                    if (!command->aborted() && xQueueReceive(data->queue(), transferQueueBuffer, pdMS_TO_TICKS(transferTimeout)) == pdTRUE) {
+                    if (!command->aborted() && xQueueReceive(data->queue(), transferQueueReceiveBuffer, pdMS_TO_TICKS(transferTimeout)) == pdTRUE) {
 
-                        if (esp_http_client_write(m_client, (const char*) transferQueueBuffer, size) != size) {
+                        if (esp_http_client_write(m_client, (const char*) transferQueueReceiveBuffer, size) != size) {
                             ESP_LOGE(TAG, "Failed to send POST data to server");
                             command->error(Command::NETWORK_ERROR,
                                 "Failed to send POST data to server", "!0");
@@ -395,7 +395,7 @@ namespace WiC64 {
         ESP_LOGD(TAG, "Client queue task queueing %d bytes...", content_length);
 
         do {
-            bytes_read = esp_http_client_read(httpClient->handle(), (char*) transferQueueBuffer, WIC64_QUEUE_ITEM_SIZE);
+            bytes_read = esp_http_client_read(httpClient->handle(), (char*) transferQueueSendBuffer, WIC64_QUEUE_ITEM_SIZE);
 
             if (bytes_read == -1) {
                 ESP_LOGE(TAG, "Read Error");
@@ -403,7 +403,7 @@ namespace WiC64 {
                 break;
             }
             ESP_LOGV(TAG, "Queueing %d bytes", WIC64_QUEUE_ITEM_SIZE);
-            if (xQueueSend(transferQueue, transferQueueBuffer, pdMS_TO_TICKS(transferTimeout)) != pdTRUE) {
+            if (xQueueSend(transferQueue, transferQueueSendBuffer, pdMS_TO_TICKS(transferTimeout)) != pdTRUE) {
                 ESP_LOGW(TAG, "Could not send to queue for more than %dms", transferTimeout);
                 httpClient->closeConnection();
                 break;
