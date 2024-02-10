@@ -6,7 +6,7 @@ namespace WiC64 {
 
     Request *Extended::createRequest(uint8_t *header) {
         uint8_t command_id = header[0];
-        static uint32_t payload_size = (*((uint32_t*) (header+1))) ;
+        uint32_t payload_size = (*((uint32_t*) (header+1))) ;
 
         ESP_LOGI(TAG, "Received %s request header "
                       WIC64_CYAN("[") WIC64_FORMAT_CMD WIC64_CYAN(" 0x%02x 0x%02x 0x%02x 0x%02x] ")
