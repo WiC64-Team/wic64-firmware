@@ -10,8 +10,8 @@ namespace WiC64 {
             case WIC64_CMD_SET_TRANSFER_TIMEOUT:
                 return "Timeout (set transfer timeout)";
                 break;
-            case WIC64_CMD_SET_REQUEST_TIMEOUT:
-                return "Timeout (set HTTP request timeout)";
+            case WIC64_CMD_SET_REMOTE_TIMEOUT:
+                return "Timeout (set remote request timeout)";
                 break;
             default:
                 return "Unhandled Timeout command id (?)";
@@ -45,8 +45,8 @@ namespace WiC64 {
             ESP_LOGI(TAG, "Transfer timeout set to %dms", customTransferTimeout);
         }
         else {
-            customRequestTimeout = seconds * 1000;
-            ESP_LOGI(TAG, "HTTP request timeout set to %dms", customRequestTimeout);
+            customRemoteTimeout = seconds * 1000;
+            ESP_LOGI(TAG, "HTTP request timeout set to %dms", customRemoteTimeout);
         }
 
     DONE:

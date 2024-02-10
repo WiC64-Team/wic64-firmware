@@ -106,7 +106,7 @@ namespace WiC64 {
         esp_http_client_config_t config = {
             .url = url,
             .method = method,
-            .timeout_ms = (int) requestTimeout,
+            .timeout_ms = (int) remoteTimeout,
             .disable_auto_redirect = false,
             .max_redirection_count = 10,
             .event_handler = eventHandler,
@@ -375,7 +375,7 @@ namespace WiC64 {
     bool HttpClient::canRetry(Command* command) {
         uint32_t elapsed = millis() - timeRequestStarted;
 
-        if (elapsed > (requestTimeout - 1000)) {
+        if (elapsed > (remoteTimeout - 1000)) {
             return false;
         }
 
