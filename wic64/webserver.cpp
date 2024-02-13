@@ -3,6 +3,8 @@
 #include "settings.h"
 #include "utilities.h"
 
+#define WEBSERVER_LOOP_INTERVAL 10
+
 namespace WiC64 {
     const char* Webserver::TAG = "SERVER";
 
@@ -14,11 +16,18 @@ namespace WiC64 {
         m_arduinoWebServer = new WebServer(80);
         m_arduinoWebServer->on("/", request);
         m_arduinoWebServer->begin();
+
+        loop_ms = millis();
+
         ESP_LOGI(TAG, "Webserver initialized, listening on port 80");
     }
 
-    void Webserver::serve(void)  {
-        m_arduinoWebServer->handleClient();
+    void Webserver::loop(void) {
+        if (millis() - loop_ms >= WEBSERVER_LOOP_INTERVAL) {
+            loop_ms = millis();
+
+            m_arduinoWebServer->handleClient();
+        }
     }
 
     void Webserver::reply(const String &response) {

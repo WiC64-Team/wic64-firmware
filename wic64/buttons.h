@@ -16,9 +16,11 @@ namespace WiC64 {
         OneButton m_esp_button = OneButton(GPIO_NUM_0, true, true);
         OneButton m_wic64_button = OneButton(GPIO_NUM_33, false, false);
 
+        uint32_t loop_ms;
+
         public:
             Buttons();
-            void tick(void);
+            void loop(void);
     };
 }
 
