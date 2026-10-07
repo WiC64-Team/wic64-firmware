@@ -7,10 +7,15 @@ namespace WiC64 {
     const char* TcpClient::TAG = "TCPCLIENT";
 
     TcpClient::TcpClient() {
+        m_unconfirmed = (uint8_t*) malloc(MAX_READ_CHUNK_SIZE);
         ESP_LOGI(TAG, "TCP client initialized");
     }
 
     bool TcpClient::connected(void) {
+        if (m_unconfirmed_size > 0) {
+            return true;
+        }
+
         if (!m_client.connected()) {
             return false;
         }
@@ -34,6 +39,8 @@ namespace WiC64 {
 
     int TcpClient::open(const char* host, const uint16_t port) {
         bool connected = false;
+        m_unconfirmed_size = 0;
+
         if (m_client.connected()) {
             ESP_LOGW(TAG, "Closing previously opened connection");
             close();
@@ -51,17 +58,32 @@ namespace WiC64 {
     }
 
     int32_t TcpClient::available(void) {
-        return m_client.available();
+        return m_unconfirmed_size + m_client.available();
     }
 
     int64_t TcpClient::read(uint8_t* data) {
         int64_t read = -1;
 
+        if (m_unconfirmed_size > 0) {
+            ESP_LOGW(TAG, "Sending the %d bytes of the last read again", m_unconfirmed_size);
+            memcpy(data, m_unconfirmed, m_unconfirmed_size);
+            return m_unconfirmed_size;
+        }
+
         if (m_client.available()) {
             read = m_client.read(data, MAX_READ_CHUNK_SIZE);
             ESP_LOGI(TAG, "Read %lld bytes", read);
+
+            if (read > 0) {
+                memcpy(m_unconfirmed, data, read);
+                m_unconfirmed_size = read;
+            }
         }
         return read;
+    }
+
+    void TcpClient::confirmRead(void) {
+        m_unconfirmed_size = 0;
     }
 
     int32_t TcpClient::write(Data *data) {
@@ -90,6 +112,7 @@ namespace WiC64 {
 
     void TcpClient::close(void) {
         ESP_LOGI(TAG, "Closing connection");
+        m_unconfirmed_size = 0;
         m_client.stop();
     }
 }

@@ -64,6 +64,11 @@ namespace WiC64 {
             virtual const char* describe();
             virtual void execute(void);
             virtual void responseReady();
+
+            // Called once the response has been handed to the C64, or the
+            // transfer has failed (delivered = false), before the command
+            // is deleted.
+            virtual void finalize(bool delivered) { }
     };
 }
 #endif // WIC64_COMMAND_H
