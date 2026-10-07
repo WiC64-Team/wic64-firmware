@@ -331,6 +331,8 @@ namespace WiC64 {
                 xQueueReset(command->response()->queue());
             }
 
+            command->finalize(success);
+
             level = success ? ESP_LOG_DEBUG : ESP_LOG_WARN;
             ESP_LOG_LEVEL(level, TAG, "Freeing allocated memory");
 
