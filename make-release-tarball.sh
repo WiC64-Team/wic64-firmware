@@ -10,6 +10,7 @@ cp -v build/bootloader/bootloader.bin "${DIR}"
 cp -v build/partition_table/partition-table.bin "${DIR}"
 cp -v build/ota_data_initial.bin "${DIR}"
 cp -v build/wic64.bin "${DIR}"
+cp -v "build/${VERSION}.bin" "${DIR}"
 
 PREFIX_SH='esptool.py -p $1'
 PREFIX_BAT='esptool.py -p %1'
