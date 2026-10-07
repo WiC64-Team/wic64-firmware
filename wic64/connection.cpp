@@ -14,6 +14,10 @@ namespace WiC64 {
         WiFi.setHostname(("wic64-" + WiFi.macAddress()).c_str());
         WiFi.mode(WIFI_STA);
 
+        // Modem sleep makes the WiC64 answer late and fall behind when a
+        // server sends many small segments
+        WiFi.setSleep(false);
+
         WiFi.onEvent(onConnected, ARDUINO_EVENT_WIFI_STA_CONNECTED);
         WiFi.onEvent(onDisconnected, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
         WiFi.onEvent(onGotIpAddress, ARDUINO_EVENT_WIFI_STA_GOT_IP);

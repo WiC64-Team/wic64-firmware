@@ -1,6 +1,8 @@
 #include "wic64.h"
 #include "tcpClient.h"
 
+#include "lwip/sockets.h"
+
 namespace WiC64 {
     const char* TcpClient::TAG = "TCPCLIENT";
 
@@ -9,7 +11,25 @@ namespace WiC64 {
     }
 
     bool TcpClient::connected(void) {
-        return m_client.connected();
+        if (!m_client.connected()) {
+            return false;
+        }
+
+        // WiFiClient::connected() probes with a 0-byte recv(), which
+        // cannot see the server closing the connection: peek at one
+        // byte instead, once everything it sent has been read.
+        if (m_client.available()) {
+            return true;
+        }
+
+        uint8_t byte;
+        int result = recv(m_client.fd(), &byte, 1, MSG_PEEK | MSG_DONTWAIT);
+
+        if (result == 0 || (result < 0 && errno != EWOULDBLOCK && errno != EAGAIN)) {
+            ESP_LOGI(TAG, "Connection closed by the server");
+            return false;
+        }
+        return true;
     }
 
     int TcpClient::open(const char* host, const uint16_t port) {
