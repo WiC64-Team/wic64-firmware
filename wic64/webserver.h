@@ -14,10 +14,11 @@ namespace WiC64 {
         private:
             WebServer *m_arduinoWebServer;
             WebServer *arduinoWebserver(void) { return m_arduinoWebServer; };
+            uint32_t loop_ms;
         public:
             Webserver();
 
-            void serve(void);
+            void loop(void);
             void reply(const String& response);
             void reloadAndClearQueryString(void);
 

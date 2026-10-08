@@ -7,7 +7,7 @@ void setup() {
 }
 
 void loop() {
-    webserver->serve();
-    buttons->tick();
-    vTaskDelay(pdMS_TO_TICKS(10));
+    webserver->loop();
+    buttons->loop();
+    display->loop();
 }

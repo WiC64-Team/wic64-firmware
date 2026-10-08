@@ -4,6 +4,8 @@
 #include "settings.h"
 #include "../generated-version.h"
 
+#define DISPLAY_LOOP_INTERVAL 5000
+
 namespace WiC64 {
     const char* Display::TAG = "DISPLAY";
 
@@ -38,6 +40,8 @@ namespace WiC64 {
         m_display->clearDisplay();
         m_display->drawBitmap(0, 0, logo, WIDTH, HEIGHT, WHITE);
         m_display->display();
+
+        loop_ms = millis();
     }
 
     bool Display::rotated(void) {
@@ -189,5 +193,13 @@ namespace WiC64 {
         display->m_notifying = false;
         display->update();
         vTaskDelete(NULL);
+    }
+
+    void Display::loop(void) {
+        if (millis() - loop_ms >= DISPLAY_LOOP_INTERVAL) {
+            loop_ms = millis();
+
+            if (!m_notifying) update();
+        }
     }
 }

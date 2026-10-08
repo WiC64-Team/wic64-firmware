@@ -24,6 +24,7 @@ namespace WiC64 {
             void connectionConfigured(bool configured);
             void update(void);
             void notify(const String& message);
+            void loop(void);
 
         private:
             const int I2C_SDA_PIN = 13;
@@ -49,6 +50,8 @@ namespace WiC64 {
 
             char m_rssi_buffer[MAX_CHARS_FOR_RSSI+1] = "";
             char m_line_buffer[MAX_CHARS_PER_LINE+1] = "";
+
+            uint32_t loop_ms;
 
             char* abbreviated(const String& string);
             char* abbreviated(const String& string, uint8_t width);

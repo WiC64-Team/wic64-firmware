@@ -4,6 +4,8 @@
 #include "display.h"
 #include "led.h"
 
+#define BUTTONS_LOOP_INTERVAL 10
+
 namespace WiC64 {
     const char* Buttons::TAG = "BUTTONS";
 
@@ -46,10 +48,16 @@ namespace WiC64 {
             display->rotated(!display->rotated());
             settings->displayRotated(display->rotated());
         });
+
+        loop_ms = millis();
     }
 
-    void Buttons::tick(void) {
-        m_esp_button.tick();
-        m_wic64_button.tick();
+    void Buttons::loop(void) {
+        if (millis() - loop_ms >= BUTTONS_LOOP_INTERVAL) {
+            loop_ms = millis();
+
+            m_esp_button.tick();
+            m_wic64_button.tick();
+        }
     }
 }
