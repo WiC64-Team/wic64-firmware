@@ -11,6 +11,7 @@ namespace WiC64 {
             using Command::Command;
             const char* describe(void);
             void execute(void);
+            void finalize(bool delivered);
     };
 }
 #endif // WIC64_TCP_H

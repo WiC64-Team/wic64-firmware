@@ -109,4 +109,10 @@ namespace WiC64 {
     DONE:
         responseReady();
     }
+
+    void Tcp::finalize(bool delivered) {
+        if (id() == WIC64_CMD_TCP_READ && delivered) {
+            tcpClient->confirmRead();
+        }
+    }
 }
